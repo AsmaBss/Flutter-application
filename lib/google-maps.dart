@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_geocoder/geocoder.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,9 +14,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Completer<GoogleMapController> _controller = Completer();
+  List myMarker = [];
   CustomInfoWindowController _customInfoWindowController =
       CustomInfoWindowController();
-  List myMarker = [];
 
   static final CameraPosition _kGoogle = const CameraPosition(
     target: LatLng(33.9871301997601, 9.64087277564642),
@@ -45,39 +46,86 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Color(0xFF0F9D58),
         title: Text("Maps"),
       ),
-      body: Container(
-        child: SafeArea(
-          // on below line creating google maps
-          child: GoogleMap(
+      body: Stack(
+        children: [
+          GoogleMap(
             initialCameraPosition: _kGoogle,
             mapType: MapType.normal,
             myLocationEnabled: true,
             compassEnabled: true,
-            onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
-            },
             markers: Set.from(myMarker),
-            onTap: _handleTap,
-            /*onTap: (LatLng latLng) {
-                print(latLng.latitude.toString() +
-                    " -------- " +
-                    latLng.longitude.toString());
-              }*/
+            onCameraMove: (position) {
+              _customInfoWindowController.onCameraMove!();
+            },
+            onMapCreated: (GoogleMapController controller) {
+              //_controller.complete(controller);
+              _customInfoWindowController.googleMapController = controller;
+            },
+            onTap: (LatLng tappedPoint) async {
+              _customInfoWindowController.hideInfoWindow!();
+              print(tappedPoint);
+              var addresses = await Geocoder.local.findAddressesFromCoordinates(
+                  Coordinates(tappedPoint.latitude, tappedPoint.longitude));
+              var first = addresses.first;
+              print(
+                  '${first.locality}, ${first.adminArea}, ${first.countryName}, ${first.addressLine}, ${first.countryCode}, ${first.featureName}, ${first.postalCode}, ${first.thoroughfare}, ${first.subAdminArea}, ${first.subLocality}, ${first.subThoroughfare}');
+              setState(() {
+                myMarker = [];
+                myMarker.add(Marker(
+                  markerId: MarkerId(tappedPoint.toString()),
+                  position: tappedPoint,
+                  draggable: false,
+                  onTap: () {
+                    _customInfoWindowController.addInfoWindow!(
+                        Container(
+                          height: 150,
+                          width: 200,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(10.0)),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 10, left: 10, right: 10),
+                                child: SizedBox(
+                                  width: 200,
+                                  child: Text(
+                                    '${first.locality}, ${first.subLocality} \n${first.adminArea}, ${first.subAdminArea}, ${first.countryName}',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.visible,
+                                    softWrap: false,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 10, left: 10, right: 10),
+                                child: Text(
+                                  '${first.addressLine}',
+                                  maxLines: 2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        tappedPoint);
+                  },
+                ));
+              });
+            },
           ),
-        ),
+          CustomInfoWindow(
+            controller: _customInfoWindowController,
+            height: 150,
+            width: 200,
+            offset: 30,
+          ),
+        ],
       ),
     );
-  }
-
-  _handleTap(LatLng tappedPoint) {
-    print(tappedPoint);
-    setState(() {
-      myMarker = [];
-      myMarker.add(Marker(
-          markerId: MarkerId(tappedPoint.toString()),
-          position: tappedPoint,
-          draggable: true,
-          infoWindow: InfoWindow(title: "title", snippet: "snippet")));
-    });
   }
 }

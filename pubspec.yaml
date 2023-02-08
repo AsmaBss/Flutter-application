@@ -39,6 +39,7 @@ dependencies:
   geolocator: ^9.0.2
   location: ^4.4.0
   custom_info_window: ^1.0.1
+  flutter_geocoder: ^0.2.2-nullsafety
 
 dev_dependencies:
   flutter_test:
