@@ -1,9 +1,16 @@
 import 'dart:async';
+//import 'dart:ffi';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/camera-page.dart';
+import 'package:flutter_application/src/database/mysql.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_geocoder/geocoder.dart';
 import 'package:custom_info_window/custom_info_window.dart';
+import 'package:clippy_flutter/triangle.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:camera/camera.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -13,12 +20,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Completer<GoogleMapController> _controller = Completer();
+  String? address, description, latitude, longitude;
   List myMarker = [];
   CustomInfoWindowController _customInfoWindowController =
       CustomInfoWindowController();
 
-  static final CameraPosition _kGoogle = const CameraPosition(
+  static const CameraPosition _kGoogle = CameraPosition(
     target: LatLng(33.9871301997601, 9.64087277564642),
     zoom: 7.1,
   );
@@ -28,9 +35,20 @@ class _HomePageState extends State<HomePage> {
         .then((value) {})
         .onError((error, stackTrace) async {
       await Geolocator.requestPermission();
-      print("ERROR" + error.toString());
+      print("ERROR$error");
     });
     return await Geolocator.getCurrentPosition();
+  }
+
+  void _saveData() async {
+    final Mysql db = Mysql();
+    await db.getConnection().then((conn) async {
+      String sql = 'insert into project.test (testcol) values (?);';
+      await conn.query(sql, ['test']);
+      //setState(() {});
+    }).onError((error, stackTrace) {
+      print(error);
+    });
   }
 
   @override
@@ -43,14 +61,14 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF0F9D58),
+        backgroundColor: Colors.green,
         title: Text("Maps"),
       ),
       body: Stack(
         children: [
           GoogleMap(
             initialCameraPosition: _kGoogle,
-            mapType: MapType.normal,
+            mapType: MapType.satellite,
             myLocationEnabled: true,
             compassEnabled: true,
             markers: Set.from(myMarker),
@@ -69,6 +87,14 @@ class _HomePageState extends State<HomePage> {
               var first = addresses.first;
               print(
                   '${first.locality}, ${first.adminArea}, ${first.countryName}, ${first.addressLine}, ${first.countryCode}, ${first.featureName}, ${first.postalCode}, ${first.thoroughfare}, ${first.subAdminArea}, ${first.subLocality}, ${first.subThoroughfare}');
+
+              latitude = tappedPoint.latitude.toString();
+              longitude = tappedPoint.longitude.toString();
+              address =
+                  '${first.locality}, ${first.adminArea}, ${first.countryName}';
+              description = '${first.addressLine}';
+              //${first.locality}, ${first.subLocality} \n${first.adminArea}, ${first.subAdminArea}, ${first.countryName}
+
               setState(() {
                 myMarker = [];
                 myMarker.add(Marker(
@@ -77,40 +103,57 @@ class _HomePageState extends State<HomePage> {
                   draggable: false,
                   onTap: () {
                     _customInfoWindowController.addInfoWindow!(
-                        Container(
-                          height: 150,
-                          width: 200,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(10.0)),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 10, left: 10, right: 10),
-                                child: SizedBox(
-                                  width: 200,
-                                  child: Text(
-                                    '${first.locality}, ${first.subLocality} \n${first.adminArea}, ${first.subAdminArea}, ${first.countryName}',
-                                    maxLines: 2,
-                                    overflow: TextOverflow.visible,
-                                    softWrap: false,
-                                  ),
+                        Column(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: double.infinity,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    //border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(10.0)),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: SizedBox(
+                                        width: 200,
+                                        child: Text(
+                                          '${first.locality}, ${first.subLocality} \n${first.adminArea}, ${first.subAdminArea}, ${first.countryName}',
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          softWrap: false,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: Text(
+                                        '${first.addressLine}',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: _saveData,
+                                      child: Text('Press me!'),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 10, left: 10, right: 10),
-                                child: Text(
-                                  '${first.addressLine}',
-                                  maxLines: 2,
-                                ),
+                            ),
+                            Triangle.isosceles(
+                              edge: Edge.BOTTOM,
+                              child: Container(
+                                color: Colors.white,
+                                width: 25,
+                                height: 15,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                         tappedPoint);
                   },
@@ -120,10 +163,28 @@ class _HomePageState extends State<HomePage> {
           ),
           CustomInfoWindow(
             controller: _customInfoWindowController,
-            height: 150,
+            height: 200,
             width: 200,
-            offset: 30,
+            offset: 50,
           ),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 5),
+              child: ElevatedButton(
+                  onPressed: () async {
+                    await availableCameras().then((value) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CameraPage(
+                                    cameras: value,
+                                  )));
+                    });
+                  },
+                  child: Icon(Icons.camera)),
+            ),
+          )
         ],
       ),
     );

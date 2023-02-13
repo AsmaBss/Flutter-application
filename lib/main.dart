@@ -1,4 +1,6 @@
+//import 'dart:ffi';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/camera-page.dart';
 import 'google-maps.dart';
 
 void main() {
