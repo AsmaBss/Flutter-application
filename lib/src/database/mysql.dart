@@ -1,4 +1,4 @@
-import 'package:mysql1/mysql1.dart';
+import 'package:mysql_client/mysql_client.dart';
 
 class Mysql {
   static String host = '192.168.1.200',
@@ -9,14 +9,13 @@ class Mysql {
 
   Mysql();
 
-  Future<MySqlConnection> getConnection() async {
-    var settings = new ConnectionSettings(
+  Future<MySQLConnection> getConnection() async {
+    return await MySQLConnection.createConnection(
         host: host,
         port: port,
-        user: user,
+        userName: user,
         password: password,
-        db: db,
-        maxPacketSize: 20971520);
-    return await MySqlConnection.connect(settings);
+        databaseName: db);
+    //return await conn.connect();
   }
 }

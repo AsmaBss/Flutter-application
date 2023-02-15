@@ -1,6 +1,6 @@
-//import 'dart:ffi';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 
 class CameraPage extends StatefulWidget {
   final List<CameraDescription>? cameras;
@@ -60,6 +60,9 @@ class _CameraPageState extends State<CameraPage> {
           child: ElevatedButton(
             onPressed: () async {
               pictureFile = await controller.takePicture();
+              GallerySaver.saveImage(pictureFile!.path);
+              print(pictureFile!.path);
+              // /data/user/0/com.example.flutter_application/cache/nom_fich.jpg
               setState(() {});
             },
             child: const Text("capture image"),

@@ -1,5 +1,4 @@
 import 'dart:async';
-//import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/camera-page.dart';
 import 'package:flutter_application/src/database/mysql.dart';
@@ -8,8 +7,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_geocoder/geocoder.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:clippy_flutter/triangle.dart';
-import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
 import 'package:camera/camera.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,6 +17,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final db = Mysql();
   String? address, description, latitude, longitude;
   List myMarker = [];
   CustomInfoWindowController _customInfoWindowController =
@@ -40,14 +38,17 @@ class _HomePageState extends State<HomePage> {
     return await Geolocator.getCurrentPosition();
   }
 
+  // "SELECT * FROM position WHERE id = :id", {"id": 1}
   void _saveData() async {
-    final Mysql db = Mysql();
     await db.getConnection().then((conn) async {
-      String sql = 'insert into project.test (testcol) values (?);';
-      await conn.query(sql, ['test']);
-      //setState(() {});
-    }).onError((error, stackTrace) {
-      print(error);
+      await conn.connect();
+      var sql =
+          'INSERT INTO `project`.`position` (`address`, `description`,`latitude`, `longitude`) VALUES ("$address","$description","$latitude","$longitude");';
+      print(sql);
+      await conn.execute(sql).whenComplete(() {
+        print("database closed");
+        conn.close();
+      });
     });
   }
 
