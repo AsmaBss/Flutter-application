@@ -37,16 +37,21 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_maps_flutter: ^2.2.3
   geolocator: ^9.0.2
+  geocoder: ^0.2.1
+  #geocoding: ^2.0.5
   custom_info_window: ^1.0.1
-  flutter_geocoder: ^0.2.2-nullsafety
   clippy_flutter: ^1.1.1
+  #flutter_geocoder: ^0.2.2-nullsafety
   mysql_client: ^0.0.27
   camera: ^0.10.3
   gallery_saver: ^2.3.2
   http: ^0.13.5
-  shared_preferences: ^2.0.17
   connectivity_plus: ^3.0.3
   flutter_dotenv: ^5.0.2
+  path_provider: ^2.0.12
+  path: ^1.8.2
+  sqlite_wrapper: ^0.1.1
+  sqlite3_flutter_libs: ^0.5.12
 
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,10 +22,10 @@ class _TestState extends State<Test> {
   }
 
   void loadData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    /*SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       value = prefs.getString('key_test');
-    });
+    });*/
   }
 
   @override
@@ -81,15 +81,15 @@ class _TestState extends State<Test> {
           ),
           ElevatedButton(
             onPressed: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              prefs.setString('key_test', 'MyValue');
+              /*SharedPreferences prefs = await SharedPreferences.getInstance();
+              prefs.setString('key_test', 'MyValue');*/
             },
             child: Text("save data"),
           ),
           ElevatedButton(
             onPressed: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              prefs.remove('key_test');
+              /*SharedPreferences prefs = await SharedPreferences.getInstance();
+              prefs.remove('key_test');*/
             },
             child: Text("clean data"),
           )

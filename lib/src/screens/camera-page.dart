@@ -1,10 +1,23 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/database/database-helper.dart';
+import 'package:flutter_application/src/models/position-model.dart';
+import 'package:flutter_application/src/screens/maps.dart';
 import 'package:gallery_saver/gallery_saver.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CameraPage extends StatefulWidget {
   final List<CameraDescription>? cameras;
-  const CameraPage({this.cameras, Key? key}) : super(key: key);
+  final String? adresse, description;
+  final LatLng? tappedPoint;
+
+  const CameraPage(
+      {this.cameras,
+      this.adresse,
+      this.description,
+      this.tappedPoint,
+      Key? key})
+      : super(key: key);
 
   @override
   State<CameraPage> createState() => _CameraPageState();
@@ -62,10 +75,18 @@ class _CameraPageState extends State<CameraPage> {
               pictureFile = await controller.takePicture();
               GallerySaver.saveImage(pictureFile!.path);
               print(pictureFile!.path);
+              DatabaseHelper().addPosition(
+                  widget.adresse.toString(),
+                  widget.description.toString(),
+                  widget.tappedPoint!.latitude.toString(),
+                  widget.tappedPoint!.longitude.toString(),
+                  pictureFile!.path.toString());
+              print("table position");
+              DatabaseHelper().showPositions().then((value) => print(value));
               // /data/user/0/com.example.flutter_application/cache/nom_fich.jpg
               setState(() {});
             },
-            child: const Text("capture image"),
+            child: const Text("take image"),
           ),
         ),
         Padding(

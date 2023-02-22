@@ -1,16 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/api-services/position-api-services.dart';
+import 'package:flutter_application/src/api-services/api-services.dart';
+import 'package:flutter_application/src/database/database-helper.dart';
 import 'package:flutter_application/src/models/position-model.dart';
+import 'package:flutter_application/src/repositories/position-repository.dart';
 import 'package:flutter_application/src/screens/camera-page.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_geocoder/geocoder.dart';
+//import 'package:flutter_geocoder/geocoder.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:clippy_flutter/triangle.dart';
 import 'package:camera/camera.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class HomePage extends StatefulWidget {
@@ -21,9 +22,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final ApiServices api = ApiServices();
+  final PositionRepository repository = PositionRepository();
+  String? _currentAddress;
+  Position? _currentPosition;
+
   String? addresse, description, latitude, longitude;
+
   List myMarker = [];
-  final PositionApiServices api = PositionApiServices();
 
   CustomInfoWindowController _customInfoWindowController =
       CustomInfoWindowController();
@@ -43,18 +49,22 @@ class _HomePageState extends State<HomePage> {
     return await Geolocator.getCurrentPosition();
   }
 
-  void getAddressFromCoords(LatLng tappedPoint) async {
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(
-        Coordinates(tappedPoint.latitude, tappedPoint.longitude));
-    var first = addresses.first;
-    print(
-        '${first.locality}, ${first.adminArea}, ${first.countryName}, ${first.addressLine}, ${first.countryCode}, ${first.featureName}, ${first.postalCode}, ${first.thoroughfare}, ${first.subAdminArea}, ${first.subLocality}, ${first.subThoroughfare}');
-    latitude = tappedPoint.latitude.toString();
-    longitude = tappedPoint.longitude.toString();
-    addresse = '${first.locality}, ${first.adminArea}, ${first.countryName}';
-    description = '${first.addressLine}';
-    //${first.locality}, ${first.subLocality} \n${first.adminArea}, ${first.subAdminArea}, ${first.countryName}
-  }
+  /*void getAddressFromCoords(LatLng tappedPoint) async {
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi) {
+      var addresses = await Geocoder.local.findAddressesFromCoordinates(
+          Coordinates(tappedPoint.latitude, tappedPoint.longitude));
+      var first = addresses.first;
+      print(
+          '${first.locality}, ${first.adminArea}, ${first.countryName}, ${first.addressLine}, ${first.countryCode}, ${first.featureName}, ${first.postalCode}, ${first.thoroughfare}, ${first.subAdminArea}, ${first.subLocality}, ${first.subThoroughfare}');
+      latitude = tappedPoint.latitude.toString();
+      longitude = tappedPoint.longitude.toString();
+      addresse = '${first.locality}, ${first.adminArea}, ${first.countryName}';
+      description = '${first.addressLine}';
+      //${first.locality}, ${first.subLocality} \n${first.adminArea}, ${first.subAdminArea}, ${first.countryName}
+    } else {}
+  }*/
 
   void _addMarkerAndCustomInfoWindow(LatLng tappedPoint) {
     setState(() {
@@ -80,14 +90,14 @@ class _HomePageState extends State<HomePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Text(
-                            'adress 1 ',
+                            '$addresse',
                             //${first.locality}, ${first.subLocality} \n${first.adminArea}, ${first.subAdminArea}, ${first.countryName}
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                             softWrap: false,
                           ),
                           Text(
-                            'address2',
+                            '$description',
                             //${first.addressLine}
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
@@ -96,7 +106,7 @@ class _HomePageState extends State<HomePage> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               ElevatedButton(
-                                onPressed: () {
+                                onPressed: () async {
                                   saveData(tappedPoint);
                                 },
                                 child: Text('Save Position'),
@@ -143,30 +153,22 @@ class _HomePageState extends State<HomePage> {
     final connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.mobile ||
         connectivityResult == ConnectivityResult.wifi) {
-      api.addPosition(PositionModel(
-          addresse: "flutter",
-          description: "flutter",
-          latitude: "flutter",
-          longitude: "flutter"));
-      //Navigator.pop(context);
+      PositionModel p = new PositionModel();
+      p.addresse = addresse;
+      p.description = description;
+      p.latitude = latitude;
+      p.longitude = longitude;
+      p.image = "test";
+      repository.addPosition(p);
     } else {
-      print("No network");
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      //String encodedMap = json.encode(myMarker);
-      //prefs.setString('marker', encodedMap);
-      prefs.setString("latitude", tappedPoint.latitude.toString());
-      prefs.setString("longitude", tappedPoint.longitude.toString());
+      /*DatabaseHelper().addPosition(addresse.toString(), description.toString(),
+          latitude.toString(), longitude.toString(), "");
+      print("table avant truncate");
+      DatabaseHelper().showPositions().then((value) => print(value));
+      //DatabaseHelper().truncateTable();
+      print("table après truncate");
+      DatabaseHelper().showPositions().then((value) => print(value));*/
     }
-  }
-
-  void loadData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    //String encodedMap = prefs.getString('marker')!;
-    //List decodedMap = json.decode(encodedMap);
-    //print('load data  = $decodedMap');
-    String lat = prefs.getString('latitude')!;
-    String long = prefs.getString('longitude')!;
-    //print('load data  = $decodedMap');
   }
 
   @override
@@ -203,7 +205,10 @@ class _HomePageState extends State<HomePage> {
             },
             onTap: (LatLng tappedPoint) async {
               _customInfoWindowController.hideInfoWindow!();
-              getAddressFromCoords(tappedPoint);
+              print("addressFromCoords");
+              //_getCurrentPosition();
+              //getAddressFromCoords(tappedPoint);
+              print("addMarkerandinfowindow");
               _addMarkerAndCustomInfoWindow(tappedPoint);
               print("all markers ---------------------------  $myMarker");
             },
