@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/database/database-helper.dart';
+import 'package:flutter_application/test.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'src/screens/google-maps.dart';
 import 'src/screens/maps.dart';
 
 void main() async {
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: const Maps(), //Test(),HomePage()
+      home: const Maps(), //Test(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -1,22 +1,18 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/database/database-helper.dart';
+import 'package:flutter_application/src/models/position-details-model.dart';
 import 'package:flutter_application/src/models/position-model.dart';
-import 'package:flutter_application/src/screens/maps.dart';
+import 'package:flutter_application/src/repositories/position-details-repository.dart';
+import 'package:flutter_application/src/repositories/position-repository.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CameraPage extends StatefulWidget {
   final List<CameraDescription>? cameras;
-  final String? adresse, description;
   final LatLng? tappedPoint;
 
-  const CameraPage(
-      {this.cameras,
-      this.adresse,
-      this.description,
-      this.tappedPoint,
-      Key? key})
+  const CameraPage({this.cameras, this.tappedPoint, Key? key})
       : super(key: key);
 
   @override
@@ -26,6 +22,10 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> {
   late CameraController controller;
   XFile? pictureFile;
+
+  PositionRepository positionRepository = PositionRepository();
+  PositionDetailsRepository positionDetailsRepository =
+      PositionDetailsRepository();
 
   @override
   void initState() {
@@ -71,22 +71,35 @@ class _CameraPageState extends State<CameraPage> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
+            child: const Text("take image"),
             onPressed: () async {
               pictureFile = await controller.takePicture();
               GallerySaver.saveImage(pictureFile!.path);
               print(pictureFile!.path);
-              DatabaseHelper().addPosition(
+              //
+              PositionModel p =
+                  await positionRepository.getPositionByLatAndLong(
+                      widget.tappedPoint!.latitude.toString(),
+                      widget.tappedPoint!.longitude.toString());
+              print("details : ${p.toString()}");
+              positionDetailsRepository.addPositionDetails(
+                  PositionDetailsModel(
+                      position_id: p.id, image: pictureFile!.path.toString()),
+                  p);
+
+              /*DatabaseHelper().addPosition(
                   widget.adresse.toString(),
                   widget.description.toString(),
                   widget.tappedPoint!.latitude.toString(),
                   widget.tappedPoint!.longitude.toString(),
-                  pictureFile!.path.toString());
+                  pictureFile!.path.toString());*/
               print("table position");
-              DatabaseHelper().showPositions().then((value) => print(value));
+              DatabaseHelper()
+                  .showPositions()
+                  .then((value) => print("$value\n"));
               // /data/user/0/com.example.flutter_application/cache/nom_fich.jpg
               setState(() {});
             },
-            child: const Text("take image"),
           ),
         ),
         Padding(

@@ -6,7 +6,8 @@ import 'package:http/http.dart' as http;
 class PositionRepository {
   final ApiServices _apiServices = ApiServices();
 
-  Future<Map<String, dynamic>> getAllPosition() async {
+  // Future<Map<String, dynamic>>
+  Future<List> getAllPositions() async {
     // getAllPosition(int page)
     /*
     Map<String, String> params = { 
@@ -20,14 +21,16 @@ class PositionRepository {
     final positionsData = responseJson as List;
     List<PositionModel> positionsList =
         positionsData.map((json) => PositionModel.fromJson(json)).toList();
-    return {
+    return positionsList;
+    /*return {
       "positions list": positionsList,
-    };
+    }*/
   }
 
   Future<PositionModel> addPosition(PositionModel p) async {
     http.Response response =
         await _apiServices.post("/Position/add-position", p.toJson(p));
+    print("statusCode : ${response.statusCode}");
     dynamic responseJson = jsonDecode(response.body);
     final jsonData = responseJson;
     return PositionModel.fromJson(jsonData);
@@ -46,5 +49,15 @@ class PositionRepository {
         await _apiServices.delete("/Position/delete-position/${p.id}");
     dynamic responseJson = jsonDecode(response.body);
     final jsonMessage = responseJson;
+    print(jsonMessage);
+  }
+
+  Future<PositionModel> getPositionByLatAndLong(
+      String latitude, String longitude) async {
+    http.Response response = await _apiServices
+        .get("/Position/show-by-lat-and-long/$latitude/$longitude");
+    dynamic responseJson = jsonDecode(response.body);
+    final jsonData = responseJson;
+    return PositionModel.fromJson(jsonData);
   }
 }

@@ -27,17 +27,23 @@ class DatabaseHelper {
 
     final DatabaseInfo dbInfo =
         await SQLiteWrapper().openDB(dbPath, onCreate: () async {
-      const String sql = """
+      const String sql1 = """
         CREATE TABLE IF NOT EXISTS "position" (
             "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
             "addresse" varchar(255) NOT NULL,
             "description" varchar(255) NOT NULL,
             "latitude" varchar(255) NOT NULL,
-            "longitude" varchar(255) NOT NULL,
-            "image" varchar(255) NOT NULL
+            "longitude" varchar(255) NOT NULL
+          );""";
+      const String sql2 = """
+        CREATE TABLE IF NOT EXISTS "position_details" (
+            "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            "image" varchar(255) NOT NULL,
+            "position_id" integer NOT NULL
           );""";
 
-      await SQLiteWrapper().execute(sql);
+      await SQLiteWrapper().execute(sql1);
+      await SQLiteWrapper().execute(sql2);
     });
     // Print where the database is stored
     debugPrint("Database path: ${dbInfo.path}");
@@ -45,10 +51,6 @@ class DatabaseHelper {
 
   closeDB() {
     SQLiteWrapper().closeDB();
-  }
-
-  truncateTable() {
-    //SQLiteWrapper().query("DELETE FROM position");
   }
 
   Future<List> showPositions() async {
@@ -62,25 +64,34 @@ class DatabaseHelper {
         params: [latitude, longitude]);
   }
 
+  Future<List> showPositionDistinctLatAndLng(
+      String latitude, String longitude) async {
+    return await SQLiteWrapper().query(
+        "SELECT DISTINCT latitude, longitude FROM position WHERE latitude = ? AND longitude = ?",
+        params: [latitude, longitude]);
+  }
+
   void addPosition(String addresse, String description, String latitude,
-      String longitude, String image) async {
+      String longitude) async {
     await SQLiteWrapper().insert(
         PositionModel(
                 addresse: addresse,
                 description: description,
                 latitude: latitude,
-                longitude: longitude,
-                image: image)
+                longitude: longitude)
+            //, image: image)
             .toMap(),
         "position");
-    print("Data inserted !");
+    print("Data inserted in local !");
   }
 
   void deletePosition(PositionModel position) async {
     await SQLiteWrapper().delete(position.toMap(), "position", keys: ["id"]);
+    print("Data deleted in local !");
   }
 
   void updatePosition(PositionModel position) async {
     await SQLiteWrapper().update(position.toMap(), "position", keys: ["id"]);
+    print("Data updated in local !");
   }
 }
