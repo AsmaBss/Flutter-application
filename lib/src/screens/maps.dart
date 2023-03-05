@@ -6,14 +6,10 @@ import 'package:camera/camera.dart';
 import 'package:clippy_flutter/triangle.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/api-services/api-services.dart';
-import 'package:flutter_application/src/database/database-helper.dart';
-import 'package:flutter_application/src/models/position-model.dart';
 import 'package:flutter_application/src/repositories/position-repository.dart';
 import 'package:flutter_application/src/screens/camera-page.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 
 class Maps extends StatefulWidget {
   const Maps({Key? key}) : super(key: key);
@@ -80,20 +76,20 @@ class _MapsState extends State<Maps> {
                     "${first.locality}, ${first.adminArea}, ${first.countryName}";
                 description = first.addressLine;
                 // save position into database
-                positionRepository.addPosition(PositionModel(
+                /*positionRepository.addPosition(PositionModel(
                     addresse: adresse,
                     description: description,
                     latitude: tappedPoint.latitude.toString(),
-                    longitude: tappedPoint.longitude.toString()));
+                    longitude: tappedPoint.longitude.toString()));*/
                 //save position into local
-                DatabaseHelper().addPosition(
+                /*DatabaseHelper().addPosition(
                     adresse.toString(),
                     description.toString(),
                     tappedPoint.latitude.toString(),
                     tappedPoint.longitude.toString());
                 DatabaseHelper()
                     .showPositions()
-                    .then((value) => print("local ==> $value\n"));
+                    .then((value) => print("local ==> $value\n"));*/
                 // add marker
                 this.allMarkers.add(Marker(
                     markerId: MarkerId(tappedPoint.toString()),
@@ -113,6 +109,31 @@ class _MapsState extends State<Maps> {
             offset: 50,
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.green,
+              ),
+              child: Text('App name'),
+            ),
+            ListTile(
+              title: const Text('Item 1'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Item 2'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -254,7 +275,7 @@ class _MapsState extends State<Maps> {
   }
 
   _loadMarkers() async {
-    List positions = await positionRepository.getAllPositions();
+    List positions = await positionRepository.getAllPositions(context);
     positions.forEach((element) {
       LatLng tappedPoint = LatLng(
           double.parse(element.latitude), double.parse(element.longitude));

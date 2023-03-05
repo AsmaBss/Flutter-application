@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: const Maps(), //Test(),
+      home: const Test(), // Maps(),
       debugShowCheckedModeBanner: false,
     );
   }

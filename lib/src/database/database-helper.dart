@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/models/position-model.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite_wrapper/sqlite_wrapper.dart';
@@ -53,45 +52,7 @@ class DatabaseHelper {
     SQLiteWrapper().closeDB();
   }
 
-  Future<List> showPositions() async {
-    return await SQLiteWrapper().query("SELECT * FROM position");
-  }
-
-  Future<List> showPositionByLatAndLng(
-      String latitude, String longitude) async {
-    return await SQLiteWrapper().query(
-        "SELECT * FROM position WHERE latitude = ? AND longitude = ?",
-        params: [latitude, longitude]);
-  }
-
-  Future<List> showPositionDistinctLatAndLng(
-      String latitude, String longitude) async {
-    return await SQLiteWrapper().query(
-        "SELECT DISTINCT latitude, longitude FROM position WHERE latitude = ? AND longitude = ?",
-        params: [latitude, longitude]);
-  }
-
-  void addPosition(String addresse, String description, String latitude,
-      String longitude) async {
-    await SQLiteWrapper().insert(
-        PositionModel(
-                addresse: addresse,
-                description: description,
-                latitude: latitude,
-                longitude: longitude)
-            //, image: image)
-            .toMap(),
-        "position");
-    print("Data inserted in local !");
-  }
-
-  void deletePosition(PositionModel position) async {
-    await SQLiteWrapper().delete(position.toMap(), "position", keys: ["id"]);
-    print("Data deleted in local !");
-  }
-
-  void updatePosition(PositionModel position) async {
-    await SQLiteWrapper().update(position.toMap(), "position", keys: ["id"]);
-    print("Data updated in local !");
-  }
+  /*DatabaseHelper()
+                    .showPositions()
+                    .then((value) => print("local ==> $value\n"));*/
 }

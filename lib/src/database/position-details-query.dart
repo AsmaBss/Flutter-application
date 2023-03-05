@@ -6,7 +6,7 @@ class PositionDetailsQuery {
     return await SQLiteWrapper().query("SELECT * FROM position_details");
   }
 
-  void addPositionDetails(int id, String image) async {
+  void addPositionDetails(int? id, String image) async {
     await SQLiteWrapper().insert(
         PositionDetailsModel(image: image, position_id: id).toMap(),
         "position_details");

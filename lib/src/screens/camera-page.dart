@@ -73,30 +73,28 @@ class _CameraPageState extends State<CameraPage> {
           child: ElevatedButton(
             child: const Text("take image"),
             onPressed: () async {
-              pictureFile = await controller.takePicture();
-              GallerySaver.saveImage(pictureFile!.path);
-              print(pictureFile!.path);
-              //
+              // Get position by lat and long
               PositionModel p =
                   await positionRepository.getPositionByLatAndLong(
                       widget.tappedPoint!.latitude.toString(),
-                      widget.tappedPoint!.longitude.toString());
-              print("details : ${p.toString()}");
+                      widget.tappedPoint!.longitude.toString(),
+                      context);
+              print("Get position by lat and long ===> ${p.toString()}");
+              // Take picture
+              pictureFile = await controller.takePicture();
+              // Save picture in gallery
+              GallerySaver.saveImage(pictureFile!.path).then((path) => {
+                    setState(() {
+                      print("Gallery saver ===> $path");
+                    }),
+                  });
+              print(pictureFile!.path);
+              // Save into database
               positionDetailsRepository.addPositionDetails(
                   PositionDetailsModel(
                       position_id: p.id, image: pictureFile!.path.toString()),
-                  p);
-
-              /*DatabaseHelper().addPosition(
-                  widget.adresse.toString(),
-                  widget.description.toString(),
-                  widget.tappedPoint!.latitude.toString(),
-                  widget.tappedPoint!.longitude.toString(),
-                  pictureFile!.path.toString());*/
-              print("table position");
-              DatabaseHelper()
-                  .showPositions()
-                  .then((value) => print("$value\n"));
+                  p,
+                  context);
               // /data/user/0/com.example.flutter_application/cache/nom_fich.jpg
               setState(() {});
             },
@@ -105,10 +103,10 @@ class _CameraPageState extends State<CameraPage> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
+            child: const Text("close"),
             onPressed: () {
               Navigator.pop(context);
             },
-            child: const Text("close"),
           ),
         ),
         // to show the image
