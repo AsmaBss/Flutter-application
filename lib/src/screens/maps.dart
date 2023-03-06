@@ -1,13 +1,11 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:clippy_flutter/triangle.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/models/position-model.dart';
 import 'package:flutter_application/src/repositories/position-repository.dart';
 import 'package:flutter_application/src/screens/camera-page.dart';
+import 'package:flutter_application/src/widget/my-drawer.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -75,32 +73,25 @@ class _MapsState extends State<Maps> {
                 adresse =
                     "${first.locality}, ${first.adminArea}, ${first.countryName}";
                 description = first.addressLine;
-                // save position into database
-                /*positionRepository.addPosition(PositionModel(
-                    addresse: adresse,
-                    description: description,
-                    latitude: tappedPoint.latitude.toString(),
-                    longitude: tappedPoint.longitude.toString()));*/
-                //save position into local
-                /*DatabaseHelper().addPosition(
-                    adresse.toString(),
-                    description.toString(),
-                    tappedPoint.latitude.toString(),
-                    tappedPoint.longitude.toString());
-                DatabaseHelper()
-                    .showPositions()
-                    .then((value) => print("local ==> $value\n"));*/
-                // add marker
-                this.allMarkers.add(Marker(
+                // Add marker
+                allMarkers.add(Marker(
                     markerId: MarkerId(tappedPoint.toString()),
                     position: tappedPoint,
                     draggable: false,
-                    onTap: () {
+                    onTap: () async {
+                      // Save position into database
+                      PositionRepository().addPosition(
+                          PositionModel(
+                              addresse: adresse.toString(),
+                              description: description.toString(),
+                              latitude: tappedPoint.latitude.toString(),
+                              longitude: tappedPoint.longitude.toString()),
+                          context);
+                      // Show InfoWindow
                       _showInfoWinfow(tappedPoint, adresse.toString(),
                           description.toString());
                     }));
                 setState(() {});
-                print(allMarkers);
               }),
           CustomInfoWindow(
             controller: _customInfoWindowController,
@@ -110,31 +101,7 @@ class _MapsState extends State<Maps> {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.green,
-              ),
-              child: Text('App name'),
-            ),
-            ListTile(
-              title: const Text('Item 1'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Item 2'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: MyDrawer(),
     );
   }
 
@@ -144,8 +111,6 @@ class _MapsState extends State<Maps> {
     var first = addresses.first;
     adresse = "${first.locality}, ${first.adminArea}, ${first.countryName}";
     description = first.addressLine;
-    print("addresse 1 ==> $adresse");
-    print("description 1 ===> $description");
     _showInfoWinfow(tappedPoint, adresse.toString(), description.toString());
   }
 
@@ -187,61 +152,16 @@ class _MapsState extends State<Maps> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            print("save into database");
-                            /*DatabaseHelper()
-                                .showPositionByLatAndLng(
-                                    tappedPoint.latitude.toString(),
-                                    tappedPoint.longitude.toString())
-                                .then((value) => {
-                                      if (value != null)
-                                        {
-                                          print("value : $value"),
-                                          print(
-                                              "value.length : ${value.length}"),
-                                          value.forEach((item) {
-                                            print('element');
-                                            print(item['addresse']);
-                                            var addresse = item['addresse'];
-                                            var description =
-                                                item['description'];
-                                            var latitude = item['latitude'];
-                                            var longitude = item['longitude'];
-                                            var image = item['image'];
-                                            print(addresse);
-                                            print(description);
-                                            print(latitude);
-                                            print(longitude);
-                                            print(image);
-                                            _addPosition(PositionModel(
-                                                addresse: addresse.toString(),
-                                                description:
-                                                    description.toString(),
-                                                latitude: latitude.toString(),
-                                                longitude: longitude.toString(),
-                                                image: image.toString()));
-                                            print("added to database");
-                                            /*DatabaseHelper().deletePosition(
-                                                PositionModel(
-                                                    addresse: addresse,
-                                                    description: description,
-                                                    latitude: latitude,
-                                                    longitude: longitude,
-                                                    image: image));
-                                            print("deleted from local");*/
-                                          }),
-                                          print(value),
-                                        }
-                                    });
-                          */
-                          },
                           child: Text('Save Position'),
+                          onPressed: () {
+                            // form
+                          },
                         ),
                         ElevatedButton(
+                          child: Icon(Icons.camera_alt),
                           onPressed: () {
                             _launchCamera(tappedPoint);
                           },
-                          child: Icon(Icons.camera),
                         ),
                       ],
                     ),
@@ -276,20 +196,20 @@ class _MapsState extends State<Maps> {
 
   _loadMarkers() async {
     List positions = await positionRepository.getAllPositions(context);
-    positions.forEach((element) {
+    for (var element in positions) {
       LatLng tappedPoint = LatLng(
           double.parse(element.latitude), double.parse(element.longitude));
-      this.allMarkers.add(
-            Marker(
-              markerId: MarkerId(tappedPoint.toString()),
-              position: tappedPoint,
-              draggable: false,
-              onTap: () {
-                _getAddressFromPosition(tappedPoint);
-              },
-            ),
-          );
-    });
+      allMarkers.add(
+        Marker(
+          markerId: MarkerId(tappedPoint.toString()),
+          position: tappedPoint,
+          draggable: false,
+          onTap: () {
+            _getAddressFromPosition(tappedPoint);
+          },
+        ),
+      );
+    }
     setState(() {});
   }
 }

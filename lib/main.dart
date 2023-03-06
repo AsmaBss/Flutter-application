@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/database/database-helper.dart';
-import 'package:flutter_application/test.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'src/screens/maps.dart';
 
@@ -20,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: Test(), // Maps(),
+      home: Maps(), //Test(),
       debugShowCheckedModeBanner: false,
     );
   }

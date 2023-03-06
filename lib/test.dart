@@ -158,7 +158,7 @@ class _TestState extends State<Test> {
                           },
                         ),
                         ElevatedButton(
-                          child: Icon(Icons.camera),
+                          child: Icon(Icons.camera_alt),
                           onPressed: () {
                             _launchCamera(tappedPoint);
                           },
