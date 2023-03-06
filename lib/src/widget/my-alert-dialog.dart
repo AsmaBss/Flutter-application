@@ -12,14 +12,14 @@ class MyAlertDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        this.title,
+        title,
         style: Theme.of(context).textTheme.titleMedium,
       ),
       content: Text(
-        this.content,
+        content,
         style: Theme.of(context).textTheme.bodyMedium,
       ),
-      actions: this.actions,
+      actions: actions,
     );
   }
 }

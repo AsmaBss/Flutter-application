@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/position-model.dart';
 import 'package:flutter_application/src/repositories/position-repository.dart';
 import 'package:flutter_application/src/screens/camera-page.dart';
+import 'package:flutter_application/src/widget/my-drawer.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -100,31 +101,7 @@ class _TestState extends State<Test> {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.green,
-              ),
-              child: Text('App name'),
-            ),
-            ListTile(
-              title: const Text('Item 1'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Item 2'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: MyDrawer(),
     );
   }
 

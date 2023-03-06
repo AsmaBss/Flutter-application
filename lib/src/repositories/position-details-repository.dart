@@ -4,7 +4,7 @@ import 'package:flutter_application/src/api-services/api-services.dart';
 import 'package:flutter_application/src/database/position-details-query.dart';
 import 'package:flutter_application/src/models/position-details-model.dart';
 import 'package:flutter_application/src/models/position-model.dart';
-import 'package:flutter_application/src/screens/my-alert-dialog.dart';
+import 'package:flutter_application/src/widget/my-alert-dialog.dart';
 import 'package:http/http.dart' as http;
 
 class PositionDetailsRepository {
@@ -75,5 +75,42 @@ class PositionDetailsRepository {
     dynamic responseJson = jsonDecode(response.body);
     final positionDetailsData = responseJson;
     return positionDetailsData;
+  }
+
+  Future<List> getPositionDetailsByPositionId(
+      BuildContext context, int id) async {
+    http.Response response =
+        await _apiServices.get("/PositionDetails/show/position/$id");
+    if (response.statusCode == 200) {
+      dynamic responseJson = jsonDecode(response.body);
+      final positionDetailsData = responseJson as List;
+      List<PositionDetailsModel> positionDetailsList = positionDetailsData
+          .map((json) => PositionDetailsModel.fromJson(json))
+          .toList();
+      if (positionDetailsList.isEmpty) {
+        showDialog(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            return MyAlertDialog(
+              title: "Il n'y a pas de données",
+              content: "",
+            );
+          },
+        );
+      }
+      return positionDetailsList;
+    } else {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext dialogContext) {
+          return MyAlertDialog(
+            title: 'Server Response',
+            content: 'Problème au niveau de serveur : ${response.statusCode}',
+          );
+        },
+      );
+      throw Exception();
+    }
   }
 }
