@@ -52,7 +52,7 @@ class PositionRepository {
         builder: (BuildContext dialogContext) {
           return MyAlertDialog(
             title: 'Server Response',
-            content: 'Problème au niveau de serveur : ${response.statusCode}',
+            content: 'Problem to connect the server : ${response.statusCode}',
           );
         },
       );
@@ -75,13 +75,39 @@ class PositionRepository {
     return PositionModel.fromJson(jsonData);
   }
 
-  void deletePosition(PositionModel p) async {
+  void deletePosition(PositionModel p, BuildContext context) async {
+    int id = int.parse(p.id.toString());
+    http.Response response = await _apiServices.delete("/Position/delete/$id");
+    if (response.statusCode == 200) {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext dialogContext) {
+          return MyAlertDialog(
+              title: 'Server Response', content: response.body);
+        },
+      );
+    } else {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext dialogContext) {
+          return MyAlertDialog(
+            title: 'Server Response',
+            content: 'Problem to connect the server : ${response.statusCode}',
+          );
+        },
+      );
+    }
+  }
+
+  /*void deletePosition(PositionModel p) async {
     http.Response response =
         await _apiServices.delete("/Position/delete/${p.id}");
     dynamic responseJson = jsonDecode(response.body);
     final jsonMessage = responseJson;
     print(jsonMessage);
-  }
+  }*/
 
   Future<PositionModel> getPositionByLatAndLong(
       String latitude, String longitude, BuildContext context) async {
@@ -97,9 +123,8 @@ class PositionRepository {
         barrierDismissible: true,
         builder: (BuildContext dialogContext) {
           return MyAlertDialog(
-            title: 'Problème au niveau de serveur',
-            content:
-                'Problème de récupérer une position : ${response.statusCode}',
+            title: 'Server Response',
+            content: 'Problem to connect the server : ${response.statusCode}',
           );
         },
       );

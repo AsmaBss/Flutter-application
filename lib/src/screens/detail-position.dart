@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/repositories/position-details-repository.dart';
 
@@ -40,7 +42,8 @@ class _DetailPositionState extends State<DetailPosition> {
               itemCount: snapshot.data?.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('${snapshot.data![index].image}'),
+                  title: Image.file(File(snapshot.data![index].image)),
+                  subtitle: Text('${snapshot.data![index].image}'),
                   onTap: () {},
                 );
               },

@@ -13,20 +13,20 @@ import 'package:path/path.dart';
 import 'package:path_provider_ex/path_provider_ex.dart';
 import 'package:path_provider/path_provider.dart';
 
-class CameraPage extends StatefulWidget {
+class totest extends StatefulWidget {
   final List<CameraDescription>? cameras;
   final LatLng? tappedPoint;
 
-  const CameraPage({this.cameras, this.tappedPoint, Key? key})
-      : super(key: key);
+  const totest({this.cameras, this.tappedPoint, Key? key}) : super(key: key);
 
   @override
-  State<CameraPage> createState() => _CameraPageState();
+  State<totest> createState() => _totestState();
 }
 
-class _CameraPageState extends State<CameraPage> {
+class _totestState extends State<totest> {
   late CameraController controller;
   XFile? pictureFile;
+  List images = [];
 
   PositionRepository positionRepository = PositionRepository();
   PositionDetailsRepository positionDetailsRepository =
@@ -89,20 +89,13 @@ class _CameraPageState extends State<CameraPage> {
                     size: 40,
                   ),
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.pop(context, images);
                   },
                 ),
                 FloatingActionButton(
                   backgroundColor: Colors.white,
                   onPressed: () async {
                     await controller.setFlashMode(FlashMode.off);
-                    // Get position by lat and long
-                    PositionModel p =
-                        await positionRepository.getPositionByLatAndLong(
-                            widget.tappedPoint!.latitude.toString(),
-                            widget.tappedPoint!.longitude.toString(),
-                            context);
-                    print("Get position by lat and long ===> ${p.toString()}");
                     // Take picture
                     pictureFile = await controller.takePicture();
                     //
@@ -114,13 +107,9 @@ class _CameraPageState extends State<CameraPage> {
                             print("Gallery saver ===> $path");
                           }),
                         });
-                    // Save into database
-                    positionDetailsRepository.addPositionDetails(
-                        PositionDetailsModel(
-                            position_id: p.id,
-                            image: imagePermanent.path.toString()),
-                        p,
-                        context);
+                    images.add(imagePermanent.path.toString());
+                    print("images 1 ===> ${images.toString()}");
+
                     // /data/user/0/com.example.flutter_application/cache/nom_fich.jpg
                     setState(() {});
                   },
@@ -135,75 +124,5 @@ class _CameraPageState extends State<CameraPage> {
         )
       ],
     );
-
-    /*
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(0.0),
-          child: CameraPreview(controller),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Padding(
-              padding: EdgeInsets.zero,
-              child: ElevatedButton(
-                child: Icon(
-                  Icons.circle_rounded,
-                  color: Colors.green,
-                ),
-                onPressed: () async {
-                  // Get position by lat and long
-                  PositionModel p =
-                      await positionRepository.getPositionByLatAndLong(
-                          widget.tappedPoint!.latitude.toString(),
-                          widget.tappedPoint!.longitude.toString(),
-                          context);
-                  print("Get position by lat and long ===> ${p.toString()}");
-                  // Take picture
-                  await controller.setFlashMode(FlashMode.off);
-                  pictureFile = await controller.takePicture();
-                  // Save picture in gallery
-                  GallerySaver.saveImage(pictureFile!.path).then((path) => {
-                        setState(() {
-                          print("Gallery saver ===> $path");
-                        }),
-                      });
-                  print(pictureFile!.path);
-                  // Save into database
-                  positionDetailsRepository.addPositionDetails(
-                      PositionDetailsModel(
-                          position_id: p.id,
-                          image: pictureFile!.path.toString()),
-                      p,
-                      context);
-                  // /data/user/0/com.example.flutter_application/cache/nom_fich.jpg
-                  setState(() {});
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                child: const Text("close"),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-          ],
-        ),
-        // to show the image
-        //if (pictureFile != null) Image.file(File(pictureFile!.path))
-        /*Image.network(
-            pictureFile!.path,
-            height: 200,
-          )*/
-      ],
-    );
-  */
   }
 }

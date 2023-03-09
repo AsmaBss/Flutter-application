@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/models/position-model.dart';
 import 'package:flutter_application/src/repositories/position-repository.dart';
 import 'package:flutter_application/src/screens/detail-position.dart';
 import 'package:flutter_application/src/widget/my-drawer.dart';
@@ -36,10 +35,22 @@ class _ListPositionsState extends State<ListPositions> {
             return ListView.builder(
               padding: const EdgeInsets.all(8),
               itemCount: snapshot.data?.length,
+              prototypeItem: ListTile(title: Text("testttt")),
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text('${snapshot.data![index].addresse}'),
                   subtitle: Text('${snapshot.data![index].description}'),
+                  trailing: TextButton(
+                    child: Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
+                    onPressed: () {
+                      PositionRepository()
+                          .deletePosition(snapshot.data![index], context);
+                      setState(() {});
+                    },
+                  ),
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (BuildContext context) =>

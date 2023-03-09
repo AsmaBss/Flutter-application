@@ -47,7 +47,11 @@ class ApiServices {
   Future<http.Response> delete(String url) async {
     try {
       Uri uri = Uri.parse(_apiUrl + url);
-      http.Response response = await http.delete(uri, headers: _headers);
+      http.Response response =
+          await http.delete(uri, headers: _headers); // headers: _headers
+      print(response.request);
+      print(response.body);
+      print(response.headers);
       return response;
     } catch (e) {
       return http.Response({"message ": e}.toString(), 400);

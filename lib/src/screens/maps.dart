@@ -3,8 +3,10 @@ import 'package:clippy_flutter/triangle.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/position-model.dart';
+import 'package:flutter_application/src/repositories/position-details-repository.dart';
 import 'package:flutter_application/src/repositories/position-repository.dart';
 import 'package:flutter_application/src/screens/camera-page.dart';
+import 'package:flutter_application/src/screens/totest.dart';
 import 'package:flutter_application/src/widget/my-drawer.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -24,6 +26,11 @@ class _MapsState extends State<Maps> {
 
   List<Marker> allMarkers = [];
   String? adresse, description;
+  List images = [];
+
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController numero = TextEditingController();
+  TextEditingController descr = TextEditingController();
 
   static const CameraPosition _cameraPosition = CameraPosition(
     target: LatLng(33.9871301997601, 9.64087277564642),
@@ -88,8 +95,62 @@ class _MapsState extends State<Maps> {
                               longitude: tappedPoint.longitude.toString()),
                           context);
                       // Show InfoWindow
-                      _showInfoWinfow(tappedPoint, adresse.toString(),
-                          description.toString());
+                      //_showInfoWinfow(tappedPoint, adresse.toString(), description.toString());
+                      // Form
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              content: Stack(
+                                //overflow: Overflow.visible,
+                                children: <Widget>[
+                                  Positioned(
+                                    right: -40.0,
+                                    top: -40.0,
+                                    child: InkResponse(
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: CircleAvatar(
+                                        child: Icon(Icons.close),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                  Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: TextFormField(),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: TextFormField(),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: ElevatedButton(
+                                            child: Text("Submitß"),
+                                            onPressed: () {
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                _formKey.currentState!.save();
+                                              }
+                                            },
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          });
+
+                      //setState(() {});
                     }));
                 setState(() {});
               }),
@@ -111,7 +172,8 @@ class _MapsState extends State<Maps> {
     var first = addresses.first;
     adresse = "${first.locality}, ${first.adminArea}, ${first.countryName}";
     description = first.addressLine;
-    _showInfoWinfow(tappedPoint, adresse.toString(), description.toString());
+    //_showInfoWinfow(tappedPoint, adresse.toString(), description.toString());
+    _showForm(tappedPoint, adresse.toString(), description.toString());
   }
 
   _showInfoWinfow(LatLng tappedPoint, String adresse, String description) {
@@ -182,13 +244,113 @@ class _MapsState extends State<Maps> {
         tappedPoint);
   }
 
+  _showForm(LatLng tappedPoint, String adresse, String description) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          insetPadding: EdgeInsets.only(left: 65, right: 65),
+          scrollable: true,
+          title: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 0.0, top: 0.0),
+                child: Stack(
+                  children: [
+                    GestureDetector(
+                      onTap: () {},
+                      child: Container(
+                        alignment: FractionalOffset.topRight,
+                        child: GestureDetector(
+                          child: Icon(
+                            Icons.clear,
+                            color: Colors.red,
+                          ),
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(5),
+                child: Text(
+                  adresse.toString(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                  softWrap: false,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(5),
+                child: Text(
+                  description.toString(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          content: Form(
+            child: Column(
+              children: <Widget>[
+                TextFormField(
+                  controller: numero,
+                  decoration: InputDecoration(
+                    labelText: 'Number',
+                  ),
+                ),
+                TextFormField(
+                  controller: descr,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      _launchCamera(tappedPoint);
+                    },
+                    icon: Icon(Icons.camera_alt),
+                    label: Text("Take picture"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              child: Text("Submit"),
+              onPressed: () async {
+                print("images 2 ==> ${images.toString()}");
+                print("numero ==> ${numero.text}");
+                print("descr ==> ${descr.text}");
+                // Save into database
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   _launchCamera(LatLng tappedPoint) async {
-    await availableCameras().then((value) {
-      Navigator.push(
+    await availableCameras().then((value) async {
+      images = await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) =>
-              CameraPage(cameras: value, tappedPoint: tappedPoint),
+              totest(cameras: value, tappedPoint: tappedPoint),
         ),
       );
     });
