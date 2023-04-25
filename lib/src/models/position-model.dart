@@ -1,20 +1,16 @@
 class PositionModel {
   int? id;
-  String? addresse;
+  String? address;
   String? description;
   String? latitude;
   String? longitude;
 
   PositionModel(
-      {this.id,
-      this.addresse,
-      this.description,
-      this.latitude,
-      this.longitude});
+      {this.id, this.address, this.description, this.latitude, this.longitude});
 
   @override
   String toString() {
-    return 'Position { id: $id, address: $addresse, '
+    return 'Position { id: $id, address: $address, '
         'description: $description, latitude: $latitude, '
         'longitude: $longitude}\n';
   }
@@ -22,7 +18,7 @@ class PositionModel {
   factory PositionModel.fromJson(Map<String, dynamic> json) {
     return PositionModel(
       id: json['id'] as int,
-      addresse: json['addresse'] as String,
+      address: json['address'] as String,
       description: json['description'] as String,
       latitude: json['latitude'] as String,
       longitude: json['longitude'] as String,
@@ -32,7 +28,7 @@ class PositionModel {
   Map<String, dynamic> toJson(PositionModel p) {
     return {
       'id': p.id,
-      'addresse': p.addresse,
+      'address': p.address,
       'description': p.description,
       'latitude': p.latitude,
       'longitude': p.longitude,
@@ -40,7 +36,7 @@ class PositionModel {
   }
 
   factory PositionModel.fromMap(Map<String, dynamic> map) {
-    return PositionModel(addresse: map['addresse'] ?? "")
+    return PositionModel(address: map['address'] ?? "")
       ..description = (map['description'] ?? "")
       ..latitude = (map['latitude'] ?? "")
       ..longitude = (map['longitude'] ?? "");
@@ -48,7 +44,7 @@ class PositionModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'addresse': addresse,
+      'address': address,
       'description': description,
       'latitude': latitude,
       'longitude': longitude

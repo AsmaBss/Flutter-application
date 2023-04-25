@@ -1,0 +1,50 @@
+{
+  "identifier": "Parcelle_1.shp",
+  "level": "map",
+  "style": {
+    "isFilled": false,
+    "hasOutline": true,
+    "outLineColor": {
+      "value": -16777216,
+      "falpha": 0.0
+    },
+    "outlineWidth": 1,
+    "outlineStroke": 0,
+    "antiAliasing": true
+  },
+  "label": {
+    "isVisible": false,
+    "colorMode": 1,
+    "color": {
+      "value": -16777216,
+      "falpha": 0.0
+    },
+    "font": {
+      "name": "Arial",
+      "style": 0,
+      "size": 12,
+      "pointSize": 12.0,
+      "fontSerializedDataVersion": 1
+    }
+  },
+  "subset": [
+    {
+      "identifier": "the_geom",
+      "level": "geolayer",
+      "epsg": "4326",
+      "norm": "lin"
+    },
+    {
+      "identifier": "Nom",
+      "level": "layer"
+    },
+    {
+      "identifier": "Culture",
+      "level": "layer"
+    },
+    {
+      "identifier": "Sol",
+      "level": "layer"
+    }
+  ]
+}

@@ -29,18 +29,17 @@ class DatabaseHelper {
       const String sql1 = """
         CREATE TABLE IF NOT EXISTS "position" (
             "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-            "addresse" varchar(255) NOT NULL,
+            "address" varchar(255) NOT NULL,
             "description" varchar(255) NOT NULL,
             "latitude" varchar(255) NOT NULL,
             "longitude" varchar(255) NOT NULL
           );""";
       const String sql2 = """
-        CREATE TABLE IF NOT EXISTS "position_details" (
+        CREATE TABLE IF NOT EXISTS "images" (
             "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
             "image" varchar(255) NOT NULL,
-            "position_id" integer NOT NULL
+            "position_id" integer NULL
           );""";
-
       await SQLiteWrapper().execute(sql1);
       await SQLiteWrapper().execute(sql2);
     });

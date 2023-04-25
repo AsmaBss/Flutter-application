@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/screens/NouvelleSecurisation.dart';
 import 'package:flutter_application/src/screens/list-positions.dart';
 
 class MyDrawer extends StatefulWidget {
@@ -27,8 +28,11 @@ class _MyDrawerState extends State<MyDrawer> {
             },
           ),
           ListTile(
-            title: Text('list 2'),
-            onTap: () {},
+            title: Text('Nouvelle Sécurisation'),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => NouvelleSecurisation()));
+            },
           ),
         ],
       ),

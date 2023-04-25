@@ -13,15 +13,28 @@ class PositionDetailsQuery {
     print("Data inserted in local !");
   }
 
-  void deletePositionDetails(PositionDetailsModel positiondet) async {
+  void deletePositionDetails(int id) async {
     await SQLiteWrapper()
-        .delete(positiondet.toMap(), "position_details", keys: ["id"]);
+        .execute("DELETE FROM position_details WHERE id = ?", params: [id]);
+    /*await SQLiteWrapper()
+        .delete(positionDetails.toMap(), "position_details", keys: ["id"]);*/
     print("Data deleted in local !");
   }
 
-  void updatePositionDetails(PositionDetailsModel positiondet) async {
-    await SQLiteWrapper()
-        .update(positiondet.toMap(), "position_details", keys: ["id"]);
-    print("Data updated in local !");
+  Future<List> showPositionDetailsByPositionId(int idPos) async {
+    return await SQLiteWrapper().query(
+        "SELECT * FROM position_details WHERE position_id = ?",
+        params: [idPos]);
+  }
+
+  Future<List> showPositionByLatAndLng(
+      String latitude, String longitude) async {
+    return await SQLiteWrapper().query(
+        "SELECT * FROM position_details WHERE latitude = ? AND longitude = ?",
+        params: [latitude, longitude]);
+  }
+
+  void truncateTable() async {
+    await SQLiteWrapper().execute("DELETE FROM position_details");
   }
 }

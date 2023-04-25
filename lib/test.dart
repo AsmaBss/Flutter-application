@@ -1,43 +1,41 @@
-import 'package:camera/camera.dart';
-import 'package:clippy_flutter/triangle.dart';
+import 'dart:math';
+
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/position-model.dart';
 import 'package:flutter_application/src/repositories/position-repository.dart';
-import 'package:flutter_application/src/screens/camera-page.dart';
-import 'package:flutter_application/src/widget/my-drawer.dart';
+import 'package:flutter_application/src/widget/DrawerWidget.dart';
+import 'package:flutter_application/src/widget/my-popup-marker.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:geocoder/geocoder.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart';
 
 class Test extends StatefulWidget {
   const Test({Key? key}) : super(key: key);
 
   @override
-  _TestState createState() => _TestState();
+  State<StatefulWidget> createState() => _TestState();
 }
 
 class _TestState extends State<Test> {
-  final PositionRepository positionRepository = PositionRepository();
+  List<Marker> allMarkers = [];
 
   CustomInfoWindowController _customInfoWindowController =
       CustomInfoWindowController();
-
-  List<Marker> allMarkers = [];
-  String? adresse, description;
-
-  static const CameraPosition _cameraPosition = CameraPosition(
-    target: LatLng(33.9871301997601, 9.64087277564642),
-    zoom: 7.1,
-  );
+  late final MapController _mapController;
+  final PopupController _popupLayerController = PopupController();
 
   @override
   void initState() {
     super.initState();
     _loadMarkers();
+    _mapController = MapController();
   }
 
   @override
   void dispose() {
+    _mapController.dispose();
     _customInfoWindowController.dispose();
     super.dispose();
   }
@@ -49,164 +47,106 @@ class _TestState extends State<Test> {
         backgroundColor: Colors.green,
         title: Text("Maps"),
       ),
-      body: Stack(
-        children: [
-          GoogleMap(
-              initialCameraPosition: _cameraPosition,
-              mapType: MapType.satellite,
-              myLocationEnabled: true,
-              compassEnabled: true,
-              markers: Set<Marker>.of(allMarkers),
-              onCameraMove: (position) {
-                _customInfoWindowController.onCameraMove!();
-              },
-              onMapCreated: (GoogleMapController controller) {
-                _customInfoWindowController.googleMapController = controller;
-              },
-              onTap: (LatLng tappedPoint) async {
-                _customInfoWindowController.hideInfoWindow!();
-                // Get address from coordinates
-                var addresses = await Geocoder.local
-                    .findAddressesFromCoordinates(Coordinates(
-                        tappedPoint.latitude, tappedPoint.longitude));
-                var first = addresses.first;
-                adresse =
-                    "${first.locality}, ${first.adminArea}, ${first.countryName}";
-                description = first.addressLine;
-                // Add marker
-                allMarkers.add(Marker(
-                    markerId: MarkerId(tappedPoint.toString()),
-                    position: tappedPoint,
-                    draggable: false,
-                    onTap: () async {
-                      // Save position into database
-                      PositionRepository().addPosition(
-                          PositionModel(
-                              addresse: adresse.toString(),
-                              description: description.toString(),
-                              latitude: tappedPoint.latitude.toString(),
-                              longitude: tappedPoint.longitude.toString()),
-                          context);
-                      // Show InfoWindow
-                      _showInfoWinfow(tappedPoint, adresse.toString(),
-                          description.toString());
-                    }));
-                setState(() {});
-              }),
-          CustomInfoWindow(
-            controller: _customInfoWindowController,
-            height: 240, //200
-            width: 210, //200
-            offset: 50,
-          ),
-        ],
+      body: Center(
+        child: Column(
+          children: [
+            Flexible(
+              child: FlutterMap(
+                mapController: _mapController,
+                options: MapOptions(
+                  center: LatLng(36.806389, 10.181667),
+                  zoom: 5,
+                  onTap: (tapPosition, point) async {
+                    // Get Address
+                    var addresses = await Geocoder.local
+                        .findAddressesFromCoordinates(
+                            Coordinates(point.latitude, point.longitude));
+                    var first = addresses.first;
+                    var adresse =
+                        "${first.locality}, ${first.adminArea}, ${first.countryName}";
+                    var street = first.addressLine;
+                    // Add Marker
+                    allMarkers.add(
+                      Marker(
+                        point: point,
+                        builder: (BuildContext context) => Icon(
+                          Icons.location_on,
+                          color: Colors.red,
+                        ),
+                      ),
+                    );
+                    // Save into database
+                    /*PositionRepository().addPosition(
+                        PositionModel(
+                            address: adresse,
+                            description: street,
+                            latitude: point.latitude.toString(),
+                            longitude: point.longitude.toString()),
+                        context);*/
+                    setState(() {});
+                  },
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    subdomains: ['a', 'b', 'c'],
+                  ),
+                  TileLayer(
+                    backgroundColor: Colors.transparent,
+                    wmsOptions: WMSTileLayerOptions(
+                      baseUrl:
+                          'http://192.168.1.66:8080/geoserver/parcelles/wms?',
+                      layers: ['parcelles:Group1'],
+                      transparent: true,
+                      format: 'image/png',
+                    ),
+                  ),
+                  /*MarkerLayer(
+                    markers: allMarkers,
+                  )*/
+                  PopupMarkerLayerWidget(
+                    options: PopupMarkerLayerOptions(
+                      popupController: _popupLayerController,
+                      markers: allMarkers,
+                      markerRotateAlignment:
+                          PopupMarkerLayerOptions.rotationAlignmentFor(
+                              AnchorAlign.top),
+                      popupBuilder: (BuildContext context, Marker marker) =>
+                          GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          _popupLayerController.hideAllPopups();
+                          setState(() {});
+                        },
+                        child: MyPopupMarker(
+                          point: marker.point,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       drawer: MyDrawer(),
     );
   }
 
-  _getAddressFromPosition(LatLng tappedPoint) async {
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(
-        Coordinates(tappedPoint.latitude, tappedPoint.longitude));
-    var first = addresses.first;
-    adresse = "${first.locality}, ${first.adminArea}, ${first.countryName}";
-    description = first.addressLine;
-    _showInfoWinfow(tappedPoint, adresse.toString(), description.toString());
-  }
-
-  _showInfoWinfow(LatLng tappedPoint, String adresse, String description) {
-    _customInfoWindowController.addInfoWindow!(
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Container(
-                height: double.infinity,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white70,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      child: Text(
-                        adresse.toString(),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      child: Text(
-                        description.toString(),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        ElevatedButton(
-                          child: Text('Save Position'),
-                          onPressed: () {
-                            // form
-                          },
-                        ),
-                        ElevatedButton(
-                          child: Icon(Icons.camera_alt),
-                          onPressed: () {
-                            _launchCamera(tappedPoint);
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Triangle.isosceles(
-              edge: Edge.BOTTOM,
-              child: Container(
-                color: Colors.white70,
-                width: 25,
-                height: 15,
-              ),
-            ),
-          ],
-        ),
-        tappedPoint);
-  }
-
-  _launchCamera(LatLng tappedPoint) async {
-    await availableCameras().then((value) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              CameraPage(cameras: value, tappedPoint: tappedPoint),
-        ),
-      );
-    });
-  }
-
   _loadMarkers() async {
-    List positions = await positionRepository.getAllPositions(context);
-    for (var element in positions) {
+    List positions = await PositionRepository().getAllPositions(context);
+    for (PositionModel element in positions) {
       LatLng tappedPoint = LatLng(
-          double.parse(element.latitude), double.parse(element.longitude));
+          double.parse(element.latitude!), double.parse(element.longitude!));
       allMarkers.add(
         Marker(
-          markerId: MarkerId(tappedPoint.toString()),
-          position: tappedPoint,
-          draggable: false,
-          onTap: () {
-            _getAddressFromPosition(tappedPoint);
-          },
+          point: tappedPoint,
+          builder: (BuildContext context) => Icon(
+            Icons.location_on,
+            color: Colors.red,
+          ),
         ),
       );
     }
