@@ -1,15 +1,27 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/models/plan-sondage-model.dart';
+import 'package:flutter_application/src/database/passe-query.dart';
+import 'package:flutter_application/src/models/PlanSondageModel.dart';
+import 'package:flutter_application/src/models/PrelevementModel.dart';
+import 'package:flutter_application/src/models/SecurisationModel.dart';
+import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
 import 'package:flutter_application/src/screens/CameraPage.dart';
 import 'package:flutter_application/src/screens/NouveauPasse.dart';
+import 'package:flutter_application/src/screens/maps.dart';
 import 'package:flutter_application/src/widget/NouveauPrelevementFormWidget.dart';
 
+import '../database/images-query.dart';
+
 class NouveauPrelevement extends StatefulWidget {
-  final PlanSondageModel? planSondage;
-  const NouveauPrelevement({this.planSondage, Key? key}) : super(key: key);
+  final List<PlanSondageModel?> planSondage;
+  //final int id;
+  final SecurisationModel securisation;
+  const NouveauPrelevement(
+      {required this.planSondage, required this.securisation, Key? key})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _NouveauPrelevementState();
@@ -17,28 +29,30 @@ class NouveauPrelevement extends StatefulWidget {
 
 class _NouveauPrelevementState extends State<NouveauPrelevement> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController nom = TextEditingController();
+  TextEditingController numero = TextEditingController();
   TextEditingController munitionRef = TextEditingController();
   TextEditingController cotePlateforme = TextEditingController();
   TextEditingController coteASecurise = TextEditingController();
   TextEditingController profondeurASecurise = TextEditingController();
+  TextEditingController remarques = TextEditingController();
   List<String> _coordinates = [];
-  String? _selectedSondage;
+  PlanSondageModel? _selectedSondage;
   String? statut;
+  bool _isShown = true;
 
   @override
   initState() {
     super.initState();
-    _loadSondages();
   }
 
   @override
   void dispose() {
-    nom.dispose();
+    numero.dispose();
     munitionRef.dispose();
     cotePlateforme.dispose();
     coteASecurise.dispose();
     profondeurASecurise.dispose();
+    remarques.dispose();
     super.dispose();
   }
 
@@ -55,13 +69,13 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
           children: [
             NouveauPrelevementFormWidget(
               formKey: _formKey,
-              nom: nom,
+              numero: numero,
               munitionRef: munitionRef,
               valuePlanSondage: _selectedSondage,
-              itemsPlanSondage: _coordinates.map((coordinate) {
-                return DropdownMenuItem<String>(
-                  value: coordinate,
-                  child: Text(coordinate),
+              itemsPlanSondage: widget.planSondage.map((value) {
+                return DropdownMenuItem<PlanSondageModel>(
+                  value: value,
+                  child: Text(value!.geometry.toString()),
                 );
               }).toList(),
               onChangedDropdownPlanSondage: (selectedCoordinate) {
@@ -72,7 +86,40 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
               cotePlateforme: cotePlateforme,
               profondeurASecurise: profondeurASecurise,
               coteASecurise: coteASecurise,
+              imageGrid: FutureBuilder(
+                future: ImagesQuery().showImages(),
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    return Center(child: Text("There is no data"));
+                  }
+                  return GridView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.all(0.0),
+                    addAutomaticKeepAlives: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 1,
+                      mainAxisSpacing: 0,
+                      crossAxisSpacing: 5,
+                      childAspectRatio: 1,
+                      mainAxisExtent: 170,
+                    ),
+                    shrinkWrap: true,
+                    itemCount: snapshot.data?.length, //5,
+                    itemBuilder: (BuildContext context, int index) {
+                      final item = snapshot.data![index];
+                      return GestureDetector(
+                        child: Image.memory(Base64Decoder().convert(item[1])),
+                        //Image.file(File(item[1])),
+                        onTap: () {
+                          _deleteImage(context, item[0]);
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
               onPressedCam: () => _launchCamera(),
+              remarques: remarques,
               statut: statut,
               onChangedStatut: (value) => {
                 print('radio selected : ${value.toString()}'),
@@ -93,11 +140,36 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      print(statut.toString());
+                      print(remarques.text);
                       if (_formKey.currentState!.validate()) {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                NouveauPrelevement()));
+                        List images = await ImagesQuery().showImages();
+                        List passes = await PasseQuery().showPasses();
+
+                        PrelevementRepository().addPrelevement(
+                            context,
+                            PrelevementModel(
+                                numero: int.parse(numero.text),
+                                munitionReference: munitionRef.text,
+                                cotePlateforme: int.parse(cotePlateforme.text),
+                                coteASecuriser: int.parse(coteASecurise.text),
+                                profondeurASecuriser:
+                                    int.parse(profondeurASecurise.text),
+                                statut: statut.toString(),
+                                remarques: remarques.text),
+                            passes,
+                            images,
+                            widget.securisation,
+                            _selectedSondage!);
+                        for (var i in images) {
+                          ImagesQuery().deleteImage(i[0]);
+                        }
+                        for (var i in images) {
+                          PasseQuery().deletePasse(i[0]);
+                        }
+                        /*Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => Maps()));*/
                       }
                     },
                     child: Text("Enregistrer"),
@@ -117,22 +189,6 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
     );
   }
 
-  _loadSondages() async {
-    print("load sondages");
-    List<String> sondages = widget.planSondage!.geometry
-        .toString()
-        .replaceAll("MULTIPOINT (", "")
-        .replaceAll("))", ")")
-        .split(", ")
-        .toList();
-    print('sondages : $sondages');
-    _coordinates = sondages.map((item) {
-      int index = sondages.indexOf(item);
-      return '${index + 1} - $item';
-    }).toList();
-    setState(() {});
-  }
-
   _launchCamera() async {
     await availableCameras().then((value) async {
       await Navigator.push(
@@ -145,5 +201,33 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
       );
     });
     setState(() {});
+  }
+
+  void _deleteImage(BuildContext context, int idImg) {
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Please Confirm'),
+          content: const Text('Are you sure to remove this image?'),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isShown = false;
+                    ImagesQuery().deleteImage(idImg);
+                  });
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Yes')),
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('No'))
+          ],
+        );
+      },
+    );
   }
 }

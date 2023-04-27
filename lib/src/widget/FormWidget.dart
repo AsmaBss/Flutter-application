@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/models/parcelle-model.dart';
+
+import '../models/ParcelleModel.dart';
+
 
 class FormWidget extends StatelessWidget {
   final formKey;

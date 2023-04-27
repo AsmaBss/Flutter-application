@@ -40,8 +40,19 @@ class DatabaseHelper {
             "image" varchar(255) NOT NULL,
             "position_id" integer NULL
           );""";
+      const String sql3 = """
+        CREATE TABLE IF NOT EXISTS "passe" (
+            "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+            "munitionReference" varchar(255) NOT NULL,
+            "profondeurSonde" integer NOT NULL,
+            "gradientMag" integer NOT NULL,
+            "profondeurSecurisee" integer NOT NULL,
+            "coteSecurisee" integer NOT NULL,
+            "prelevement" integer NULL
+          );""";
       await SQLiteWrapper().execute(sql1);
       await SQLiteWrapper().execute(sql2);
+      await SQLiteWrapper().execute(sql3);
     });
     // Print where the database is stored
     debugPrint("Database path: ${dbInfo.path}");

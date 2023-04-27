@@ -12,7 +12,7 @@ class PlanSondageModel {
   String toString() {
     return 'PlanSondage { id: $id, file: $file, '
         'type: $type, geometry: $geometry, '
-        'longitude: $parcelle}\n';
+        'parcelle: $parcelle}\n';
   }
 
   factory PlanSondageModel.fromJson(Map<String, dynamic> json) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/models/parcelle-model.dart';
+import 'package:flutter_application/src/models/ParcelleModel.dart';
 
 class NouvelleSecurisationFormWidget extends StatelessWidget {
   final formKey;

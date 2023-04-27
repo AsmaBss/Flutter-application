@@ -1,13 +1,16 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/models/parcelle-model.dart';
-import 'package:flutter_application/src/models/plan-sondage-model.dart';
+import 'package:flutter_application/src/models/ParcelleModel.dart';
+import 'package:flutter_application/src/models/PlanSondageModel.dart';
+import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/repositories/parcelle-repository.dart';
 import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
 import 'package:flutter_application/src/screens/NouveauPrelevement.dart';
 import 'package:flutter_application/src/widget/FormWidget.dart';
 import 'package:flutter_application/src/widget/NouvelleSecurisationFormWidget.dart';
+
+import '../repositories/SecurisationRepository.dart';
 
 class NouvelleSecurisation extends StatefulWidget {
   @override
@@ -23,8 +26,8 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   TextEditingController profondeurASecurise = TextEditingController();
   TextEditingController planSondage = TextEditingController();
   List<ParcelleModel> _parcelles = [];
+  List<PlanSondageModel> _planSondages = [];
   ParcelleModel? _selectedParcelle;
-  PlanSondageModel? _selectedSondage;
 
   @override
   initState() {
@@ -83,12 +86,39 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
+                        SecurisationModel securisation =
+                            await SecurisationRepository().addSecurisation(
+                                context,
+                                SecurisationModel(
+                                  munitionReference: munitionRef.text,
+                                  nom: nom.text,
+                                  coteASecuriser: int.parse(coteASecurise.text),
+                                  cotePlateforme:
+                                      int.parse(cotePlateforme.text),
+                                  profondeurASecuriser:
+                                      int.parse(profondeurASecurise.text),
+                                ),
+                                _selectedParcelle!);
+                        /*int id = await SecurisationRepository()
+                            .addSecurisationParcelle(
+                                context,
+                                SecurisationModel(
+                                  munitionReference: munitionRef.text,
+                                  nom: nom.text,
+                                  coteASecuriser: int.parse(coteASecurise.text),
+                                  cotePlateforme:
+                                      int.parse(cotePlateforme.text),
+                                  profondeurASecuriser:
+                                      int.parse(profondeurASecurise.text),
+                                ),
+                                _selectedParcelle!);*/
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (BuildContext context) =>
                                 NouveauPrelevement(
-                                    planSondage: _selectedSondage)));
+                                    planSondage: _planSondages,
+                                    securisation: securisation)));
                       }
                     },
                     child: Text("Enregistrer"),
@@ -120,12 +150,10 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   _loadPlanSondage(ParcelleModel parcelle) async {
     if (_selectedParcelle != "") {
       print("load plan sondage");
-      print(parcelle.id);
-      PlanSondageModel ps = await PlanSondageRepository()
+      List<PlanSondageModel> list = await PlanSondageRepository()
           .getPlanSondageByParcelle(parcelle.id!, context);
-      _selectedSondage = ps;
-      planSondage.text = ps.file!;
-      print(_selectedSondage);
+      _planSondages = list;
+      planSondage.text = _planSondages.first.file!;
     } else {
       print("not loaded");
     }

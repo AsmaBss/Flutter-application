@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/api-services/api-services.dart';
-import 'package:flutter_application/src/models/parcelle-model.dart';
+import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:http/http.dart' as http;
 
 class ParcelleRepository {

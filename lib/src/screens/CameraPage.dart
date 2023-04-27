@@ -110,7 +110,7 @@ class _CameraPageState extends State<CameraPage> {
       ImagesQuery().showImages().then(
             (value) => {
               if (value.isNotEmpty)
-                {print("item  -PosDet- ==> $value\n")}
+                {print("item  ==> $value\n")}
               else
                 {print("table empty")}
             },

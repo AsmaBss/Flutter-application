@@ -1,23 +1,29 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/models/PlanSondageModel.dart';
+
+import '../database/images-query.dart';
 
 class NouveauPrelevementFormWidget extends StatelessWidget {
   final formKey;
-  final TextEditingController? nom,
+  final TextEditingController? numero,
       munitionRef,
       cotePlateforme,
       coteASecurise,
       profondeurASecurise,
       remarques;
-  final List<DropdownMenuItem<String>>? itemsPlanSondage;
+  final List<DropdownMenuItem<PlanSondageModel>>? itemsPlanSondage;
   final onChangedDropdownPlanSondage;
-  final String? valuePlanSondage;
+  final PlanSondageModel? valuePlanSondage;
   final onPressedCam, onChangedStatut;
   final String? statut;
   final nvPasse;
+  final Widget? imageGrid;
 
   NouveauPrelevementFormWidget(
       {this.formKey,
-      this.nom,
+      this.numero,
       this.munitionRef,
       this.cotePlateforme,
       this.coteASecurise,
@@ -29,7 +35,8 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
       this.onPressedCam,
       this.onChangedStatut,
       this.statut,
-      this.nvPasse});
+      this.nvPasse,
+      this.imageGrid});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +49,7 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
             child: TextFormField(
-              controller: nom,
+              controller: numero,
               decoration: InputDecoration(
                 labelText: "Numéro de prélèvement",
                 focusedBorder: OutlineInputBorder(
@@ -59,7 +66,7 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: DropdownButtonFormField<String>(
+            child: DropdownButtonFormField<PlanSondageModel>(
               isExpanded: true,
               value: valuePlanSondage,
               hint: Text('Sélectionner un point de sondage'),
@@ -145,6 +152,11 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
           Row(
             children: [
               Container(
+                  padding: EdgeInsets.only(top: 15, bottom: 15),
+                  height: 300,
+                  width: 280,
+                  child: imageGrid),
+              /*Container(
                 padding: EdgeInsets.only(top: 15, bottom: 15),
                 height: 300,
                 width: 280,
@@ -173,6 +185,7 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
                   },
                 ),
               ),
+              */
               IconButton(
                 padding: EdgeInsets.zero,
                 alignment: Alignment.centerRight,
