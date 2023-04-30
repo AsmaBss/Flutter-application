@@ -6,8 +6,7 @@ import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/repositories/parcelle-repository.dart';
 import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
-import 'package:flutter_application/src/screens/NouveauPrelevement.dart';
-import 'package:flutter_application/src/widget/FormWidget.dart';
+import 'package:flutter_application/src/screens/MapPrelevement.dart';
 import 'package:flutter_application/src/widget/NouvelleSecurisationFormWidget.dart';
 
 import '../repositories/SecurisationRepository.dart';
@@ -87,8 +86,8 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        SecurisationModel securisation =
+                      //if (_formKey.currentState!.validate()) {
+                      /*SecurisationModel securisation =
                             await SecurisationRepository().addSecurisation(
                                 context,
                                 SecurisationModel(
@@ -100,26 +99,19 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                                   profondeurASecuriser:
                                       int.parse(profondeurASecurise.text),
                                 ),
-                                _selectedParcelle!);
-                        /*int id = await SecurisationRepository()
-                            .addSecurisationParcelle(
-                                context,
-                                SecurisationModel(
-                                  munitionReference: munitionRef.text,
-                                  nom: nom.text,
-                                  coteASecuriser: int.parse(coteASecurise.text),
-                                  cotePlateforme:
-                                      int.parse(cotePlateforme.text),
-                                  profondeurASecuriser:
-                                      int.parse(profondeurASecurise.text),
-                                ),
                                 _selectedParcelle!);*/
-                        Navigator.of(context).push(MaterialPageRoute(
+                      /*Navigator.of(context).push(MaterialPageRoute(
                             builder: (BuildContext context) =>
                                 NouveauPrelevement(
                                     planSondage: _planSondages,
                                     securisation: securisation)));
-                      }
+                                    */
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => MapPrelevement(
+                              planSondage: _planSondages,
+                              //securisation: securisation,
+                              parcelle: _selectedParcelle)));
+                      //}
                     },
                     child: Text("Enregistrer"),
                   ),

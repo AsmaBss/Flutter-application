@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/database/database-helper.dart';
 import 'package:flutter_application/src/screens/maps.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'test.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
