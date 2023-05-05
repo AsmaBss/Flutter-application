@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
+import 'package:number_inc_dec/number_inc_dec.dart';
 
 import '../database/images-query.dart';
 
@@ -13,13 +14,10 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
       coteASecurise,
       profondeurASecurise,
       remarques;
-  final List<DropdownMenuItem<PlanSondageModel>>? itemsPlanSondage;
-  final onChangedDropdownPlanSondage;
-  final PlanSondageModel? valuePlanSondage;
   final onPressedCam, onChangedStatut;
   final String? statut;
   final nvPasse;
-  final Widget? imageGrid;
+  final Widget? imageGrid, listPasse;
 
   NouveauPrelevementFormWidget(
       {this.formKey,
@@ -29,14 +27,12 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
       this.coteASecurise,
       this.profondeurASecurise,
       this.remarques,
-      this.valuePlanSondage,
-      this.itemsPlanSondage,
-      this.onChangedDropdownPlanSondage,
       this.onPressedCam,
       this.onChangedStatut,
       this.statut,
       this.nvPasse,
-      this.imageGrid});
+      this.imageGrid,
+      this.listPasse});
 
   @override
   Widget build(BuildContext context) {
@@ -62,16 +58,6 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
                 }
                 return null;
               },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(bottom: 15.0),
-            child: DropdownButtonFormField<PlanSondageModel>(
-              isExpanded: true,
-              value: valuePlanSondage,
-              hint: Text('Sélectionner un point de sondage'),
-              items: itemsPlanSondage,
-              onChanged: onChangedDropdownPlanSondage,
             ),
           ),
           Padding(
@@ -111,17 +97,18 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
               },
             ),
           ),
+          Text(
+            "Profondeur à sécuriser (m)",
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
+            ),
+          ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: profondeurASecurise,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Profondeur à sécuriser (m)',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
+            child: NumberInputPrefabbed.roundedEdgeButtons(
+              controller: profondeurASecurise!,
+              initialValue: 9,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
@@ -130,17 +117,18 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
               },
             ),
           ),
+          Text(
+            "Côte à sécuriser (m)",
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
+            ),
+          ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: coteASecurise,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Côte à sécuriser (m)',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
+            child: NumberInputPrefabbed.roundedEdgeButtons(
+              controller: coteASecurise!,
+              initialValue: 9,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
@@ -148,54 +136,6 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
                 return null;
               },
             ),
-          ),
-          Row(
-            children: [
-              Container(
-                  padding: EdgeInsets.only(top: 15, bottom: 15),
-                  height: 300,
-                  width: 280,
-                  child: imageGrid),
-              /*Container(
-                padding: EdgeInsets.only(top: 15, bottom: 15),
-                height: 300,
-                width: 280,
-                child: GridView.builder(
-                  scrollDirection: Axis.horizontal,
-                  addAutomaticKeepAlives: true,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 1,
-                    mainAxisSpacing: 5,
-                    crossAxisSpacing: 5,
-                    childAspectRatio: 1,
-                    mainAxisExtent: 170,
-                  ),
-                  shrinkWrap: true,
-                  itemCount: 5,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      color: Colors.blue,
-                      child: Center(
-                        child: Text(
-                          'Item $index',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              */
-              IconButton(
-                padding: EdgeInsets.zero,
-                alignment: Alignment.centerRight,
-                onPressed: onPressedCam,
-                icon: Icon(
-                  Icons.camera_alt,
-                  color: Colors.green,
-                ),
-              ),
-            ],
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
@@ -217,6 +157,24 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
               },
             ),
           ),
+          Row(
+            children: [
+              Container(
+                  padding: EdgeInsets.only(top: 15, bottom: 15),
+                  height: 300,
+                  width: 280,
+                  child: imageGrid),
+              IconButton(
+                padding: EdgeInsets.zero,
+                alignment: Alignment.centerRight,
+                onPressed: onPressedCam,
+                icon: Icon(
+                  Icons.camera_alt,
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
           Container(
             padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
             child: Row(
@@ -233,6 +191,11 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          Container(
+            height: 300,
+            padding: EdgeInsets.only(bottom: 15.0),
+            child: listPasse,
           ),
           Column(
             children: [

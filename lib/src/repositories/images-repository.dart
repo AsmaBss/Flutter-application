@@ -47,6 +47,30 @@ class ImagesRepository {
     throw Exception("Failed get all images !");
   }
 
+  Future<List<ImagesModel>> getByPrelevement(
+      int id, BuildContext context) async {
+    http.Response response =
+        await _apiServices.get("/Images/show/prelevement/$id");
+    if (response.statusCode == 200) {
+      dynamic responseJson = jsonDecode(response.body);
+      final imagesData = responseJson as List;
+      List<ImagesModel> images =
+          imagesData.map((json) => ImagesModel.fromJson(json)).toList();
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server success : ${response.statusCode}"),
+      ));
+      print('images => $images');
+      return images;
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server error : ${response.statusCode}"),
+      ));
+    }
+    throw Exception("Failed get all images !");
+  }
+
   void addImages(ImagesModel img, BuildContext context) async {
     http.Response response =
         await _apiServices.post("/Images/add", img.toJson(img));

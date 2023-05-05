@@ -54,6 +54,8 @@ class NouveauPasseFormWidget extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
               controller: profondeurSonde,
+              initialValue: 50,
+              incDecFactor: 50,
             ),
           ),
           Padding(
@@ -75,17 +77,18 @@ class NouveauPasseFormWidget extends StatelessWidget {
               },
             ),
           ),
+          Text(
+            "Profondeur sécurisée (m)",
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
+            ),
+          ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: profondeurSecurisee,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Profondeur sécurisée (m)',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
+            child: NumberInputPrefabbed.roundedEdgeButtons(
+              controller: profondeurSecurisee!,
+              initialValue: 1,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
@@ -94,17 +97,18 @@ class NouveauPasseFormWidget extends StatelessWidget {
               },
             ),
           ),
+          Text(
+            "Côte sécurisée (m)",
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
+            ),
+          ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: coteSecurisee,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Côte sécurisée (m)',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
+            child: NumberInputPrefabbed.roundedEdgeButtons(
+              controller: coteSecurisee!,
+              initialValue: 1,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';

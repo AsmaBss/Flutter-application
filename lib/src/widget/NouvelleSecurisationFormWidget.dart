@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
+import 'package:number_inc_dec/number_inc_dec.dart';
 
 class NouvelleSecurisationFormWidget extends StatelessWidget {
   final formKey;
@@ -13,17 +14,18 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
   final onChangedDropdown;
   final ParcelleModel? value;
 
-  NouvelleSecurisationFormWidget(
-      {this.formKey,
-      this.items,
-      this.nom,
-      this.munitionRef,
-      this.cotePlateforme,
-      this.coteASecurise,
-      this.profondeurASecurise,
-      this.onChangedDropdown,
-      this.value,
-      this.planSondage});
+  NouvelleSecurisationFormWidget({
+    this.formKey,
+    this.items,
+    this.nom,
+    this.munitionRef,
+    this.cotePlateforme,
+    this.coteASecurise,
+    required this.profondeurASecurise,
+    this.onChangedDropdown,
+    this.value,
+    this.planSondage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -97,17 +99,18 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
               },
             ),
           ),
+          Text(
+            "Profondeur à sécuriser (m)",
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
+            ),
+          ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: profondeurASecurise,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Profondeur à sécuriser (m)',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
+            child: NumberInputPrefabbed.roundedEdgeButtons(
+              controller: profondeurASecurise!,
+              initialValue: 9,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
@@ -116,17 +119,18 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
               },
             ),
           ),
+          Text(
+            "Côte à sécuriser (m)",
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
+            ),
+          ),
           Padding(
-            padding: EdgeInsets.only(bottom: 10.0),
-            child: TextFormField(
-              controller: coteASecurise,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Côte à sécuriser (m)',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
+            padding: EdgeInsets.only(bottom: 15.0),
+            child: NumberInputPrefabbed.roundedEdgeButtons(
+              controller: coteASecurise!,
+              initialValue: 9,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';

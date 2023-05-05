@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/screens/ListSecurisation.dart';
 import 'package:flutter_application/src/screens/NouvelleSecurisation.dart';
 import 'package:flutter_application/src/screens/list-positions.dart';
 
@@ -21,10 +22,10 @@ class _MyDrawerState extends State<MyDrawer> {
             decoration: BoxDecoration(color: Colors.green),
           ),
           ListTile(
-            title: Text('All Positions'),
+            title: Text('Liste des sécurisations'),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => ListPositions()));
+                  builder: (BuildContext context) => ListSecurisation()));
             },
           ),
           ListTile(

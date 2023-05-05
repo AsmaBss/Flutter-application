@@ -103,4 +103,28 @@ class PlanSondageRepository {
     }
     throw Exception("Failed get planSondage !");
   }
+
+  Future<PlanSondageModel> getByCoords(
+      String point, BuildContext context) async {
+    http.Response response =
+        await _apiServices.get("/PlanSondage/show/coordinates/$point");
+    if (response.statusCode == 200) {
+      dynamic responseJson = jsonDecode(response.body);
+      final planSondagesData = responseJson;
+      print(responseJson);
+      PlanSondageModel planSondage =
+          PlanSondageModel.fromJson(planSondagesData);
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server success : ${response.statusCode}"),
+      ));
+      return planSondage;
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server error : ${response.statusCode}"),
+      ));
+    }
+    throw Exception("Failed get planSondage !");
+  }
 }

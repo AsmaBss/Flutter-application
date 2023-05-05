@@ -42,13 +42,56 @@ class ParcelleRepository {
     if (response.statusCode == 200) {
       dynamic responseJson = jsonDecode(response.body);
       final parcelleData = responseJson;
-      ParcelleModel parcelle =
-          parcelleData.map((json) => ParcelleModel.fromJson(json)).toList();
+      ParcelleModel parcelle = ParcelleModel.fromJson(parcelleData);
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Server success : ${response.statusCode}"),
       ));
       return parcelle;
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server error : ${response.statusCode}"),
+      ));
+    }
+    throw Exception("Failed get all parcelle !");
+  }
+
+  Future<ParcelleModel> getSecurisation(int id, BuildContext context) async {
+    http.Response response =
+        await _apiServices.get("/Parcelle/show/securisation/$id");
+    if (response.statusCode == 200) {
+      print(" ------------------------------------- ${response.body}");
+      dynamic responseJson = jsonDecode(response.body);
+      final parcelleData = responseJson;
+      print(" ------------------------------------- $parcelleData");
+      ParcelleModel parcelle = ParcelleModel.fromJson(parcelleData);
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server success : ${response.statusCode}"),
+      ));
+      return parcelle;
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server error : ${response.statusCode}"),
+      ));
+    }
+    throw Exception("Failed get all parcelle !");
+  }
+
+  Future<List> getCoordinates(int id, BuildContext context) async {
+    http.Response response =
+        await _apiServices.get("/Parcelle/show/coordinates/$id");
+    print("code = ${response.statusCode}");
+    if (response.statusCode == 200) {
+      dynamic responseJson = jsonDecode(response.body);
+      final data = responseJson as List;
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server success : ${response.statusCode}"),
+      ));
+      return data;
     } else {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

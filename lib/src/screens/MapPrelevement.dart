@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
+import 'package:flutter_application/src/models/PrelevementModel.dart';
+import 'package:flutter_application/src/models/SecurisationModel.dart';
+import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
+import 'package:flutter_application/src/screens/ModifierPrelevement.dart';
+import 'package:flutter_application/src/screens/NouveauPrelevement.dart';
+import 'package:flutter_application/src/screens/maps.dart';
+import 'package:flutter_application/src/widget/ListPrelevementWidget.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geojson/geojson.dart';
 import 'package:latlong2/latlong.dart';
@@ -9,11 +16,13 @@ import 'package:dart_jts/dart_jts.dart' as jts;
 class MapPrelevement extends StatefulWidget {
   final List<PlanSondageModel?> planSondage;
   final ParcelleModel? parcelle;
-  //final SecurisationModel securisation;
+  final SecurisationModel securisation;
+  final bool leading;
   const MapPrelevement(
       {required this.planSondage,
       required this.parcelle,
-      //required this.securisation,
+      required this.securisation,
+      required this.leading,
       Key? key})
       : super(key: key);
 
@@ -21,12 +30,16 @@ class MapPrelevement extends StatefulWidget {
   State<StatefulWidget> createState() => _MapPrelevementState();
 }
 
-class _MapPrelevementState extends State<MapPrelevement> {
+class _MapPrelevementState extends State<MapPrelevement>
+    with AutomaticKeepAliveClientMixin<MapPrelevement> {
   List<Marker> allMarkers = [];
   late final MapController _mapController;
   LatLng? center;
   List<LatLng> multipolygon = [];
   List<Marker> markers = [];
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -42,6 +55,12 @@ class _MapPrelevementState extends State<MapPrelevement> {
     super.dispose();
   }
 
+  void refreshPage() {
+    setState(() {
+      _loadPlanSondage();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final polygon = Polygon(
@@ -53,7 +72,18 @@ class _MapPrelevementState extends State<MapPrelevement> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text("Map"),
+        title: Text("Map  -  ${widget.securisation.nom}"),
+        automaticallyImplyLeading: widget.leading,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => Maps(),
+              ));
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
@@ -78,9 +108,11 @@ class _MapPrelevementState extends State<MapPrelevement> {
                 ],
               ),
             ),
-            //Text("${multipolygon.toString()}"),
           ],
         ),
+      ),
+      drawer: ListPrelevementWidget(
+        future: _fetchPlanSondageList(),
       ),
     );
   }
@@ -100,7 +132,6 @@ class _MapPrelevementState extends State<MapPrelevement> {
       });
       coordinates.add(points);
     });
-    print(coordinates);
     List<List<LatLng>> points = [];
     coordinates.forEach((p) {
       List<LatLng> polyPoints = [];
@@ -113,7 +144,7 @@ class _MapPrelevementState extends State<MapPrelevement> {
     center = _calculateCentroid(multipolygon);
   }
 
-  _loadPlanSondage() {
+  _loadPlanSondage() async {
     List<String?> geometries = widget.planSondage
         .map((e) => e!.geometry
             .toString()
@@ -137,14 +168,46 @@ class _MapPrelevementState extends State<MapPrelevement> {
     });
     List<LatLng> multipoints = points[0];
     for (var point in multipoints) {
-      markers.add(
-        Marker(
-          point: LatLng(point.latitude, point.longitude),
-          builder: (ctx) => Icon(Icons.location_on),
-        ),
-      );
+      String coord = "(${point.longitude}, ${point.latitude})";
+      PrelevementModel? prelevement = await PrelevementRepository()
+          .getPrelevementByPlanSondage(coord, context);
+      if (prelevement == null) {
+        markers.add(
+          Marker(
+            point: point,
+            builder: (context) => GestureDetector(
+              child: Icon(
+                Icons.location_on,
+                color: Colors.red,
+              ),
+              onTap: () => _addPrelevement(context, point),
+            ),
+          ),
+        );
+      } else {
+        markers.add(
+          Marker(
+            point: point,
+            builder: (context) => GestureDetector(
+              child: Icon(
+                Icons.location_on,
+                color: Colors.green,
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ModifierPrelevement(prelevement: prelevement),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+      setState(() {});
     }
-    print(markers);
   }
 
   LatLng _calculateCentroid(List<LatLng> polygon) {
@@ -156,5 +219,25 @@ class _MapPrelevementState extends State<MapPrelevement> {
       longitude += polygon[i].longitude;
     }
     return LatLng(latitude / n, longitude / n);
+  }
+
+  void _addPrelevement(BuildContext context, LatLng point) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            NouveauPrelevement(point: point, securisation: widget.securisation),
+      ),
+    );
+    if (result == true) {
+      refreshPage();
+    }
+  }
+
+  Future<List<PlanSondageModel?>> _fetchPlanSondageList() async {
+    final list =
+        widget.planSondage.where((element) => element != null).toList();
+    await Future.delayed(Duration(seconds: 1));
+    return list;
   }
 }

@@ -12,7 +12,6 @@ class SecurisationRepository {
       BuildContext context) async {
     try {
       http.Response response = await _apiServices.get("/Securisation/show");
-      print("status => ${response.statusCode}");
       if (response.statusCode == 200) {
         dynamic responseJson = jsonDecode(response.body);
         List<dynamic> securisationsData =
@@ -20,10 +19,6 @@ class SecurisationRepository {
         List<SecurisationModel> securisationsList = securisationsData
             .map((json) => SecurisationModel.fromJson(json))
             .toList();
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Server success : ${response.statusCode}"),
-        ));
         return securisationsList;
       } else {
         // ignore: use_build_context_synchronously
@@ -63,21 +58,6 @@ class SecurisationRepository {
     throw Exception("Failed get all Securisation !");
   }
 
-  Future<int> addSecurisationParcelle(
-      BuildContext context, SecurisationModel s, ParcelleModel p) async {
-    http.Response response = await _apiServices.post("/Securisation/add", {
-      "securisation": {
-        'nom': s.nom,
-        'munitionReference': s.munitionReference,
-        'cotePlateforme': s.cotePlateforme,
-        'profondeurASecuriser': s.profondeurASecuriser,
-        'coteASecuriser': s.coteASecuriser,
-      },
-      "parcelle": p.toJson(p)
-    });
-    return int.parse(response.body);
-  }
-
   Future<SecurisationModel> addSecurisation(
       BuildContext context, SecurisationModel s, ParcelleModel p) async {
     http.Response response = await _apiServices.post("/Securisation/add", {
@@ -91,5 +71,33 @@ class SecurisationRepository {
       "parcelle": p.toJson(p)
     });
     return SecurisationModel.fromJson(jsonDecode(response.body));
+  }
+
+  Future<SecurisationModel> updateSecurisation(
+      BuildContext context, SecurisationModel s, int id) async {
+    http.Response response =
+        await _apiServices.put("/Securisation/update/$id", s.toJson(s));
+    return SecurisationModel.fromJson(jsonDecode(response.body));
+  }
+
+  void deleteSecurisation(int id, BuildContext context) async {
+    http.Response response =
+        await _apiServices.delete("/Securisation/delete/$id");
+    if (response.statusCode == 200) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(
+            content: Text("${response.statusCode}"),
+            duration: Duration(milliseconds: 10),
+          ))
+          .closed;
+      Navigator.of(context).pop();
+      //.then((value) => Navigator.of(context).pop())
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server error : ${response.statusCode}"),
+      ));
+    }
   }
 }

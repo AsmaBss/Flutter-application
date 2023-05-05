@@ -88,7 +88,7 @@ class _MapsState extends State<Maps> {
                         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                     subdomains: ['a', 'b', 'c'],
                   ),
-                  TileLayer(
+                  /*TileLayer(
                     backgroundColor: Colors.transparent,
                     wmsOptions: WMSTileLayerOptions(
                       baseUrl: '$_apiUrl/parcelles/wms?',
@@ -96,7 +96,7 @@ class _MapsState extends State<Maps> {
                       transparent: true,
                       format: 'image/png',
                     ),
-                  ),
+                  ),*/
                   PopupMarkerLayerWidget(
                     options: PopupMarkerLayerOptions(
                       popupController: _popupLayerController,
@@ -114,7 +114,6 @@ class _MapsState extends State<Maps> {
                         child: MyPopupMarker(
                           point: marker.point,
                         ),
-                        
                       ),
                     ),
                   ),
@@ -129,7 +128,7 @@ class _MapsState extends State<Maps> {
   }
 
   _loadMarkers() async {
-    List positions = await PositionRepository().getAllPositions(context);
+    /*List positions = await PositionRepository().getAllPositions(context);
     for (PositionModel element in positions) {
       LatLng tappedPoint = LatLng(
           double.parse(element.latitude!), double.parse(element.longitude!));
@@ -143,6 +142,6 @@ class _MapsState extends State<Maps> {
         ),
       );
     }
-    setState(() {});
+    setState(() {});*/
   }
 }

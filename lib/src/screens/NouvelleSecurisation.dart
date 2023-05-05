@@ -58,6 +58,7 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
           children: [
             NouvelleSecurisationFormWidget(
               formKey: _formKey,
+              nom: nom,
               value: _selectedParcelle,
               items: _parcelles.map((ParcelleModel parcelle) {
                 return DropdownMenuItem<ParcelleModel>(
@@ -71,11 +72,10 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                   _loadPlanSondage(newValue);
                 });
               },
-              nom: nom,
               munitionRef: munitionRef,
               cotePlateforme: cotePlateforme,
-              coteASecurise: coteASecurise,
               profondeurASecurise: profondeurASecurise,
+              coteASecurise: coteASecurise,
               planSondage: planSondage,
             ),
             Padding(
@@ -86,8 +86,8 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      //if (_formKey.currentState!.validate()) {
-                      /*SecurisationModel securisation =
+                      if (_formKey.currentState!.validate()) {
+                        SecurisationModel securisation =
                             await SecurisationRepository().addSecurisation(
                                 context,
                                 SecurisationModel(
@@ -99,19 +99,14 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                                   profondeurASecuriser:
                                       int.parse(profondeurASecurise.text),
                                 ),
-                                _selectedParcelle!);*/
-                      /*Navigator.of(context).push(MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                NouveauPrelevement(
-                                    planSondage: _planSondages,
-                                    securisation: securisation)));
-                                    */
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => MapPrelevement(
-                              planSondage: _planSondages,
-                              //securisation: securisation,
-                              parcelle: _selectedParcelle)));
-                      //}
+                                _selectedParcelle!);
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => MapPrelevement(
+                                planSondage: _planSondages,
+                                securisation: securisation,
+                                parcelle: _selectedParcelle,
+                                leading: false)));
+                      }
                     },
                     child: Text("Enregistrer"),
                   ),
@@ -131,23 +126,19 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   }
 
   _loadParcelles() async {
-    print("load parcelles");
     List<ParcelleModel> list =
         await ParcelleRepository().getAllParcelles(context);
     _parcelles = list;
-    _parcelles.map((ParcelleModel e) => {print(e.id)}).toList();
+    //_parcelles.map((ParcelleModel e) => {print(e.id)}).toList();
     setState(() {});
   }
 
   _loadPlanSondage(ParcelleModel parcelle) async {
     if (_selectedParcelle != "") {
-      print("load plan sondage");
       List<PlanSondageModel> list = await PlanSondageRepository()
           .getPlanSondageByParcelle(parcelle.id!, context);
       _planSondages = list;
       planSondage.text = _planSondages.first.file!;
-    } else {
-      print("not loaded");
     }
   }
 }

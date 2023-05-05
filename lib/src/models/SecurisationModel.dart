@@ -30,7 +30,7 @@ class SecurisationModel {
       cotePlateforme: json['cotePlateforme'] as int,
       profondeurASecuriser: json['profondeurASecuriser'] as int,
       coteASecuriser: json['coteASecuriser'] as int,
-      parcelle: json['parcelle'] as int,
+      parcelle: json['parcelle'] as int, //['id']
     );
   }
 

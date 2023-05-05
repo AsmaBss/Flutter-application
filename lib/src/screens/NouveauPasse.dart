@@ -54,7 +54,6 @@ class _NouveauPasseState extends State<NouveauPasse> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      print("*********** save Passe ***********");
                       PasseQuery().addPasse(PasseModel(
                           munitionReference: munitionRef.text,
                           profondeurSonde: int.parse(profondeurSonde.text),
@@ -63,7 +62,6 @@ class _NouveauPasseState extends State<NouveauPasse> {
                           profondeurSecurisee:
                               int.parse(profondeurSecurisee.text),
                           prelevement: null));
-                      print("*********** all Passes ***********");
                       PasseQuery().showPasses().then(
                             (value) => {
                               if (value.isNotEmpty)
@@ -72,7 +70,7 @@ class _NouveauPasseState extends State<NouveauPasse> {
                                 {print("table empty")}
                             },
                           );
-                      Navigator.pop(context);
+                      Navigator.pop(context, true);
                     },
                     child: Text("Enregistrer"),
                   ),
