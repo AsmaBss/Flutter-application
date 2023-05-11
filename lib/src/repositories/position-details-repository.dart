@@ -28,17 +28,17 @@ class PositionDetailsRepository {
     http.Response response =
         await _apiServices.post("/PositionDetails/add/${p.id}", pd.toJson(pd));
     if (response.statusCode == 200) {
-      showDialog(
+      /*showDialog(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext dialogContext) {
           return MyAlertDialog(
               title: 'Server Response', content: response.body);
         },
-      );
+      );*/
     } else {
       PositionDetailsQuery().addPositionDetails(p.id, pd.image.toString());
-      showDialog(
+      /*showDialog(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext dialogContext) {
@@ -47,7 +47,7 @@ class PositionDetailsRepository {
             content: 'Problème au niveau de serveur : ${response.statusCode}',
           );
         },
-      );
+      );*/
     }
   }
 
@@ -88,7 +88,7 @@ class PositionDetailsRepository {
           .map((json) => PositionDetailsModel.fromJson(json))
           .toList();
       if (positionDetailsList.isEmpty) {
-        showDialog(
+        /*showDialog(
           context: context,
           builder: (BuildContext dialogContext) {
             return MyAlertDialog(
@@ -96,11 +96,11 @@ class PositionDetailsRepository {
               content: "",
             );
           },
-        );
+        );*/
       }
       return positionDetailsList;
     } else {
-      showDialog(
+      /*showDialog(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext dialogContext) {
@@ -109,7 +109,7 @@ class PositionDetailsRepository {
             content: 'Problème au niveau de serveur : ${response.statusCode}',
           );
         },
-      );
+      );*/
       throw Exception();
     }
   }

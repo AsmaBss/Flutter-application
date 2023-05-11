@@ -47,6 +47,10 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
     super.initState();
   }
 
+  void refreshPage() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,9 +101,14 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                       itemCount: snapshot.data?.length, //5,
                       itemBuilder: (BuildContext context, int index) {
                         final item = snapshot.data![index];
+                        print(
+                            "image id ==========> -----------------------${snapshot.data}");
                         return GestureDetector(
                           child: Image.memory(
                               Base64Decoder().convert(item.image!)),
+                          onTap: () {
+                            _deleteImage(context, item.id!);
+                          },
                         );
                       },
                     );
@@ -140,7 +149,9 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                             'Gradient Mag : ${item.gradientMag}',
                             style: TextStyle(fontSize: 15),
                           ),
-                          onTap: () {},
+                          onTap: () {
+                            _deletePasse(context, item.id!);
+                          },
                         );
                       },
                     );
@@ -200,12 +211,9 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
       context: context,
       builder: (BuildContext ctx) {
         return MyDialog(
-          onPressed: () {
-            setState(() {
-              _isShownPasse = false;
-              //PasseQuery().deletePasse(idPass);
-            });
-            Navigator.of(context).pop();
+          onPressed: () async {
+            await PasseRepository().deletePasse(idPass, context);
+            refreshPage();
           },
         );
       },
@@ -217,12 +225,9 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
       context: context,
       builder: (BuildContext ctx) {
         return MyDialog(
-          onPressed: () {
-            setState(() {
-              _isShownImage = false;
-              //ImagesQuery().deleteImage(idImg);
-            });
-            Navigator.of(context).pop();
+          onPressed: () async {
+            await ImagesRepository().deleteImage(idImg, context);
+            refreshPage();
           },
         );
       },

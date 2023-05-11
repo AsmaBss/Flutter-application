@@ -18,15 +18,11 @@ import 'package:latlong2/latlong.dart';
 import '../database/images-query.dart';
 
 class NouveauPrelevement extends StatefulWidget {
-  //final List<PlanSondageModel?> planSondage;
+  final PlanSondageModel planSondage;
   final SecurisationModel securisation;
-  final LatLng point;
 
   const NouveauPrelevement(
-      { //required this.planSondage,
-      required this.point,
-      required this.securisation,
-      Key? key})
+      {required this.planSondage, required this.securisation, Key? key})
       : super(key: key);
 
   @override
@@ -49,7 +45,7 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
 
   @override
   initState() {
-    _getPlanSondage(widget.point);
+    _selectedSondage = widget.planSondage;
     super.initState();
   }
 
@@ -231,11 +227,11 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
     setState(() {});
   }
 
-  _getPlanSondage(LatLng point) async {
+  /*_getPlanSondage(LatLng point) async {
     String coord = "(${widget.point.longitude}, ${widget.point.latitude})";
     _selectedSondage =
         await PlanSondageRepository().getByCoords(coord, context);
-  }
+  }*/
 
   void _addPasse(BuildContext context) async {
     final result = await Navigator.of(context).push(

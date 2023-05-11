@@ -7,12 +7,13 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
   final TextEditingController? nom,
       munitionRef,
       cotePlateforme,
-      coteASecurise,
-      profondeurASecurise,
+      coteASecuriser,
+      profondeurASecuriser,
       planSondage;
   final List<DropdownMenuItem<ParcelleModel>>? items;
   final onChangedDropdown;
   final ParcelleModel? value;
+  final num? initialProfondeurASecuriser, initialCoteASecuriser;
 
   NouvelleSecurisationFormWidget({
     this.formKey,
@@ -20,11 +21,13 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
     this.nom,
     this.munitionRef,
     this.cotePlateforme,
-    this.coteASecurise,
-    required this.profondeurASecurise,
+    this.coteASecuriser,
+    required this.profondeurASecuriser,
     this.onChangedDropdown,
     this.value,
     this.planSondage,
+    this.initialProfondeurASecuriser,
+    this.initialCoteASecuriser,
   });
 
   @override
@@ -109,8 +112,8 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
-              controller: profondeurASecurise!,
-              initialValue: 9,
+              controller: profondeurASecuriser!,
+              initialValue: initialProfondeurASecuriser ?? 9,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
@@ -129,8 +132,8 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
-              controller: coteASecurise!,
-              initialValue: 9,
+              controller: coteASecuriser!,
+              initialValue: initialCoteASecuriser ?? 9,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';

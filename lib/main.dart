@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/database/database-helper.dart';
+import 'package:flutter_application/src/screens/ListSecurisation.dart';
+import 'package:flutter_application/src/screens/NouvelleSecurisation.dart';
 import 'package:flutter_application/src/screens/maps.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -21,6 +23,12 @@ class MyApp extends StatelessWidget {
       ),
       home: Maps(),
       debugShowCheckedModeBanner: false,
+      routes: {
+        //'/': (context) => Maps(),
+        '/list-securisation': (context) => ListSecurisation(),
+        '/add-securisation': (context) => NouvelleSecurisation(),
+        //'/update-securisation': (context) => ModifierSecurisation(),
+      },
     );
   }
 }

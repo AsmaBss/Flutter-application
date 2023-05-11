@@ -113,7 +113,13 @@ class ImagesRepository {
     return ImagesModel.fromJson(jsonData);
   }
 
-  void deleteImages(int id, BuildContext context) async {
+  deleteImage(int id, BuildContext context) async {
+    await _apiServices
+        .delete("/Images/delete/$id")
+        .then((value) => Navigator.pop(context));
+  }
+
+  /*void deleteImages(int id, BuildContext context) async {
     http.Response response = await _apiServices.delete("/Images/delete/$id");
     if (response.statusCode == 200) {
       // ignore: use_build_context_synchronously
@@ -126,7 +132,7 @@ class ImagesRepository {
         content: Text("Server error : ${response.statusCode}"),
       ));
     }
-  }
+  }*/
 
   Future<List> getFormMarkerById(int id, BuildContext context) async {
     http.Response response = await _apiServices.get("/Images/$id");

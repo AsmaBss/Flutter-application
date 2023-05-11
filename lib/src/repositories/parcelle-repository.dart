@@ -61,22 +61,10 @@ class ParcelleRepository {
     http.Response response =
         await _apiServices.get("/Parcelle/show/securisation/$id");
     if (response.statusCode == 200) {
-      print(" ------------------------------------- ${response.body}");
       dynamic responseJson = jsonDecode(response.body);
       final parcelleData = responseJson;
-      print(" ------------------------------------- $parcelleData");
-      ParcelleModel parcelle = ParcelleModel.fromJson(parcelleData);
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server success : ${response.statusCode}"),
-      ));
-      return parcelle;
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
-    }
+      return ParcelleModel.fromJson(parcelleData);
+    } else {}
     throw Exception("Failed get all parcelle !");
   }
 

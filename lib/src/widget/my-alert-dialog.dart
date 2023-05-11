@@ -6,7 +6,7 @@ class MyAlertDialog extends StatelessWidget {
   final List<Widget> actions;
 
   MyAlertDialog(
-      {required this.title, required this.content, this.actions = const []});
+      {required this.title, required this.content, this.actions = const [], required Null Function() onPressed});
 
   @override
   Widget build(BuildContext context) {

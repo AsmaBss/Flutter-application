@@ -1,28 +1,32 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/repositories/parcelle-repository.dart';
 import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
-import 'package:flutter_application/src/screens/MapPrelevement.dart';
 import 'package:flutter_application/src/widget/NouvelleSecurisationFormWidget.dart';
 
 import '../repositories/SecurisationRepository.dart';
 
-class NouvelleSecurisation extends StatefulWidget {
+class ModifierSecurisation extends StatefulWidget {
+  final SecurisationModel securisation;
+  final ParcelleModel? parcelle;
+
+  const ModifierSecurisation(
+      {required this.securisation, required this.parcelle, Key? key})
+      : super(key: key);
+
   @override
-  State<StatefulWidget> createState() => _NouvelleSecurisationState();
+  State<StatefulWidget> createState() => _ModifierSecurisationState();
 }
 
-class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
+class _ModifierSecurisationState extends State<ModifierSecurisation> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController nom = TextEditingController();
   TextEditingController munitionRef = TextEditingController();
   TextEditingController cotePlateforme = TextEditingController();
-  TextEditingController coteASecurise = TextEditingController();
-  TextEditingController profondeurASecurise = TextEditingController();
+  TextEditingController coteASecuriser = TextEditingController();
+  TextEditingController profondeurASecuriser = TextEditingController();
   TextEditingController planSondage = TextEditingController();
   List<ParcelleModel> _parcelles = [];
   List<PlanSondageModel> _planSondages = [];
@@ -32,17 +36,12 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   initState() {
     super.initState();
     _loadParcelles();
-  }
-
-  @override
-  void dispose() {
-    nom.dispose();
-    munitionRef.dispose();
-    cotePlateforme.dispose();
-    coteASecurise.dispose();
-    profondeurASecurise.dispose();
-    planSondage.dispose();
-    super.dispose();
+    nom.text = widget.securisation.nom.toString();
+    munitionRef.text = widget.securisation.munitionReference.toString();
+    cotePlateforme.text = widget.securisation.cotePlateforme.toString();
+    profondeurASecuriser.text =
+        widget.securisation.profondeurASecuriser.toString();
+    coteASecuriser.text = widget.securisation.coteASecuriser.toString();
   }
 
   @override
@@ -50,7 +49,7 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text("Nouvelle Sécurisation"),
+        title: Text("Modifier sécurisation  -  ${widget.securisation.nom}"),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -74,9 +73,12 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
               },
               munitionRef: munitionRef,
               cotePlateforme: cotePlateforme,
-              profondeurASecuriser: profondeurASecurise,
-              coteASecuriser: coteASecurise,
+              profondeurASecuriser: profondeurASecuriser,
+              coteASecuriser: coteASecuriser,
               planSondage: planSondage,
+              initialCoteASecuriser: widget.securisation.coteASecuriser,
+              initialProfondeurASecuriser:
+                  widget.securisation.profondeurASecuriser,
             ),
             Padding(
               padding: EdgeInsets.all(40.0),
@@ -87,25 +89,17 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        SecurisationModel securisation =
-                            await SecurisationRepository().addSecurisation(
-                                context,
-                                SecurisationModel(
-                                  munitionReference: munitionRef.text,
-                                  nom: nom.text,
-                                  coteASecuriser: int.parse(coteASecurise.text),
-                                  cotePlateforme:
-                                      int.parse(cotePlateforme.text),
-                                  profondeurASecuriser:
-                                      int.parse(profondeurASecurise.text),
-                                ),
-                                _selectedParcelle!);
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (BuildContext context) => MapPrelevement(
-                                  planSondage: _planSondages,
-                                  securisation: securisation,
-                                  parcelle: _selectedParcelle,
-                                )));
+                        SecurisationRepository().updateSecurisation(
+                            context,
+                            SecurisationModel(
+                              munitionReference: munitionRef.text,
+                              nom: nom.text,
+                              coteASecuriser: int.parse(coteASecuriser.text),
+                              cotePlateforme: int.parse(cotePlateforme.text),
+                              profondeurASecuriser:
+                                  int.parse(profondeurASecuriser.text),
+                            ),
+                            widget.securisation.id!);
                       }
                     },
                     child: Text("Enregistrer"),
@@ -129,6 +123,12 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
     List<ParcelleModel> list =
         await ParcelleRepository().getAllParcelles(context);
     _parcelles = list;
+    _parcelles
+        .map((ParcelleModel e) => {
+              if (e.toString() == widget.parcelle.toString())
+                {_selectedParcelle = e, _loadPlanSondage(_selectedParcelle!)}
+            })
+        .toList();
     setState(() {});
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
+import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
 import 'package:flutter_application/src/screens/ModifierPrelevement.dart';
 import 'package:flutter_application/src/screens/NouveauPrelevement.dart';
 import 'package:flutter_application/src/screens/maps.dart';
@@ -17,12 +18,10 @@ class MapPrelevement extends StatefulWidget {
   final List<PlanSondageModel?> planSondage;
   final ParcelleModel? parcelle;
   final SecurisationModel securisation;
-  final bool leading;
   const MapPrelevement(
       {required this.planSondage,
       required this.parcelle,
       required this.securisation,
-      required this.leading,
       Key? key})
       : super(key: key);
 
@@ -55,12 +54,6 @@ class _MapPrelevementState extends State<MapPrelevement>
     super.dispose();
   }
 
-  void refreshPage() {
-    setState(() {
-      _loadPlanSondage();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final polygon = Polygon(
@@ -73,7 +66,6 @@ class _MapPrelevementState extends State<MapPrelevement>
       appBar: AppBar(
         backgroundColor: Colors.green,
         title: Text("Map  -  ${widget.securisation.nom}"),
-        automaticallyImplyLeading: widget.leading,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.close),
@@ -111,10 +103,84 @@ class _MapPrelevementState extends State<MapPrelevement>
           ],
         ),
       ),
-      drawer: ListPrelevementWidget(
-        future: _fetchPlanSondageList(),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            SizedBox(
+              height: 120,
+              child: DrawerHeader(
+                  margin: EdgeInsets.all(10),
+                  child: Text("Liste des plan de sondage")),
+            ),
+            FutureBuilder<List<PlanSondageModel?>>(
+              future: _fetchPlanSondageList(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final planSondageList = snapshot.data!;
+                  return ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: planSondageList.length,
+                    itemBuilder: (context, index) {
+                      final planSondage = planSondageList[index]!;
+                      return FutureBuilder<PrelevementModel?>(
+                        future: PrelevementRepository()
+                            .getPrelevementByPlanSondageId(
+                                planSondage.id!, context),
+                        builder: (context, snapshot) {
+                          Color statusColor;
+                          if (snapshot.hasData && snapshot.data != null) {
+                            statusColor = Colors.green;
+                          } else {
+                            statusColor = Colors.red;
+                          }
+                          return ListTile(
+                            title: Text(planSondage.file!),
+                            subtitle: Text(planSondage.baseRef.toString()),
+                            trailing: Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                            onTap: () {
+                              if (statusColor == Colors.green) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ModifierPrelevement(
+                                        prelevement: snapshot.data!),
+                                  ),
+                                );
+                              } else {
+                                _addPrelevement(context, planSondage);
+                              }
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                } else if (snapshot.hasError) {
+                  return Text("${snapshot.error}");
+                }
+                // By default, show a loading spinner.
+                return Center(child: CircularProgressIndicator());
+              },
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  void refreshPage() {
+    setState(() {
+      _loadPlanSondage();
+    });
   }
 
   _loadParcelle() {
@@ -171,6 +237,8 @@ class _MapPrelevementState extends State<MapPrelevement>
       String coord = "(${point.longitude}, ${point.latitude})";
       PrelevementModel? prelevement = await PrelevementRepository()
           .getPrelevementByPlanSondage(coord, context);
+      PlanSondageModel ps =
+          await PlanSondageRepository().getByCoords(coord, context);
       if (prelevement == null) {
         markers.add(
           Marker(
@@ -180,7 +248,7 @@ class _MapPrelevementState extends State<MapPrelevement>
                 Icons.location_on,
                 color: Colors.red,
               ),
-              onTap: () => _addPrelevement(context, point),
+              onTap: () => _addPrelevement(context, ps),
             ),
           ),
         );
@@ -221,12 +289,12 @@ class _MapPrelevementState extends State<MapPrelevement>
     return LatLng(latitude / n, longitude / n);
   }
 
-  void _addPrelevement(BuildContext context, LatLng point) async {
+  void _addPrelevement(BuildContext context, PlanSondageModel ps) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            NouveauPrelevement(point: point, securisation: widget.securisation),
+        builder: (context) => NouveauPrelevement(
+            planSondage: ps, securisation: widget.securisation),
       ),
     );
     if (result == true) {
@@ -237,7 +305,7 @@ class _MapPrelevementState extends State<MapPrelevement>
   Future<List<PlanSondageModel?>> _fetchPlanSondageList() async {
     final list =
         widget.planSondage.where((element) => element != null).toList();
-    await Future.delayed(Duration(seconds: 1));
+    //await Future.delayed(Duration(seconds: 1));
     return list;
   }
 }

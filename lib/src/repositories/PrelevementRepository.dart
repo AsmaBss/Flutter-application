@@ -31,6 +31,27 @@ class PrelevementRepository {
     throw Exception("Failed get all Prelevement !");
   }
 
+  Future<PrelevementModel?> getPrelevementByPlanSondageId(
+      int id, BuildContext context) async {
+    http.Response response =
+        await _apiServices.get("/Prelevement/show/sondage/$id");
+    if (response.statusCode == 200) {
+      if (response.body.isEmpty) {
+        return null;
+      } else {
+        dynamic responseJson = jsonDecode(response.body);
+        final prelevementData = responseJson;
+        return PrelevementModel.fromJson(prelevementData);
+      }
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server error : ${response.statusCode}"),
+      ));
+    }
+    throw Exception("Failed get all Prelevement !");
+  }
+
   void addPrelevement(
       BuildContext context,
       PrelevementModel s,

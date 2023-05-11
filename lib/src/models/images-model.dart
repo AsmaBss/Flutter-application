@@ -12,12 +12,13 @@ class ImagesModel {
 
   factory ImagesModel.fromJson(Map<String, dynamic> json) {
     return ImagesModel(
+        id: json['id'] as int,
         image: json['image'] as String,
         position_id: json['position_id'] as int);
   }
 
   Map<String, dynamic> toJson(ImagesModel p) {
-    return {'image': p.image, 'position_id': p.position_id};
+    return {'id': p.id, 'image': p.image, 'position_id': p.position_id};
   }
 
   factory ImagesModel.fromMap(Map<String, dynamic> map) {

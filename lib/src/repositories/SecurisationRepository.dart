@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/api-services/api-services.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
+import 'package:flutter_application/src/screens/ListSecurisation.dart';
 import 'package:http/http.dart' as http;
 
 class SecurisationRepository {
@@ -20,11 +22,6 @@ class SecurisationRepository {
             .map((json) => SecurisationModel.fromJson(json))
             .toList();
         return securisationsList;
-      } else {
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Server error : ${response.statusCode}"),
-        ));
       }
     } catch (e) {
       print('Error fetching Securisation: $e');
@@ -44,16 +41,7 @@ class SecurisationRepository {
       SecurisationModel securisation = securisationData
           .map((json) => SecurisationModel.fromJson(json))
           .toList();
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server success : ${response.statusCode}"),
-      ));
       return securisation;
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
     }
     throw Exception("Failed get all Securisation !");
   }
@@ -73,31 +61,19 @@ class SecurisationRepository {
     return SecurisationModel.fromJson(jsonDecode(response.body));
   }
 
-  Future<SecurisationModel> updateSecurisation(
+  void updateSecurisation(
       BuildContext context, SecurisationModel s, int id) async {
     http.Response response =
         await _apiServices.put("/Securisation/update/$id", s.toJson(s));
-    return SecurisationModel.fromJson(jsonDecode(response.body));
-  }
-
-  void deleteSecurisation(int id, BuildContext context) async {
-    http.Response response =
-        await _apiServices.delete("/Securisation/delete/$id");
     if (response.statusCode == 200) {
       // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(
-            content: Text("${response.statusCode}"),
-            duration: Duration(milliseconds: 10),
-          ))
-          .closed;
-      Navigator.of(context).pop();
-      //.then((value) => Navigator.of(context).pop())
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
+      Navigator.pop(context, true);
     }
+  }
+
+  deleteSecurisation(int id, BuildContext context) async {
+    await _apiServices
+        .delete("/Securisation/delete/$id")
+        .then((value) => Navigator.pop(context));
   }
 }

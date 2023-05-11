@@ -30,4 +30,10 @@ class PasseRepository {
     }
     throw Exception("Failed get all passes !");
   }
+
+  deletePasse(int id, BuildContext context) async {
+    await _apiServices
+        .delete("/Passe/delete/$id")
+        .then((value) => Navigator.pop(context));
+  }
 }
