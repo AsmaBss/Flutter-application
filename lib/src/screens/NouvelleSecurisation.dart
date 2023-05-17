@@ -1,10 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
-import 'package:flutter_application/src/repositories/parcelle-repository.dart';
+import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
 import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
 import 'package:flutter_application/src/screens/MapPrelevement.dart';
 import 'package:flutter_application/src/widget/NouvelleSecurisationFormWidget.dart';
@@ -19,7 +20,6 @@ class NouvelleSecurisation extends StatefulWidget {
 class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController nom = TextEditingController();
-  TextEditingController munitionRef = TextEditingController();
   TextEditingController cotePlateforme = TextEditingController();
   TextEditingController coteASecurise = TextEditingController();
   TextEditingController profondeurASecurise = TextEditingController();
@@ -27,6 +27,7 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   List<ParcelleModel> _parcelles = [];
   List<PlanSondageModel> _planSondages = [];
   ParcelleModel? _selectedParcelle;
+  MunitionReferenceEnum? _selectedMunitionReference;
 
   @override
   initState() {
@@ -37,7 +38,6 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   @override
   void dispose() {
     nom.dispose();
-    munitionRef.dispose();
     cotePlateforme.dispose();
     coteASecurise.dispose();
     profondeurASecurise.dispose();
@@ -59,20 +59,31 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
             NouvelleSecurisationFormWidget(
               formKey: _formKey,
               nom: nom,
-              value: _selectedParcelle,
-              items: _parcelles.map((ParcelleModel parcelle) {
+              valueParcelle: _selectedParcelle,
+              itemsParcelle: _parcelles.map((ParcelleModel parcelle) {
                 return DropdownMenuItem<ParcelleModel>(
                   value: parcelle,
                   child: Text(parcelle.file!),
                 );
               }).toList(),
-              onChangedDropdown: (ParcelleModel newValue) {
+              onChangedDropdownParcelle: (ParcelleModel newValue) {
                 setState(() {
                   _selectedParcelle = newValue;
                   _loadPlanSondage(newValue);
                 });
               },
-              munitionRef: munitionRef,
+              valueMunitionRef: _selectedMunitionReference,
+              itemsMunitionRef: MunitionReferenceEnum.values
+                  .map((value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(value.sentence),
+                      ))
+                  .toList(),
+              onChangedDropdownMunitionRef: (MunitionReferenceEnum newValue) {
+                setState(() {
+                  _selectedMunitionReference = newValue;
+                });
+              },
               cotePlateforme: cotePlateforme,
               profondeurASecuriser: profondeurASecurise,
               coteASecuriser: coteASecurise,
@@ -91,8 +102,8 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                             await SecurisationRepository().addSecurisation(
                                 context,
                                 SecurisationModel(
-                                  munitionReference: munitionRef.text,
                                   nom: nom.text,
+                                  munitionReference: _selectedMunitionReference,
                                   coteASecuriser: int.parse(coteASecurise.text),
                                   cotePlateforme:
                                       int.parse(cotePlateforme.text),

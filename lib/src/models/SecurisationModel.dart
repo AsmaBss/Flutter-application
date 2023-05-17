@@ -1,7 +1,9 @@
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
+
 class SecurisationModel {
   int? id;
   String? nom;
-  String? munitionReference;
+  MunitionReferenceEnum? munitionReference;
   int? cotePlateforme;
   int? profondeurASecuriser;
   int? coteASecuriser;
@@ -26,7 +28,9 @@ class SecurisationModel {
     return SecurisationModel(
       id: json['id'] as int,
       nom: json['nom'] as String,
-      munitionReference: json['munitionReference'] as String,
+      munitionReference:
+          MunitionReferenceEnum.fromJson(json['munitionReference']),
+      //munitionReference: json['munitionReference'] as MunitionReferenceEnum, //String,
       cotePlateforme: json['cotePlateforme'] as int,
       profondeurASecuriser: json['profondeurASecuriser'] as int,
       coteASecuriser: json['coteASecuriser'] as int,
@@ -38,7 +42,8 @@ class SecurisationModel {
     return {
       'id': p.id,
       'nom': p.nom,
-      'munitionReference': p.munitionReference,
+      'munitionReference': munitionReference!.toJson(),
+      //'munitionReference': p.munitionReference,
       'cotePlateforme': p.cotePlateforme,
       'profondeurASecuriser': p.profondeurASecuriser,
       'coteASecuriser': p.coteASecuriser,

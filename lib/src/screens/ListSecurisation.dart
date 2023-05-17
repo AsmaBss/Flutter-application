@@ -6,10 +6,12 @@ import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
 import 'package:flutter_application/src/repositories/SecurisationRepository.dart';
-import 'package:flutter_application/src/repositories/parcelle-repository.dart';
+import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
 import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
 import 'package:flutter_application/src/screens/MapPrelevement.dart';
 import 'package:flutter_application/src/screens/ModifierSecurisation.dart';
+import 'package:flutter_application/src/screens/NouvelleSecurisation.dart';
+import 'package:flutter_application/src/widget/DrawerWidget.dart';
 import 'package:flutter_application/src/widget/MyDialog.dart';
 
 class ListSecurisation extends StatefulWidget {
@@ -41,15 +43,19 @@ class _ListSecurisationState extends State<ListSecurisation> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Liste  des sécurisations"),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
       ),
       body: FutureBuilder(
-        future: SecurisationRepository().getAllSecurisations(context),
+        future: SecurisationRepository()
+            .getAllSecurisations(context)
+            .catchError((error) {}),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -168,6 +174,14 @@ class _ListSecurisationState extends State<ListSecurisation> {
           }
         },
       ),
+      drawer: MyDrawer(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (BuildContext context) => NouvelleSecurisation()));
+        },
+        child: Icon(Icons.add),
+      ),
     );
   }
 
@@ -177,10 +191,8 @@ class _ListSecurisationState extends State<ListSecurisation> {
       builder: (BuildContext context) {
         return MyDialog(
           onPressed: () async {
-            print("11");
             await SecurisationRepository()
                 .deleteSecurisation(item.id!, context);
-            print("12");
             refreshPage();
           },
         );
@@ -219,5 +231,14 @@ class _ListSecurisationState extends State<ListSecurisation> {
                   parcelle: parcelle,
                   planSondage: planSondage,
                 )));
+  }
+
+  void loadSecurisations() {
+    SecurisationRepository()
+        .getAllSecurisations(context)
+        .then((securisations) {})
+        .catchError((error) {
+      print("Error loading securisations: $error");
+    });
   }
 }

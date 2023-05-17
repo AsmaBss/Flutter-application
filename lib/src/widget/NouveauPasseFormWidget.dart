@@ -6,8 +6,8 @@ class NouveauPasseFormWidget extends StatelessWidget {
   final TextEditingController? munitionRef,
       coteSecurisee,
       profondeurSecurisee,
-      gradient;
-  final TextEditingController profondeurSonde;
+      gradient,
+      profondeurSonde;
 
   NouveauPasseFormWidget(
       {this.formKey,
@@ -15,7 +15,7 @@ class NouveauPasseFormWidget extends StatelessWidget {
       this.profondeurSecurisee,
       this.coteSecurisee,
       this.gradient,
-      required this.profondeurSonde});
+      this.profondeurSonde});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class NouveauPasseFormWidget extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
-              controller: profondeurSonde,
+              controller: profondeurSonde!,
               initialValue: 50,
               incDecFactor: 50,
             ),

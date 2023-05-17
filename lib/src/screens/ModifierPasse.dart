@@ -1,22 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/models/PasseModel.dart';
+import 'package:flutter_application/src/repositories/PasseRepository.dart';
 import 'package:flutter_application/src/widget/NouveauPasseFormWidget.dart';
 
-class NouveauPasse extends StatefulWidget {
-  final Function(String, int, int, int, int) nvPasse;
+class ModifierPasse extends StatefulWidget {
+  final PasseModel passe;
 
-  const NouveauPasse({required this.nvPasse});
+  const ModifierPasse({required this.passe});
 
   @override
-  _NouveauPasseState createState() => _NouveauPasseState();
+  _ModifierPasseState createState() => _ModifierPasseState();
 }
 
-class _NouveauPasseState extends State<NouveauPasse> {
+class _ModifierPasseState extends State<ModifierPasse> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController munitionRef = TextEditingController();
   TextEditingController gradient = TextEditingController();
   TextEditingController coteSecurisee = TextEditingController();
   TextEditingController profondeurSecurisee = TextEditingController();
   TextEditingController profondeurSonde = TextEditingController();
+
+  @override
+  void initState() {
+    munitionRef.text = widget.passe.munitionReference.toString();
+    gradient.text = widget.passe.gradientMag.toString();
+    coteSecurisee.text = widget.passe.coteSecurisee.toString();
+    profondeurSecurisee.text = widget.passe.profondeurSecurisee.toString();
+    profondeurSonde.text = widget.passe.profondeurSonde.toString();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -28,22 +40,12 @@ class _NouveauPasseState extends State<NouveauPasse> {
     super.dispose();
   }
 
-  Future<void> _addNvPasse() async {
-    widget.nvPasse(
-        munitionRef.text,
-        int.parse(profondeurSonde.text),
-        int.parse(gradient.text),
-        int.parse(profondeurSecurisee.text),
-        int.parse(coteSecurisee.text));
-    Navigator.pop(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text("Nouveau Passe"),
+        title: Text("Modifier Passe"),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -64,8 +66,22 @@ class _NouveauPasseState extends State<NouveauPasse> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ElevatedButton(
-                    onPressed: _addNvPasse,
-                    child: Text("Enregistrer"),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        PasseRepository().updatePasse(
+                            PasseModel(
+                                munitionReference: munitionRef.text,
+                                profondeurSonde:
+                                    int.parse(profondeurSonde.text),
+                                gradientMag: int.parse(gradient.text),
+                                profondeurSecurisee:
+                                    int.parse(profondeurSecurisee.text),
+                                coteSecurisee: int.parse(coteSecurisee.text)),
+                            widget.passe.id!,
+                            context);
+                      }
+                    },
+                    child: Text("Modifier"),
                   ),
                   ElevatedButton(
                     onPressed: () {

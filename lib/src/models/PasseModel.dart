@@ -18,7 +18,7 @@ class PasseModel {
 
   @override
   String toString() {
-    return 'Prevelement { id: $id, munitionReference: $munitionReference, '
+    return 'Passe { id: $id, munitionReference: $munitionReference, '
         'profondeurSonde: $profondeurSonde, gradientMag: $gradientMag,  '
         'profondeurSecurisee: $profondeurSecurisee, coteSecurisee: $coteSecurisee, prelevement: $prelevement}\n';
   }

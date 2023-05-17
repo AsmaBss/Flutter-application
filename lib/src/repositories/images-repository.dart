@@ -60,7 +60,6 @@ class ImagesRepository {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Server success : ${response.statusCode}"),
       ));
-      print('images => $images');
       return images;
     } else {
       // ignore: use_build_context_synchronously
@@ -71,21 +70,8 @@ class ImagesRepository {
     throw Exception("Failed get all images !");
   }
 
-  void addImages(ImagesModel img, BuildContext context) async {
-    http.Response response =
-        await _apiServices.post("/Images/add", img.toJson(img));
-    if (response.statusCode == 200) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(response.body),
-      ));
-    } else {
-      print(response.body);
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error image: ${response.body}"),
-      ));
-    }
+  addImage(ImagesModel img, int id, BuildContext context) async {
+    await _apiServices.post("/Images/add/$id", img.toJson(img));
   }
 
   /*void addImages(

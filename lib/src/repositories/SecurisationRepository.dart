@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/api-services/api-services.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
-import 'package:flutter_application/src/screens/ListSecurisation.dart';
 import 'package:http/http.dart' as http;
 
 class SecurisationRepository {
@@ -22,14 +21,17 @@ class SecurisationRepository {
             .map((json) => SecurisationModel.fromJson(json))
             .toList();
         return securisationsList;
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
       }
     } catch (e) {
-      print('Error fetching Securisation: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Failed to fetch Securisation: $e"),
-      ));
+      print('Erreur: $e');
     }
-    throw Exception("Failed get all Securisation !");
+    throw Exception("Echec !");
   }
 
   Future<SecurisationModel> getSecurisationById(

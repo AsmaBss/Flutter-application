@@ -7,8 +7,7 @@ import 'package:flutter_application/src/repositories/PrelevementRepository.dart'
 import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
 import 'package:flutter_application/src/screens/ModifierPrelevement.dart';
 import 'package:flutter_application/src/screens/NouveauPrelevement.dart';
-import 'package:flutter_application/src/screens/maps.dart';
-import 'package:flutter_application/src/widget/ListPrelevementWidget.dart';
+import 'package:flutter_application/src/widget/DrawerWidget.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geojson/geojson.dart';
 import 'package:latlong2/latlong.dart';
@@ -68,11 +67,9 @@ class _MapPrelevementState extends State<MapPrelevement>
         title: Text("Map  -  ${widget.securisation.nom}"),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.close),
+            icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => Maps(),
-              ));
+              Navigator.of(context).pop();
             },
           ),
         ],
@@ -103,76 +100,10 @@ class _MapPrelevementState extends State<MapPrelevement>
           ],
         ),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            SizedBox(
-              height: 120,
-              child: DrawerHeader(
-                  margin: EdgeInsets.all(10),
-                  child: Text("Liste des plan de sondage")),
-            ),
-            FutureBuilder<List<PlanSondageModel?>>(
-              future: _fetchPlanSondageList(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final planSondageList = snapshot.data!;
-                  return ListView.builder(
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemCount: planSondageList.length,
-                    itemBuilder: (context, index) {
-                      final planSondage = planSondageList[index]!;
-                      return FutureBuilder<PrelevementModel?>(
-                        future: PrelevementRepository()
-                            .getPrelevementByPlanSondageId(
-                                planSondage.id!, context),
-                        builder: (context, snapshot) {
-                          Color statusColor;
-                          if (snapshot.hasData && snapshot.data != null) {
-                            statusColor = Colors.green;
-                          } else {
-                            statusColor = Colors.red;
-                          }
-                          return ListTile(
-                            title: Text(planSondage.file!),
-                            subtitle: Text(planSondage.baseRef.toString()),
-                            trailing: Container(
-                              width: 20,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color: statusColor,
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                            ),
-                            onTap: () {
-                              if (statusColor == Colors.green) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ModifierPrelevement(
-                                        prelevement: snapshot.data!),
-                                  ),
-                                );
-                              } else {
-                                _addPrelevement(context, planSondage);
-                              }
-                            },
-                          );
-                        },
-                      );
-                    },
-                  );
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
-                }
-                // By default, show a loading spinner.
-                return Center(child: CircularProgressIndicator());
-              },
-            ),
-          ],
-        ),
+      drawer: MyDrawer(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showModal,
+        child: Icon(Icons.menu),
       ),
     );
   }
@@ -307,5 +238,85 @@ class _MapPrelevementState extends State<MapPrelevement>
         widget.planSondage.where((element) => element != null).toList();
     //await Future.delayed(Duration(seconds: 1));
     return list;
+  }
+
+  _showModal() {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  FutureBuilder<List<PlanSondageModel?>>(
+                    future: _fetchPlanSondageList(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final planSondageList = snapshot.data!;
+                        return ListView.builder(
+                          //scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          itemCount: planSondageList.length,
+                          itemBuilder: (context, index) {
+                            final planSondage = planSondageList[index]!;
+                            return FutureBuilder<PrelevementModel?>(
+                              future: PrelevementRepository()
+                                  .getPrelevementByPlanSondageId(
+                                      planSondage.id!, context),
+                              builder: (context, snapshot) {
+                                Color statusColor;
+                                if (snapshot.hasData && snapshot.data != null) {
+                                  statusColor = Colors.green;
+                                } else {
+                                  statusColor = Colors.red;
+                                }
+                                return ListTile(
+                                  title: Text(planSondage.file!),
+                                  subtitle:
+                                      Text(planSondage.baseRef.toString()),
+                                  trailing: Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                      color: statusColor,
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    if (statusColor == Colors.green) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              ModifierPrelevement(
+                                                  prelevement: snapshot.data!),
+                                        ),
+                                      );
+                                    } else {
+                                      _addPrelevement(context, planSondage);
+                                    }
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text("${snapshot.error}");
+                      }
+                      // By default, show a loading spinner.
+                      return Center(child: CircularProgressIndicator());
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

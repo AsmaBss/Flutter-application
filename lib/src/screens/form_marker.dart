@@ -7,7 +7,6 @@ import 'package:flutter_application/src/database/images-query.dart';
 import 'package:flutter_application/src/models/position-model.dart';
 import 'package:flutter_application/src/repositories/position-repository.dart';
 import 'package:flutter_application/src/screens/cam.dart';
-import 'package:flutter_application/src/widget/my-form.dart';
 import 'package:flutter_application/src/widget/my-grid_images.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:latlong2/latlong.dart';
@@ -54,7 +53,7 @@ class _FormMarkerState extends State<FormMarker> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            MyForm(
+            /*MyForm(
               formKey: _formKey,
               address: widget.adresse,
               latlong: "${widget.point.latitude} - ${widget.point.longitude}",
@@ -65,6 +64,7 @@ class _FormMarkerState extends State<FormMarker> {
                 label: Text("Take picture"),
               ),
             ),
+            */
             FutureBuilder(
               future: ImagesQuery().showImages(),
               //PositionDetailsQuery().showPositionDetailsByPositionId(int.parse(widget.element.id.toString())),
@@ -115,14 +115,14 @@ class _FormMarkerState extends State<FormMarker> {
   }
 
   _launchCamera(LatLng point) async {
-    await availableCameras().then((value) async {
+    /*await availableCameras().then((value) async {
       await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => Cam(cameras: value, point: point),
         ),
       );
-    });
+    });*/
     setState(() {});
   }
 

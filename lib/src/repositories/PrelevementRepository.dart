@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/api-services/api-services.dart';
 import 'package:flutter_application/src/database/images-query.dart';
 import 'package:flutter_application/src/database/passe-query.dart';
+import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
+import 'package:flutter_application/src/models/images-model.dart';
 import 'package:http/http.dart' as http;
 
 class PrelevementRepository {
@@ -55,10 +57,11 @@ class PrelevementRepository {
   void addPrelevement(
       BuildContext context,
       PrelevementModel s,
-      List passes,
-      List images,
+      List<PasseModel> passes,
+      List<ImagesModel> images,
       SecurisationModel securisation,
       PlanSondageModel planSondage) async {
+    print("passes => ${passes.runtimeType}");
     http.Response response = await _apiServices.post("/Prelevement/add", {
       "prelevement": {
         'numero': s.numero,
@@ -69,8 +72,8 @@ class PrelevementRepository {
         'remarques': s.remarques,
         'statut': s.statut
       },
-      "passes": passes,
-      "images": images,
+      'passes': passes.map((passe) => passe.toJson(passe)).toList(),
+      'images': images.map((image) => image.toJson(image)).toList(),
       "planSondage": planSondage.toJson(planSondage),
       "securisation": securisation.toJson(securisation)
     });
@@ -93,7 +96,7 @@ class PrelevementRepository {
     } else {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
+        content: Text("Server error : ${response.body}"),
       ));
     }
   }

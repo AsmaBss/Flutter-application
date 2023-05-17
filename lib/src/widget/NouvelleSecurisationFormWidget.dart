@@ -1,30 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
 
 class NouvelleSecurisationFormWidget extends StatelessWidget {
   final formKey;
   final TextEditingController? nom,
-      munitionRef,
       cotePlateforme,
       coteASecuriser,
       profondeurASecuriser,
       planSondage;
-  final List<DropdownMenuItem<ParcelleModel>>? items;
-  final onChangedDropdown;
-  final ParcelleModel? value;
+  final ParcelleModel? valueParcelle;
+  final MunitionReferenceEnum? valueMunitionRef;
+  final List<DropdownMenuItem<ParcelleModel>>? itemsParcelle;
+  final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
+  final onChangedDropdownParcelle, onChangedDropdownMunitionRef;
   final num? initialProfondeurASecuriser, initialCoteASecuriser;
 
   NouvelleSecurisationFormWidget({
     this.formKey,
-    this.items,
     this.nom,
-    this.munitionRef,
+    this.valueParcelle,
+    this.itemsParcelle,
+    this.onChangedDropdownParcelle,
+    this.valueMunitionRef,
+    this.itemsMunitionRef,
+    this.onChangedDropdownMunitionRef,
     this.cotePlateforme,
     this.coteASecuriser,
-    required this.profondeurASecuriser,
-    this.onChangedDropdown,
-    this.value,
+    this.profondeurASecuriser,
     this.planSondage,
     this.initialProfondeurASecuriser,
     this.initialCoteASecuriser,
@@ -50,7 +54,7 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Veuillez renseigner ce champ';
                 }
                 return null;
               },
@@ -59,28 +63,19 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
             child: DropdownButtonFormField<ParcelleModel>(
-              value: value,
-              hint: Text('Sélectionner une parcelle'),
-              items: items,
-              onChanged: onChangedDropdown,
+              value: valueParcelle,
+              hint: Text('Sélectionner un lot'),
+              items: itemsParcelle,
+              onChanged: onChangedDropdownParcelle,
             ),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: munitionRef,
-              decoration: InputDecoration(
-                labelText: 'Munition de référence',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
+            child: DropdownButtonFormField<MunitionReferenceEnum>(
+              value: valueMunitionRef,
+              hint: Text('Sélectionner une munition de référence'),
+              items: itemsMunitionRef,
+              onChanged: onChangedDropdownMunitionRef,
             ),
           ),
           Padding(
@@ -96,7 +91,7 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Veuillez renseigner ce champ';
                 }
                 return null;
               },
@@ -116,7 +111,7 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
               initialValue: initialProfondeurASecuriser ?? 9,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Veuillez renseigner ce champ';
                 }
                 return null;
               },
@@ -136,7 +131,7 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
               initialValue: initialCoteASecuriser ?? 9,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Veuillez renseigner ce champ';
                 }
                 return null;
               },

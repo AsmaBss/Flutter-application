@@ -1,19 +1,20 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/models/PlanSondageModel.dart';
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
-
-import '../database/images-query.dart';
 
 class NouveauPrelevementFormWidget extends StatelessWidget {
   final formKey;
   final TextEditingController? numero,
-      munitionRef,
       cotePlateforme,
       coteASecurise,
       profondeurASecurise,
       remarques;
+  final MunitionReferenceEnum? valueMunitionRef;
+  final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
+  final onChangedDropdownMunitionRef;
+  final num? initialProfondeurASecuriser,
+      initialCoteASecuriser,
+      initialCotePlateforme;
   final onPressedCam, onChangedStatut;
   final String? statut;
   final nvPasse;
@@ -22,10 +23,15 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
   NouveauPrelevementFormWidget(
       {this.formKey,
       this.numero,
-      this.munitionRef,
+      this.valueMunitionRef,
+      this.itemsMunitionRef,
+      this.onChangedDropdownMunitionRef,
       this.cotePlateforme,
+      this.initialCotePlateforme,
       this.coteASecurise,
+      this.initialCoteASecuriser,
       this.profondeurASecurise,
+      this.initialProfondeurASecuriser,
       this.remarques,
       this.onPressedCam,
       this.onChangedStatut,
@@ -46,6 +52,7 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 15.0),
             child: TextFormField(
               controller: numero,
+              keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: "Numéro de prélèvement",
                 focusedBorder: OutlineInputBorder(
@@ -54,7 +61,7 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Veuillez renseigner ce champ';
                 }
                 return null;
               },
@@ -62,39 +69,25 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: munitionRef,
-              decoration: InputDecoration(
-                labelText: 'Munition de référence',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
+            child: DropdownButtonFormField<MunitionReferenceEnum>(
+              value: valueMunitionRef,
+              hint: Text('Sélectionner une munition de référence'),
+              items: itemsMunitionRef,
+              onChanged: onChangedDropdownMunitionRef,
+            ),
+          ),
+          Text(
+            "Côte de la plateforme",
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
             ),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: cotePlateforme,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Côte de la plateforme',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
+            child: NumberInputPrefabbed.roundedEdgeButtons(
+              controller: cotePlateforme!,
+              initialValue: initialCotePlateforme!,
             ),
           ),
           Text(
@@ -108,13 +101,7 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
               controller: profondeurASecurise!,
-              initialValue: 9,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
+              initialValue: initialProfondeurASecuriser!,
             ),
           ),
           Text(
@@ -128,13 +115,7 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
               controller: coteASecurise!,
-              initialValue: 9,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
+              initialValue: initialCoteASecuriser!,
             ),
           ),
           Padding(
@@ -149,12 +130,6 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
                   borderSide: BorderSide(width: 1, color: Colors.green),
                 ),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
             ),
           ),
           Row(

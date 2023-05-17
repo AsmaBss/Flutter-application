@@ -2,10 +2,13 @@ import 'dart:convert';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
+import 'package:flutter_application/src/models/images-model.dart';
 import 'package:flutter_application/src/repositories/PasseRepository.dart';
 import 'package:flutter_application/src/repositories/images-repository.dart';
 import 'package:flutter_application/src/screens/CameraPage.dart';
+import 'package:flutter_application/src/screens/ModifierPasse.dart';
 import 'package:flutter_application/src/screens/NouveauPasse.dart';
 import 'package:flutter_application/src/widget/MyDialog.dart';
 import 'package:flutter_application/src/widget/NouveauPrelevementFormWidget.dart';
@@ -31,8 +34,6 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   TextEditingController profondeurASecurise = TextEditingController();
   TextEditingController remarques = TextEditingController();
   String? statut;
-  bool _isShownImage = true;
-  bool _isShownPasse = true;
 
   @override
   initState() {
@@ -55,7 +56,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Modifier Prélèvement"),
+        title: Text("Modifier Prélèvement - ${widget.prelevement.numero}"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -70,7 +71,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
             NouveauPrelevementFormWidget(
               formKey: _formKey,
               numero: numero,
-              munitionRef: munitionRef,
+              //munitionRef: munitionRef,
               cotePlateforme: cotePlateforme,
               profondeurASecurise: profondeurASecurise,
               coteASecurise: coteASecurise,
@@ -88,7 +89,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                   } else {
                     return GridView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.all(0.0),
+                      padding: EdgeInsets.all(10.0),
                       addAutomaticKeepAlives: true,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 1,
@@ -98,11 +99,9 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                         mainAxisExtent: 170,
                       ),
                       shrinkWrap: true,
-                      itemCount: snapshot.data?.length, //5,
+                      itemCount: snapshot.data?.length,
                       itemBuilder: (BuildContext context, int index) {
                         final item = snapshot.data![index];
-                        print(
-                            "image id ==========> -----------------------${snapshot.data}");
                         return GestureDetector(
                           child: Image.memory(
                               Base64Decoder().convert(item.image!)),
@@ -115,7 +114,17 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                   }
                 },
               ),
-              onPressedCam: () => _launchCamera(),
+              onPressedCam: () async {
+                await availableCameras().then((value) async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CameraPage(onPictureTaken: _addImage, cameras: value),
+                    ),
+                  );
+                });
+              },
               remarques: remarques,
               statut: statut,
               onChangedStatut: (value) => {
@@ -123,7 +132,14 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                   statut = value.toString();
                 })
               },
-              nvPasse: () => _addPasse(context),
+              nvPasse: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NouveauPasse(nvPasse: _addPasse),
+                  ),
+                )
+              },
               listPasse: FutureBuilder(
                 future: PasseRepository()
                     .getByPrelevement(widget.prelevement.id!, context),
@@ -150,6 +166,9 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                             style: TextStyle(fontSize: 15),
                           ),
                           onTap: () {
+                            _updatePasse(context, item);
+                          },
+                          onLongPress: () {
                             _deletePasse(context, item.id!);
                           },
                         );
@@ -186,24 +205,30 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
     );
   }
 
-  _launchCamera() async {
-    await availableCameras().then((value) async {
-      await Navigator.push(
+  void _addPasse(String munitionReference, int profondeurSonde, int gradientMag,
+      int profondeurSecurisee, int coteSecurisee) {
+    setState(() {
+      PasseRepository().addPasse(
+          PasseModel(
+              munitionReference: munitionReference,
+              profondeurSonde: profondeurSonde,
+              gradientMag: gradientMag,
+              profondeurSecurisee: profondeurSecurisee,
+              coteSecurisee: coteSecurisee),
+          widget.prelevement.id!,
+          context);
+    });
+  }
+
+  void _updatePasse(BuildContext context, PasseModel item) {
+    setState(() {
+      Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CameraPage(
-            cameras: value,
-          ),
+          builder: (context) => ModifierPasse(passe: item),
         ),
       );
     });
-    setState(() {});
-  }
-
-  void _addPasse(BuildContext context) async {
-    final result = await Navigator.of(context).push(
-        MaterialPageRoute(builder: (BuildContext context) => NouveauPasse()));
-    setState(() {});
   }
 
   void _deletePasse(BuildContext context, int idPass) {
@@ -218,6 +243,12 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
         );
       },
     );
+  }
+
+  void _addImage(String image) async {
+    await ImagesRepository()
+        .addImage(ImagesModel(image: image), widget.prelevement.id!, context);
+    refreshPage();
   }
 
   void _deleteImage(BuildContext context, int idImg) {

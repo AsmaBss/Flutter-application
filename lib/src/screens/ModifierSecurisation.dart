@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
-import 'package:flutter_application/src/repositories/parcelle-repository.dart';
+import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
 import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
 import 'package:flutter_application/src/widget/NouvelleSecurisationFormWidget.dart';
 
@@ -23,7 +24,6 @@ class ModifierSecurisation extends StatefulWidget {
 class _ModifierSecurisationState extends State<ModifierSecurisation> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController nom = TextEditingController();
-  TextEditingController munitionRef = TextEditingController();
   TextEditingController cotePlateforme = TextEditingController();
   TextEditingController coteASecuriser = TextEditingController();
   TextEditingController profondeurASecuriser = TextEditingController();
@@ -31,13 +31,14 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
   List<ParcelleModel> _parcelles = [];
   List<PlanSondageModel> _planSondages = [];
   ParcelleModel? _selectedParcelle;
+  MunitionReferenceEnum? _selectedMunitionReference;
 
   @override
   initState() {
     super.initState();
     _loadParcelles();
+    _selectedMunitionReference = widget.securisation.munitionReference;
     nom.text = widget.securisation.nom.toString();
-    munitionRef.text = widget.securisation.munitionReference.toString();
     cotePlateforme.text = widget.securisation.cotePlateforme.toString();
     profondeurASecuriser.text =
         widget.securisation.profondeurASecuriser.toString();
@@ -58,20 +59,31 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
             NouvelleSecurisationFormWidget(
               formKey: _formKey,
               nom: nom,
-              value: _selectedParcelle,
-              items: _parcelles.map((ParcelleModel parcelle) {
+              valueParcelle: _selectedParcelle,
+              itemsParcelle: _parcelles.map((ParcelleModel parcelle) {
                 return DropdownMenuItem<ParcelleModel>(
                   value: parcelle,
                   child: Text(parcelle.file!),
                 );
               }).toList(),
-              onChangedDropdown: (ParcelleModel newValue) {
+              onChangedDropdownParcelle: (ParcelleModel newValue) {
                 setState(() {
                   _selectedParcelle = newValue;
                   _loadPlanSondage(newValue);
                 });
               },
-              munitionRef: munitionRef,
+              valueMunitionRef: _selectedMunitionReference,
+              itemsMunitionRef: MunitionReferenceEnum.values
+                  .map((value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(value.sentence),
+                      ))
+                  .toList(),
+              onChangedDropdownMunitionRef: (MunitionReferenceEnum newValue) {
+                setState(() {
+                  _selectedMunitionReference = newValue;
+                });
+              },
               cotePlateforme: cotePlateforme,
               profondeurASecuriser: profondeurASecuriser,
               coteASecuriser: coteASecuriser,
@@ -92,8 +104,8 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
                         SecurisationRepository().updateSecurisation(
                             context,
                             SecurisationModel(
-                              munitionReference: munitionRef.text,
                               nom: nom.text,
+                              munitionReference: _selectedMunitionReference,
                               coteASecuriser: int.parse(coteASecuriser.text),
                               cotePlateforme: int.parse(cotePlateforme.text),
                               profondeurASecuriser:

@@ -1,26 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/database/images-query.dart';
-import 'package:flutter_application/src/database/position-details-query.dart';
-import 'package:flutter_application/src/models/position-model.dart';
-import 'package:flutter_application/src/repositories/position-repository.dart';
-import 'package:gallery_saver/gallery_saver.dart';
-import 'package:http/http.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Cam extends StatefulWidget {
   final List<CameraDescription>? cameras;
-  final LatLng point;
 
-  const Cam({Key? key, required this.cameras, required this.point})
-      : super(key: key);
+  const Cam({Key? key, required this.cameras}) : super(key: key);
 
   @override
   State<Cam> createState() => _CamState();
@@ -32,13 +23,11 @@ class _CamState extends State<Cam> {
   @override
   void initState() {
     super.initState();
-    // initialize the rear camera
     initCamera(widget.cameras![0]);
   }
 
   @override
   void dispose() {
-    // Dispose of the controller when the widget is disposed.
     _cameraController.dispose();
     super.dispose();
   }
@@ -90,11 +79,9 @@ class _CamState extends State<Cam> {
   }
 
   Future initCamera(CameraDescription cameraDescription) async {
-    // create a CameraController
     _cameraController = CameraController(
         cameraDescription, ResolutionPreset.high,
         enableAudio: false);
-    // Next, initialize the controller. This returns a Future.
     try {
       await _cameraController.initialize().then((_) {
         if (!mounted) return;
@@ -120,23 +107,16 @@ class _CamState extends State<Cam> {
       String img64 = base64Encode(bytes);
       print("bytes $bytes");
       print("img64 $img64");
-      // Save Image Permamently
-      //final imagePermanent = await saveImage(picture.path);
-      //print("imagePermanent ===> ${imagePermanent.toString()}");
-      // Show local data
       ImagesQuery().showImages().then(
             (value) => {
               if (value.isNotEmpty)
-                {print("item  -PosDet- ==> $value\n")}
+                {print("item  ==> $value\n")}
               else
                 {print("table empty")}
             },
           );
-      // Save image
-      //ImagesQuery().addImage(imagePermanent.path);
-      print("1");
       ImagesQuery().addImage(img64);
-      print("2");
+      Navigator.pop(context);
     } on CameraException catch (e) {
       debugPrint('Error occured while taking picture: $e');
       return null;

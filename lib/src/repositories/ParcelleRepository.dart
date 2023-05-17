@@ -10,31 +10,24 @@ class ParcelleRepository {
   Future<List<ParcelleModel>> getAllParcelles(BuildContext context) async {
     try {
       http.Response response = await _apiServices.get("/Parcelle/show");
-      print("status => ${response.statusCode}");
       if (response.statusCode == 200) {
         dynamic responseJson = jsonDecode(response.body);
         List<dynamic> parcellesData =
             responseJson is List ? responseJson : [responseJson];
         List<ParcelleModel> parcellesList =
             parcellesData.map((json) => ParcelleModel.fromJson(json)).toList();
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Server success : ${response.statusCode}"),
-        ));
         return parcellesList;
       } else {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Server error : ${response.statusCode}"),
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
     } catch (e) {
-      print('Error fetching parcelles: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Failed to fetch parcelles: $e"),
-      ));
+      print('Erreur: $e');
     }
-    throw Exception("Failed get all parcelles !");
+    throw Exception("Echec !");
   }
 
   Future<ParcelleModel> getParcelleById(int id, BuildContext context) async {

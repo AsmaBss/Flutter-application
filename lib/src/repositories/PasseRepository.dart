@@ -31,6 +31,29 @@ class PasseRepository {
     throw Exception("Failed get all passes !");
   }
 
+  void addPasse(PasseModel p, int id, BuildContext context) async {
+    http.Response response =
+        await _apiServices.post("/Passe/add/$id", p.toJson(p));
+    if (response.statusCode == 200) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(response.body),
+      ));
+    } else {
+      print(response.body);
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server error image: ${response.body}"),
+      ));
+    }
+  }
+
+  void updatePasse(PasseModel p, int id, BuildContext context) async {
+    await _apiServices
+        .put("/Passe/update/$id", p.toJson(p))
+        .then((value) => Navigator.pop(context));
+  }
+
   deletePasse(int id, BuildContext context) async {
     await _apiServices
         .delete("/Passe/delete/$id")

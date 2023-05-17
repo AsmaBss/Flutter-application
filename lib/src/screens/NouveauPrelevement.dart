@@ -1,21 +1,18 @@
-import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/database/passe-query.dart';
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
+import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
+import 'package:flutter_application/src/models/images-model.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
-import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
 import 'package:flutter_application/src/screens/CameraPage.dart';
 import 'package:flutter_application/src/screens/NouveauPasse.dart';
-import 'package:flutter_application/src/widget/MyDialog.dart';
 import 'package:flutter_application/src/widget/NouveauPrelevementFormWidget.dart';
-import 'package:latlong2/latlong.dart';
-
-import '../database/images-query.dart';
 
 class NouveauPrelevement extends StatefulWidget {
   final PlanSondageModel planSondage;
@@ -32,27 +29,31 @@ class NouveauPrelevement extends StatefulWidget {
 class _NouveauPrelevementState extends State<NouveauPrelevement> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController numero = TextEditingController();
-  TextEditingController munitionRef = TextEditingController();
   TextEditingController cotePlateforme = TextEditingController();
   TextEditingController coteASecurise = TextEditingController();
   TextEditingController profondeurASecurise = TextEditingController();
   TextEditingController remarques = TextEditingController();
-  List<String> _coordinates = [];
+  List<ImagesTemp> _images = [];
+  List<PassesTemp> _passes = [];
   PlanSondageModel? _selectedSondage;
+  MunitionReferenceEnum? _selectedMunitionReference;
   String? statut;
-  bool _isShownImage = true;
-  bool _isShownPasse = true;
 
   @override
   initState() {
     _selectedSondage = widget.planSondage;
+    _selectedMunitionReference = widget.securisation.munitionReference;
+    cotePlateforme.text = widget.securisation.cotePlateforme.toString();
+    coteASecurise.text = widget.securisation.coteASecuriser.toString();
+    profondeurASecurise.text =
+        widget.securisation.profondeurASecuriser.toString();
+    print(profondeurASecurise.text);
     super.initState();
   }
 
   @override
   void dispose() {
     numero.dispose();
-    munitionRef.dispose();
     cotePlateforme.dispose();
     coteASecurise.dispose();
     profondeurASecurise.dispose();
@@ -66,15 +67,6 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
       appBar: AppBar(
         backgroundColor: Colors.green,
         title: Text("Nouveau Prélèvement"),
-        automaticallyImplyLeading: false,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.close),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -83,24 +75,29 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
             NouveauPrelevementFormWidget(
               formKey: _formKey,
               numero: numero,
-              munitionRef: munitionRef,
+              valueMunitionRef: _selectedMunitionReference,
+              itemsMunitionRef: MunitionReferenceEnum.values
+                  .map((value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(value.sentence),
+                      ))
+                  .toList(),
+              onChangedDropdownMunitionRef: (MunitionReferenceEnum newValue) {
+                setState(() {
+                  _selectedMunitionReference = newValue;
+                });
+              },
               cotePlateforme: cotePlateforme,
+              initialCotePlateforme: int.parse(cotePlateforme.text),
               profondeurASecurise: profondeurASecurise,
+              initialProfondeurASecuriser: int.parse(profondeurASecurise.text),
               coteASecurise: coteASecurise,
-              imageGrid: FutureBuilder(
-                future: ImagesQuery().showImages(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.data == null || snapshot.data!.isEmpty) {
-                    return Center(
-                        child: Text("Il n'y a pas encore des images"));
-                  } else {
-                    return GridView.builder(
+              initialCoteASecuriser: int.parse(coteASecurise.text),
+              imageGrid: (_images.isEmpty)
+                  ? Center(child: Text("Il n'y a pas encore des images"))
+                  : GridView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.all(0.0),
+                      padding: EdgeInsets.all(1.0),
                       addAutomaticKeepAlives: true,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 1,
@@ -110,22 +107,27 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                         mainAxisExtent: 170,
                       ),
                       shrinkWrap: true,
-                      itemCount: snapshot.data?.length, //5,
+                      itemCount: _images.length,
                       itemBuilder: (BuildContext context, int index) {
-                        final item = snapshot.data![index];
                         return GestureDetector(
-                          child: Image.memory(Base64Decoder().convert(item[1])),
-                          //Image.file(File(item[1])),
-                          onTap: () {
-                            _deleteImage(context, item[0]);
-                          },
+                          child: Image.memory(
+                              Base64Decoder().convert(_images[index].image)),
+                          //Image.file(File(_images[index].image)),
+                          onTap: () => _deleteImage(index),
                         );
                       },
-                    );
-                  }
-                },
-              ),
-              onPressedCam: () => _launchCamera(),
+                    ),
+              onPressedCam: () async {
+                await availableCameras().then((value) async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CameraPage(onPictureTaken: _addImage, cameras: value),
+                    ),
+                  );
+                });
+              },
               remarques: remarques,
               statut: statut,
               onChangedStatut: (value) => {
@@ -133,41 +135,37 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                   statut = value.toString();
                 })
               },
-              nvPasse: () => _addPasse(context),
-              listPasse: FutureBuilder(
-                future: PasseQuery().showPasses(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.data == null || snapshot.data!.isEmpty) {
-                    return Center(
-                        child: Text("Il n'y a pas encore des passes"));
-                  } else {
-                    return ListView.builder(
+              nvPasse: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NouveauPasse(nvPasse: _addPasse),
+                  ),
+                )
+              },
+              listPasse: (_passes.isEmpty)
+                  ? Center(child: Text("Il n'y a pas encore des passes"))
+                  : ListView.builder(
                       padding: EdgeInsets.all(8),
-                      itemCount: snapshot.data?.length,
+                      itemCount: _passes.length,
                       itemBuilder: (context, index) {
-                        final item = snapshot.data![index];
-                        var ps = item[2] - 50;
+                        final item = _passes[index];
+                        var ps = item.profondeurSonde - 50;
                         return ListTile(
-                          title: Text('$ps - ${item[2]}',
+                          title: Text('$ps - ${item.profondeurSonde}',
                               style: TextStyle(fontSize: 17)),
                           trailing: Text(
-                            'Gradient Mag : ${item[3]}',
+                            'Gradient Mag : ${item.gradientMag}',
                             style: TextStyle(fontSize: 15),
                           ),
                           onTap: () {
-                            _deletePasse(context, item[0]);
+                            _deletePasse(index);
                           },
                         );
                       },
-                    );
-                  }
-                },
-              ),
+                    ),
             ),
+            Image.asset("assets/Profondeur-vs-intensité - ESID.JPG"),
             Padding(
               padding: EdgeInsets.all(40.0),
               child: Row(
@@ -177,13 +175,14 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        List images = await ImagesQuery().showImages();
-                        List passes = await PasseQuery().showPasses();
+                        List<ImagesModel> images = _allImages();
+                        List<PasseModel> passes = _allPasses();
                         PrelevementRepository().addPrelevement(
                             context,
                             PrelevementModel(
                                 numero: int.parse(numero.text),
-                                munitionReference: munitionRef.text,
+                                munitionReference:
+                                    _selectedMunitionReference.toString(),
                                 cotePlateforme: int.parse(cotePlateforme.text),
                                 coteASecuriser: int.parse(coteASecurise.text),
                                 profondeurASecuriser:
@@ -213,63 +212,67 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
     );
   }
 
-  _launchCamera() async {
-    await availableCameras().then((value) async {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CameraPage(
-            cameras: value,
-          ),
-        ),
-      );
+  void _addImage(String image) {
+    setState(() {
+      _images.add(ImagesTemp(image: image));
     });
-    setState(() {});
   }
 
-  /*_getPlanSondage(LatLng point) async {
-    String coord = "(${widget.point.longitude}, ${widget.point.latitude})";
-    _selectedSondage =
-        await PlanSondageRepository().getByCoords(coord, context);
-  }*/
-
-  void _addPasse(BuildContext context) async {
-    final result = await Navigator.of(context).push(
-        MaterialPageRoute(builder: (BuildContext context) => NouveauPasse()));
-    setState(() {});
+  void _deleteImage(int index) {
+    setState(() {
+      _images.removeAt(index);
+    });
   }
 
-  void _deletePasse(BuildContext context, int idPass) {
-    showDialog(
-      context: context,
-      builder: (BuildContext ctx) {
-        return MyDialog(
-          onPressed: () {
-            setState(() {
-              _isShownPasse = false;
-              PasseQuery().deletePasse(idPass);
-            });
-            Navigator.of(context).pop();
-          },
-        );
-      },
-    );
+  void _addPasse(String munitionReference, int profondeurSonde, int gradientMag,
+      int profondeurSecurisee, int coteSecurisee) {
+    setState(() {
+      _passes.add(PassesTemp(
+          munitionReference: munitionReference,
+          profondeurSonde: profondeurSonde,
+          gradientMag: gradientMag,
+          profondeurSecurisee: profondeurSecurisee,
+          coteSecurisee: coteSecurisee));
+    });
   }
 
-  void _deleteImage(BuildContext context, int idImg) {
-    showDialog(
-      context: context,
-      builder: (BuildContext ctx) {
-        return MyDialog(
-          onPressed: () {
-            setState(() {
-              _isShownImage = false;
-              ImagesQuery().deleteImage(idImg);
-            });
-            Navigator.of(context).pop();
-          },
-        );
-      },
-    );
+  void _deletePasse(int index) {
+    setState(() {
+      _passes.removeAt(index);
+    });
   }
+
+  List<ImagesModel> _allImages() {
+    return _images.map((i) => ImagesModel(image: i.image)).toList();
+  }
+
+  List<PasseModel> _allPasses() {
+    return _passes
+        .map((i) => PasseModel(
+            munitionReference: i.munitionReference,
+            profondeurSonde: i.profondeurSonde,
+            gradientMag: i.gradientMag,
+            profondeurSecurisee: i.profondeurSecurisee,
+            coteSecurisee: i.coteSecurisee,
+            prelevement: null))
+        .toList();
+  }
+}
+
+class ImagesTemp {
+  String image;
+
+  ImagesTemp({required this.image});
+}
+
+class PassesTemp {
+  String munitionReference;
+  int profondeurSonde, gradientMag, profondeurSecurisee, coteSecurisee;
+
+  PassesTemp(
+      {required this.munitionReference,
+      required this.profondeurSonde,
+      required this.gradientMag,
+      required this.coteSecurisee,
+      required this.profondeurSecurisee});
 }
