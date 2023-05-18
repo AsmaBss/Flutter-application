@@ -3,6 +3,7 @@ import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
+import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
 import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
 import 'package:flutter_application/src/screens/ModifierPrelevement.dart';
@@ -177,27 +178,36 @@ class _MapPrelevementState extends State<MapPrelevement>
             builder: (context) => GestureDetector(
               child: Icon(
                 Icons.location_on,
-                color: Colors.red,
+                color: Colors.grey,
               ),
               onTap: () => _addPrelevement(context, ps),
             ),
           ),
         );
       } else {
+        var statusColor;
+        if (prelevement.statut == StatutEnum.Securise) {
+          statusColor = Colors.green;
+        } else if (prelevement.statut == StatutEnum.A_Verifier) {
+          statusColor = Colors.orange;
+        } else {
+          statusColor = Colors.red;
+        }
         markers.add(
           Marker(
             point: point,
             builder: (context) => GestureDetector(
               child: Icon(
                 Icons.location_on,
-                color: Colors.green,
+                color: statusColor,
               ),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        ModifierPrelevement(prelevement: prelevement),
+                    builder: (context) => ModifierPrelevement(
+                        prelevement: prelevement,
+                        securisation: widget.securisation),
                   ),
                 );
               },
@@ -269,9 +279,17 @@ class _MapPrelevementState extends State<MapPrelevement>
                               builder: (context, snapshot) {
                                 Color statusColor;
                                 if (snapshot.hasData && snapshot.data != null) {
-                                  statusColor = Colors.green;
+                                  if (snapshot.data!.statut ==
+                                      StatutEnum.Securise) {
+                                    statusColor = Colors.green;
+                                  } else if (snapshot.data!.statut ==
+                                      StatutEnum.A_Verifier) {
+                                    statusColor = Colors.orange;
+                                  } else {
+                                    statusColor = Colors.red;
+                                  }
                                 } else {
-                                  statusColor = Colors.red;
+                                  statusColor = Colors.grey;
                                 }
                                 return ListTile(
                                   title: Text(planSondage.file!),
@@ -292,7 +310,9 @@ class _MapPrelevementState extends State<MapPrelevement>
                                         MaterialPageRoute(
                                           builder: (context) =>
                                               ModifierPrelevement(
-                                                  prelevement: snapshot.data!),
+                                            prelevement: snapshot.data!,
+                                            securisation: widget.securisation,
+                                          ),
                                         ),
                                       );
                                     } else {

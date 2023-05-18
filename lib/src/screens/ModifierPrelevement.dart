@@ -2,10 +2,14 @@ import 'dart:convert';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
+import 'package:flutter_application/src/models/SecurisationModel.dart';
+import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/models/images-model.dart';
 import 'package:flutter_application/src/repositories/PasseRepository.dart';
+import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
 import 'package:flutter_application/src/repositories/images-repository.dart';
 import 'package:flutter_application/src/screens/CameraPage.dart';
 import 'package:flutter_application/src/screens/ModifierPasse.dart';
@@ -14,9 +18,11 @@ import 'package:flutter_application/src/widget/MyDialog.dart';
 import 'package:flutter_application/src/widget/NouveauPrelevementFormWidget.dart';
 
 class ModifierPrelevement extends StatefulWidget {
+  final SecurisationModel securisation;
   final PrelevementModel prelevement;
 
-  const ModifierPrelevement({required this.prelevement, Key? key})
+  const ModifierPrelevement(
+      {required this.prelevement, required this.securisation, Key? key})
       : super(key: key);
 
   @override
@@ -28,23 +34,23 @@ class ModifierPrelevement extends StatefulWidget {
 class _ModifierPrelevementState extends State<ModifierPrelevement> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController numero = TextEditingController();
-  TextEditingController munitionRef = TextEditingController();
   TextEditingController cotePlateforme = TextEditingController();
   TextEditingController coteASecurise = TextEditingController();
   TextEditingController profondeurASecurise = TextEditingController();
   TextEditingController remarques = TextEditingController();
-  String? statut;
+  MunitionReferenceEnum? _selectedMunitionReference;
+  StatutEnum? _selectedStatut;
 
   @override
   initState() {
     numero.text = widget.prelevement.numero.toString();
-    munitionRef.text = widget.prelevement.munitionReference.toString();
+    _selectedMunitionReference = widget.prelevement.munitionReference;
     cotePlateforme.text = widget.prelevement.cotePlateforme.toString();
     coteASecurise.text = widget.prelevement.coteASecuriser.toString();
     profondeurASecurise.text =
         widget.prelevement.profondeurASecuriser.toString();
     remarques.text = widget.prelevement.remarques.toString();
-    statut = widget.prelevement.statut.toString();
+    _selectedStatut = widget.prelevement.statut;
     super.initState();
   }
 
@@ -71,10 +77,24 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
             NouveauPrelevementFormWidget(
               formKey: _formKey,
               numero: numero,
-              //munitionRef: munitionRef,
+              valueMunitionRef: _selectedMunitionReference,
+              itemsMunitionRef: MunitionReferenceEnum.values
+                  .map((value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(value.sentence),
+                      ))
+                  .toList(),
+              onChangedDropdownMunitionRef: (MunitionReferenceEnum newValue) {
+                setState(() {
+                  _selectedMunitionReference = newValue;
+                });
+              },
               cotePlateforme: cotePlateforme,
+              initialCotePlateforme: int.parse(cotePlateforme.text),
               profondeurASecurise: profondeurASecurise,
+              initialProfondeurASecuriser: int.parse(profondeurASecurise.text),
               coteASecurise: coteASecurise,
+              initialCoteASecuriser: int.parse(coteASecurise.text),
               imageGrid: FutureBuilder(
                 future: ImagesRepository()
                     .getByPrelevement(widget.prelevement.id!, context),
@@ -126,17 +146,20 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                 });
               },
               remarques: remarques,
-              statut: statut,
-              onChangedStatut: (value) => {
+              selectedStatut: _selectedStatut,
+              onChangedStatut: (value) {
                 setState(() {
-                  statut = value.toString();
-                })
+                  _selectedStatut = value;
+                });
               },
               nvPasse: () => {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => NouveauPasse(nvPasse: _addPasse),
+                    builder: (context) => NouveauPasse(
+                      nvPasse: _addPasse,
+                      securisation: widget.securisation,
+                    ),
                   ),
                 )
               },
@@ -186,7 +209,21 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {}
+                      if (_formKey.currentState!.validate()) {
+                        PrelevementRepository().updatePrelevement(
+                            context,
+                            PrelevementModel(
+                                id: widget.prelevement.id!,
+                                numero: int.parse(numero.text),
+                                munitionReference: _selectedMunitionReference,
+                                cotePlateforme: int.parse(cotePlateforme.text),
+                                coteASecuriser: int.parse(coteASecurise.text),
+                                profondeurASecuriser:
+                                    int.parse(profondeurASecurise.text),
+                                statut: _selectedStatut,
+                                remarques: remarques.text),
+                            widget.prelevement.id!);
+                      }
                     },
                     child: Text("Enregistrer"),
                   ),
@@ -205,8 +242,8 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
     );
   }
 
-  void _addPasse(String munitionReference, int profondeurSonde, int gradientMag,
-      int profondeurSecurisee, int coteSecurisee) {
+  void _addPasse(MunitionReferenceEnum munitionReference, int profondeurSonde,
+      int gradientMag, int profondeurSecurisee, int coteSecurisee) {
     setState(() {
       PasseRepository().addPasse(
           PasseModel(

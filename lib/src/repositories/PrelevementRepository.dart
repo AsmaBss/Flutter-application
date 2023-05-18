@@ -102,25 +102,9 @@ class PrelevementRepository {
   }
 
   void updatePrelevement(
-      BuildContext context,
-      PrelevementModel s,
-      List passes,
-      List images,
-      SecurisationModel securisation,
-      PlanSondageModel planSondage) async {
-    http.Response response = await _apiServices.post("/Prelevement/update", {
-      "prelevement": {
-        'numero': s.numero,
-        'munitionReference': s.munitionReference,
-        'cotePlateforme': s.cotePlateforme,
-        'profondeurASecuriser': s.profondeurASecuriser,
-        'coteASecuriser': s.coteASecuriser,
-        'remarques': s.remarques,
-        'statut': s.statut
-      },
-      "passes": passes,
-      "images": images
-    });
+      BuildContext context, PrelevementModel p, int id) async {
+    http.Response response =
+        await _apiServices.put("/Prelevement/update/$id", p.toJson(p));
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(

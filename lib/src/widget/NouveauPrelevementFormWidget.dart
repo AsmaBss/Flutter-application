@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
+import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
 
 class NouveauPrelevementFormWidget extends StatelessWidget {
@@ -16,7 +17,7 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
       initialCoteASecuriser,
       initialCotePlateforme;
   final onPressedCam, onChangedStatut;
-  final String? statut;
+  final StatutEnum? selectedStatut;
   final nvPasse;
   final Widget? imageGrid, listPasse;
 
@@ -35,7 +36,7 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
       this.remarques,
       this.onPressedCam,
       this.onChangedStatut,
-      this.statut,
+      this.selectedStatut,
       this.nvPasse,
       this.imageGrid,
       this.listPasse});
@@ -132,23 +133,27 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
               ),
             ),
           ),
-          Row(
-            children: [
-              Container(
-                  padding: EdgeInsets.only(top: 15, bottom: 15),
-                  height: 300,
-                  width: 280,
-                  child: imageGrid),
-              IconButton(
-                padding: EdgeInsets.zero,
-                alignment: Alignment.centerRight,
-                onPressed: onPressedCam,
-                icon: Icon(
-                  Icons.camera_alt,
-                  color: Colors.green,
+          Container(
+            padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Images",
+                  style: TextStyle(color: Colors.grey[700], fontSize: 16),
                 ),
-              ),
-            ],
+                IconButton(
+                  color: Colors.green,
+                  onPressed: onPressedCam,
+                  icon: Icon(Icons.camera_alt, size: 24),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            height: 300,
+            padding: EdgeInsets.only(bottom: 15.0),
+            child: imageGrid,
           ),
           Container(
             padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
@@ -172,57 +177,35 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 15.0),
             child: listPasse,
           ),
+          Text(
+            "Statut",
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
+            ),
+          ),
           Column(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: Row(
-                      children: [
-                        Radio(
-                          value: "Sécurisé",
-                          groupValue: statut,
-                          onChanged: onChangedStatut,
+                children: StatutEnum.values
+                    .map(
+                      (statut) => Expanded(
+                        flex: 1,
+                        child: Row(
+                          children: [
+                            Radio(
+                              value: statut,
+                              groupValue: selectedStatut,
+                              onChanged: onChangedStatut,
+                            ),
+                            Expanded(
+                              child: Text(statut.sentence),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          child: Text('Sécurisé'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Row(
-                      children: [
-                        Radio(
-                          value: "A vérifier",
-                          groupValue: statut,
-                          onChanged: onChangedStatut,
-                        ),
-                        Expanded(
-                          child: Text('A vérifier'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Row(
-                      children: [
-                        Radio(
-                          value: "Non Sécurisé",
-                          groupValue: statut,
-                          onChanged: onChangedStatut,
-                        ),
-                        Expanded(
-                          child: Text('Non sécurisé'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                      ),
+                    )
+                    .toList(),
               ),
             ],
           ),

@@ -14,7 +14,6 @@ class ModifierPasse extends StatefulWidget {
 
 class _ModifierPasseState extends State<ModifierPasse> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController munitionRef = TextEditingController();
   TextEditingController gradient = TextEditingController();
   TextEditingController coteSecurisee = TextEditingController();
   TextEditingController profondeurSecurisee = TextEditingController();
@@ -22,7 +21,6 @@ class _ModifierPasseState extends State<ModifierPasse> {
 
   @override
   void initState() {
-    munitionRef.text = widget.passe.munitionReference.toString();
     gradient.text = widget.passe.gradientMag.toString();
     coteSecurisee.text = widget.passe.coteSecurisee.toString();
     profondeurSecurisee.text = widget.passe.profondeurSecurisee.toString();
@@ -32,7 +30,6 @@ class _ModifierPasseState extends State<ModifierPasse> {
 
   @override
   void dispose() {
-    munitionRef.dispose();
     gradient.dispose();
     coteSecurisee.dispose();
     profondeurSecurisee.dispose();
@@ -53,7 +50,7 @@ class _ModifierPasseState extends State<ModifierPasse> {
           children: [
             NouveauPasseFormWidget(
               formKey: _formKey,
-              munitionRef: munitionRef,
+              //munitionRef: munitionRef,
               gradient: gradient,
               coteSecurisee: coteSecurisee,
               profondeurSecurisee: profondeurSecurisee,
@@ -70,7 +67,7 @@ class _ModifierPasseState extends State<ModifierPasse> {
                       if (_formKey.currentState!.validate()) {
                         PasseRepository().updatePasse(
                             PasseModel(
-                                munitionReference: munitionRef.text,
+                                //munitionReference: munitionRef.text,
                                 profondeurSonde:
                                     int.parse(profondeurSonde.text),
                                 gradientMag: int.parse(gradient.text),

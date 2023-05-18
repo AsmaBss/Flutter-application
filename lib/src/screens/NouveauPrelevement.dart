@@ -8,6 +8,7 @@ import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
+import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/models/images-model.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
 import 'package:flutter_application/src/screens/CameraPage.dart';
@@ -37,7 +38,7 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   List<PassesTemp> _passes = [];
   PlanSondageModel? _selectedSondage;
   MunitionReferenceEnum? _selectedMunitionReference;
-  String? statut;
+  StatutEnum? _selectedStatut;
 
   @override
   initState() {
@@ -47,7 +48,6 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
     coteASecurise.text = widget.securisation.coteASecuriser.toString();
     profondeurASecurise.text =
         widget.securisation.profondeurASecuriser.toString();
-    print(profondeurASecurise.text);
     super.initState();
   }
 
@@ -97,7 +97,7 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                   ? Center(child: Text("Il n'y a pas encore des images"))
                   : GridView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.all(1.0),
+                      padding: EdgeInsets.all(5.0),
                       addAutomaticKeepAlives: true,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 1,
@@ -112,7 +112,6 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                         return GestureDetector(
                           child: Image.memory(
                               Base64Decoder().convert(_images[index].image)),
-                          //Image.file(File(_images[index].image)),
                           onTap: () => _deleteImage(index),
                         );
                       },
@@ -129,17 +128,19 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                 });
               },
               remarques: remarques,
-              statut: statut,
-              onChangedStatut: (value) => {
+              selectedStatut: _selectedStatut,
+              onChangedStatut: (value) {
                 setState(() {
-                  statut = value.toString();
-                })
+                  _selectedStatut = value;
+                  print(_selectedStatut);
+                });
               },
               nvPasse: () => {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => NouveauPasse(nvPasse: _addPasse),
+                    builder: (context) => NouveauPasse(
+                        nvPasse: _addPasse, securisation: widget.securisation),
                   ),
                 )
               },
@@ -181,13 +182,12 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                             context,
                             PrelevementModel(
                                 numero: int.parse(numero.text),
-                                munitionReference:
-                                    _selectedMunitionReference.toString(),
+                                munitionReference: _selectedMunitionReference,
                                 cotePlateforme: int.parse(cotePlateforme.text),
                                 coteASecuriser: int.parse(coteASecurise.text),
                                 profondeurASecuriser:
                                     int.parse(profondeurASecurise.text),
-                                statut: statut.toString(),
+                                statut: _selectedStatut,
                                 remarques: remarques.text),
                             passes,
                             images,
@@ -224,8 +224,8 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
     });
   }
 
-  void _addPasse(String munitionReference, int profondeurSonde, int gradientMag,
-      int profondeurSecurisee, int coteSecurisee) {
+  void _addPasse(MunitionReferenceEnum munitionReference, int profondeurSonde,
+      int gradientMag, int profondeurSecurisee, int coteSecurisee) {
     setState(() {
       _passes.add(PassesTemp(
           munitionReference: munitionReference,
@@ -266,7 +266,7 @@ class ImagesTemp {
 }
 
 class PassesTemp {
-  String munitionReference;
+  MunitionReferenceEnum munitionReference;
   int profondeurSonde, gradientMag, profondeurSecurisee, coteSecurisee;
 
   PassesTemp(

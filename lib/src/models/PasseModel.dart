@@ -1,6 +1,8 @@
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
+
 class PasseModel {
   int? id;
-  String? munitionReference;
+  MunitionReferenceEnum? munitionReference;
   int? profondeurSonde;
   int? gradientMag;
   int? profondeurSecurisee;
@@ -26,7 +28,8 @@ class PasseModel {
   factory PasseModel.fromJson(Map<String, dynamic> json) {
     return PasseModel(
       id: json['id'] as int,
-      munitionReference: json['munitionReference'] as String,
+      munitionReference:
+          MunitionReferenceEnum.fromJson(json['munitionReference']),
       profondeurSonde: json['profondeurSonde'] as int,
       gradientMag: json['gradientMag'] as int,
       profondeurSecurisee: json['profondeurSecurisee'] as int,
@@ -38,7 +41,7 @@ class PasseModel {
   Map<String, dynamic> toJson(PasseModel p) {
     return {
       'id': p.id,
-      'munitionReference': p.munitionReference,
+      'munitionReference': p.munitionReference!.toJson(),
       'profondeurSonde': p.profondeurSonde,
       'gradientMag': p.gradientMag,
       'profondeurSecurisee': p.profondeurSecurisee,

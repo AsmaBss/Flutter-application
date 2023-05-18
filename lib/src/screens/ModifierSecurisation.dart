@@ -89,8 +89,8 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
               coteASecuriser: coteASecuriser,
               planSondage: planSondage,
               initialCoteASecuriser: widget.securisation.coteASecuriser,
-              initialProfondeurASecuriser:
-                  widget.securisation.profondeurASecuriser,
+              /*initialProfondeurASecuriser:
+                  widget.securisation.profondeurASecuriser,*/
             ),
             Padding(
               padding: EdgeInsets.all(40.0),

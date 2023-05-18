@@ -56,16 +56,10 @@ class ImagesRepository {
       final imagesData = responseJson as List;
       List<ImagesModel> images =
           imagesData.map((json) => ImagesModel.fromJson(json)).toList();
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server success : ${response.statusCode}"),
-      ));
+
       return images;
     } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
+      //
     }
     throw Exception("Failed get all images !");
   }

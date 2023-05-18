@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
 
 class NouveauPasseFormWidget extends StatelessWidget {
   final formKey;
-  final TextEditingController? munitionRef,
-      coteSecurisee,
-      profondeurSecurisee,
+  final MunitionReferenceEnum? valueMunitionRef;
+  final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
+  final onChangedDropdownMunitionRef;
+  final TextEditingController? profondeurSonde,
       gradient,
-      profondeurSonde;
+      coteSecurisee,
+      profondeurSecurisee;
+  final num? initialCoteSecurisee, initialProfondeurSecurisee;
 
   NouveauPasseFormWidget(
       {this.formKey,
-      this.munitionRef,
-      this.profondeurSecurisee,
-      this.coteSecurisee,
+      this.valueMunitionRef,
+      this.itemsMunitionRef,
+      this.onChangedDropdownMunitionRef,
+      this.profondeurSonde,
       this.gradient,
-      this.profondeurSonde});
+      this.coteSecurisee,
+      this.initialCoteSecurisee,
+      this.profondeurSecurisee,
+      this.initialProfondeurSecurisee});
 
   @override
   Widget build(BuildContext context) {
@@ -27,20 +35,11 @@ class NouveauPasseFormWidget extends StatelessWidget {
         children: <Widget>[
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: munitionRef,
-              decoration: InputDecoration(
-                labelText: 'Munition de référence',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
+            child: DropdownButtonFormField<MunitionReferenceEnum>(
+              value: valueMunitionRef,
+              hint: Text('Sélectionner une munition de référence'),
+              items: itemsMunitionRef,
+              onChanged: onChangedDropdownMunitionRef,
             ),
           ),
           Text(
@@ -54,8 +53,8 @@ class NouveauPasseFormWidget extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
               controller: profondeurSonde!,
-              initialValue: 50,
-              incDecFactor: 50,
+              initialValue: 0,
+              //incDecFactor: 50,
             ),
           ),
           Padding(
@@ -69,12 +68,6 @@ class NouveauPasseFormWidget extends StatelessWidget {
                   borderSide: BorderSide(width: 1, color: Colors.green),
                 ),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
             ),
           ),
           Text(
@@ -88,13 +81,7 @@ class NouveauPasseFormWidget extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
               controller: profondeurSecurisee!,
-              initialValue: 1,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
+              //initialValue: initialProfondeurSecurisee!,
             ),
           ),
           Text(
@@ -108,13 +95,7 @@ class NouveauPasseFormWidget extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
               controller: coteSecurisee!,
-              initialValue: 1,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
+              //initialValue: initialCoteSecurisee!,
             ),
           ),
         ],

@@ -17,16 +17,10 @@ class PasseRepository {
       final passesData = responseJson as List;
       List<PasseModel> passes =
           passesData.map((json) => PasseModel.fromJson(json)).toList();
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server success : ${response.statusCode}"),
-      ));
+
       return passes;
     } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
+      //
     }
     throw Exception("Failed get all passes !");
   }

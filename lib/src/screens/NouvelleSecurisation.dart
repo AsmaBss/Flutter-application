@@ -28,11 +28,14 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   List<PlanSondageModel> _planSondages = [];
   ParcelleModel? _selectedParcelle;
   MunitionReferenceEnum? _selectedMunitionReference;
+  num? initialCoteASecuriser;
 
   @override
   initState() {
     super.initState();
     _loadParcelles();
+    initialCoteASecuriser =
+        int.parse(cotePlateforme.text) - int.parse(profondeurASecurise.text);
   }
 
   @override
@@ -88,6 +91,7 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
               profondeurASecuriser: profondeurASecurise,
               coteASecuriser: coteASecurise,
               planSondage: planSondage,
+              initialCoteASecuriser: initialCoteASecuriser,
             ),
             Padding(
               padding: EdgeInsets.all(40.0),

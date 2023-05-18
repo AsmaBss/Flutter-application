@@ -1,13 +1,16 @@
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
+import 'package:flutter_application/src/models/StatutEnum.dart';
+
 class PrelevementModel {
   int? id;
   int? numero;
-  String? munitionReference;
+  MunitionReferenceEnum? munitionReference;
   int? cotePlateforme;
   int? profondeurASecuriser;
   int? coteASecuriser;
   int? planSondage;
   int? securisation;
-  String? statut;
+  StatutEnum? statut;
   String? remarques;
 
   PrelevementModel(
@@ -34,8 +37,9 @@ class PrelevementModel {
     return PrelevementModel(
       id: json['id'] as int,
       numero: json['numero'] as int,
-      munitionReference: json['munitionReference'] as String,
-      statut: json['statut'] as String,
+      munitionReference:
+          MunitionReferenceEnum.fromJson(json['munitionReference']),
+      statut: StatutEnum.fromJson(json['statut']),
       remarques: json['remarques'] as String,
       cotePlateforme: json['cotePlateforme'] as int,
       profondeurASecuriser: json['profondeurASecuriser'] as int,
@@ -49,9 +53,9 @@ class PrelevementModel {
     return {
       'id': p.id,
       'numero': p.numero,
-      'munitionReference': p.munitionReference,
+      'munitionReference': p.munitionReference!.toJson(),
       'remarques': p.remarques,
-      'statut': p.statut,
+      'statut': p.statut!.toJson(),
       'cotePlateforme': p.cotePlateforme,
       'profondeurASecuriser': p.profondeurASecuriser,
       'coteASecuriser': p.coteASecuriser,

@@ -15,7 +15,8 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
   final List<DropdownMenuItem<ParcelleModel>>? itemsParcelle;
   final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
   final onChangedDropdownParcelle, onChangedDropdownMunitionRef;
-  final num? initialProfondeurASecuriser, initialCoteASecuriser;
+  final num? initialCoteASecuriser; //initialProfondeurASecuriser,
+  //initialCotePlateforme;
 
   NouvelleSecurisationFormWidget({
     this.formKey,
@@ -30,7 +31,8 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
     this.coteASecuriser,
     this.profondeurASecuriser,
     this.planSondage,
-    this.initialProfondeurASecuriser,
+    //this.initialCotePlateforme,
+    //this.initialProfondeurASecuriser,
     this.initialCoteASecuriser,
   });
 
@@ -67,6 +69,11 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
               hint: Text('Sélectionner un lot'),
               items: itemsParcelle,
               onChanged: onChangedDropdownParcelle,
+              validator: (value) {
+                if (value == null || value == "") {
+                  return 'Veuillez renseigner ce champ';
+                }
+              },
             ),
           ),
           Padding(
@@ -76,25 +83,24 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
               hint: Text('Sélectionner une munition de référence'),
               items: itemsMunitionRef,
               onChanged: onChangedDropdownMunitionRef,
+              validator: (value) {
+                if (value == null || value == "") {
+                  return 'Veuillez renseigner ce champ';
+                }
+              },
+            ),
+          ),
+          Text(
+            "Côte de la plateforme",
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
             ),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: cotePlateforme,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Côte de la plateforme',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.green),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez renseigner ce champ';
-                }
-                return null;
-              },
+            child: NumberInputPrefabbed.roundedEdgeButtons(
+              controller: cotePlateforme!,
             ),
           ),
           Text(
@@ -108,7 +114,7 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
               controller: profondeurASecuriser!,
-              initialValue: initialProfondeurASecuriser ?? 9,
+              //initialValue: initialProfondeurASecuriser ?? 0,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Veuillez renseigner ce champ';
@@ -128,7 +134,7 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 15.0),
             child: NumberInputPrefabbed.roundedEdgeButtons(
               controller: coteASecuriser!,
-              initialValue: initialCoteASecuriser ?? 9,
+              initialValue: initialCoteASecuriser ?? 0,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Veuillez renseigner ce champ';

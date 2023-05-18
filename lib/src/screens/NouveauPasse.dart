@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
+import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/widget/NouveauPasseFormWidget.dart';
 
 class NouveauPasse extends StatefulWidget {
-  final Function(String, int, int, int, int) nvPasse;
+  final Function(MunitionReferenceEnum, int, int, int, int) nvPasse;
+  final SecurisationModel securisation;
 
-  const NouveauPasse({required this.nvPasse});
+  const NouveauPasse({required this.nvPasse, required this.securisation});
 
   @override
   _NouveauPasseState createState() => _NouveauPasseState();
@@ -12,15 +15,20 @@ class NouveauPasse extends StatefulWidget {
 
 class _NouveauPasseState extends State<NouveauPasse> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController munitionRef = TextEditingController();
   TextEditingController gradient = TextEditingController();
   TextEditingController coteSecurisee = TextEditingController();
   TextEditingController profondeurSecurisee = TextEditingController();
   TextEditingController profondeurSonde = TextEditingController();
+  MunitionReferenceEnum? _selectedMunitionReference;
+
+  @override
+  initState() {
+    _selectedMunitionReference = widget.securisation.munitionReference;
+    super.initState();
+  }
 
   @override
   void dispose() {
-    munitionRef.dispose();
     gradient.dispose();
     coteSecurisee.dispose();
     profondeurSecurisee.dispose();
@@ -30,7 +38,7 @@ class _NouveauPasseState extends State<NouveauPasse> {
 
   Future<void> _addNvPasse() async {
     widget.nvPasse(
-        munitionRef.text,
+        _selectedMunitionReference!,
         int.parse(profondeurSonde.text),
         int.parse(gradient.text),
         int.parse(profondeurSecurisee.text),
@@ -51,12 +59,24 @@ class _NouveauPasseState extends State<NouveauPasse> {
           children: [
             NouveauPasseFormWidget(
               formKey: _formKey,
-              munitionRef: munitionRef,
+              valueMunitionRef: _selectedMunitionReference,
+              itemsMunitionRef: MunitionReferenceEnum.values
+                  .map((value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(value.sentence),
+                      ))
+                  .toList(),
+              onChangedDropdownMunitionRef: (MunitionReferenceEnum newValue) {
+                setState(() {
+                  _selectedMunitionReference = newValue;
+                });
+              },
               gradient: gradient,
               coteSecurisee: coteSecurisee,
               profondeurSecurisee: profondeurSecurisee,
               profondeurSonde: profondeurSonde,
             ),
+            Image.asset("assets/Profondeur-vs-intensité - ESID.JPG"),
             Padding(
               padding: EdgeInsets.all(40.0),
               child: Row(
