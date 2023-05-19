@@ -31,8 +31,8 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController numero = TextEditingController();
   TextEditingController cotePlateforme = TextEditingController();
-  TextEditingController coteASecurise = TextEditingController();
-  TextEditingController profondeurASecurise = TextEditingController();
+  TextEditingController coteASecuriser = TextEditingController();
+  TextEditingController profondeurASecuriser = TextEditingController();
   TextEditingController remarques = TextEditingController();
   List<ImagesTemp> _images = [];
   List<PassesTemp> _passes = [];
@@ -45,8 +45,8 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
     _selectedSondage = widget.planSondage;
     _selectedMunitionReference = widget.securisation.munitionReference;
     cotePlateforme.text = widget.securisation.cotePlateforme.toString();
-    coteASecurise.text = widget.securisation.coteASecuriser.toString();
-    profondeurASecurise.text =
+    coteASecuriser.text = widget.securisation.coteASecuriser.toString();
+    profondeurASecuriser.text =
         widget.securisation.profondeurASecuriser.toString();
     super.initState();
   }
@@ -55,8 +55,8 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   void dispose() {
     numero.dispose();
     cotePlateforme.dispose();
-    coteASecurise.dispose();
-    profondeurASecurise.dispose();
+    coteASecuriser.dispose();
+    profondeurASecuriser.dispose();
     remarques.dispose();
     super.dispose();
   }
@@ -88,11 +88,11 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                 });
               },
               cotePlateforme: cotePlateforme,
-              initialCotePlateforme: int.parse(cotePlateforme.text),
-              profondeurASecurise: profondeurASecurise,
-              initialProfondeurASecuriser: int.parse(profondeurASecurise.text),
-              coteASecurise: coteASecurise,
-              initialCoteASecuriser: int.parse(coteASecurise.text),
+              onChangedCotePlateforme: (value) => updateCoteASecuriserValue(),
+              profondeurASecuriser: profondeurASecuriser,
+              onChangedProfondeurASecuriser: (value) =>
+                  updateCoteASecuriserValue(),
+              coteASecuriser: coteASecuriser,
               imageGrid: (_images.isEmpty)
                   ? Center(child: Text("Il n'y a pas encore des images"))
                   : GridView.builder(
@@ -184,9 +184,9 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                                 numero: int.parse(numero.text),
                                 munitionReference: _selectedMunitionReference,
                                 cotePlateforme: int.parse(cotePlateforme.text),
-                                coteASecuriser: int.parse(coteASecurise.text),
+                                coteASecuriser: int.parse(coteASecuriser.text),
                                 profondeurASecuriser:
-                                    int.parse(profondeurASecurise.text),
+                                    int.parse(profondeurASecuriser.text),
                                 statut: _selectedStatut,
                                 remarques: remarques.text),
                             passes,
@@ -210,6 +210,20 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
         ),
       ),
     );
+  }
+
+  void updateCoteASecuriserValue() {
+    String firstValue = cotePlateforme.text;
+    String secondValue = profondeurASecuriser.text;
+
+    if (firstValue.isEmpty || secondValue.isEmpty) {
+      coteASecuriser.text = '';
+      return;
+    }
+
+    int result = int.parse(firstValue) - int.parse(secondValue);
+    coteASecuriser.text = result.toString();
+    setState(() {});
   }
 
   void _addImage(String image) {

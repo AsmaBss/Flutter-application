@@ -35,8 +35,8 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController numero = TextEditingController();
   TextEditingController cotePlateforme = TextEditingController();
-  TextEditingController coteASecurise = TextEditingController();
-  TextEditingController profondeurASecurise = TextEditingController();
+  TextEditingController coteASecuriser = TextEditingController();
+  TextEditingController profondeurASecuriser = TextEditingController();
   TextEditingController remarques = TextEditingController();
   MunitionReferenceEnum? _selectedMunitionReference;
   StatutEnum? _selectedStatut;
@@ -46,8 +46,8 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
     numero.text = widget.prelevement.numero.toString();
     _selectedMunitionReference = widget.prelevement.munitionReference;
     cotePlateforme.text = widget.prelevement.cotePlateforme.toString();
-    coteASecurise.text = widget.prelevement.coteASecuriser.toString();
-    profondeurASecurise.text =
+    coteASecuriser.text = widget.prelevement.coteASecuriser.toString();
+    profondeurASecuriser.text =
         widget.prelevement.profondeurASecuriser.toString();
     remarques.text = widget.prelevement.remarques.toString();
     _selectedStatut = widget.prelevement.statut;
@@ -62,7 +62,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Modifier Prélèvement - ${widget.prelevement.numero}"),
+        title: Text("Modifier Prélèvement - \n${widget.prelevement.numero}"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -90,11 +90,11 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                 });
               },
               cotePlateforme: cotePlateforme,
-              initialCotePlateforme: int.parse(cotePlateforme.text),
-              profondeurASecurise: profondeurASecurise,
-              initialProfondeurASecuriser: int.parse(profondeurASecurise.text),
-              coteASecurise: coteASecurise,
-              initialCoteASecuriser: int.parse(coteASecurise.text),
+              onChangedCotePlateforme: (value) => updateCoteASecuriserValue(),
+              profondeurASecuriser: profondeurASecuriser,
+              onChangedProfondeurASecuriser: (value) =>
+                  updateCoteASecuriserValue(),
+              coteASecuriser: coteASecuriser,
               imageGrid: FutureBuilder(
                 future: ImagesRepository()
                     .getByPrelevement(widget.prelevement.id!, context),
@@ -217,9 +217,9 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                                 numero: int.parse(numero.text),
                                 munitionReference: _selectedMunitionReference,
                                 cotePlateforme: int.parse(cotePlateforme.text),
-                                coteASecuriser: int.parse(coteASecurise.text),
+                                coteASecuriser: int.parse(coteASecuriser.text),
                                 profondeurASecuriser:
-                                    int.parse(profondeurASecurise.text),
+                                    int.parse(profondeurASecuriser.text),
                                 statut: _selectedStatut,
                                 remarques: remarques.text),
                             widget.prelevement.id!);
@@ -240,6 +240,20 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
         ),
       ),
     );
+  }
+
+  void updateCoteASecuriserValue() {
+    String firstValue = cotePlateforme.text;
+    String secondValue = profondeurASecuriser.text;
+
+    if (firstValue.isEmpty || secondValue.isEmpty) {
+      coteASecuriser.text = '';
+      return;
+    }
+
+    int result = int.parse(firstValue) - int.parse(secondValue);
+    coteASecuriser.text = result.toString();
+    setState(() {});
   }
 
   void _addPasse(MunitionReferenceEnum munitionReference, int profondeurSonde,

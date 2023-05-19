@@ -4,7 +4,7 @@ import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
-import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
+import 'package:flutter_application/src/repositories/PlanSondageRepository.dart';
 import 'package:flutter_application/src/widget/NouvelleSecurisationFormWidget.dart';
 
 import '../repositories/SecurisationRepository.dart';
@@ -29,16 +29,16 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
   TextEditingController profondeurASecuriser = TextEditingController();
   TextEditingController planSondage = TextEditingController();
   List<ParcelleModel> _parcelles = [];
-  List<PlanSondageModel> _planSondages = [];
   ParcelleModel? _selectedParcelle;
+  List<PlanSondageModel> _planSondages = [];
   MunitionReferenceEnum? _selectedMunitionReference;
 
   @override
   initState() {
     super.initState();
+    nom.text = widget.securisation.nom.toString();
     _loadParcelles();
     _selectedMunitionReference = widget.securisation.munitionReference;
-    nom.text = widget.securisation.nom.toString();
     cotePlateforme.text = widget.securisation.cotePlateforme.toString();
     profondeurASecuriser.text =
         widget.securisation.profondeurASecuriser.toString();
@@ -50,7 +50,7 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text("Modifier sécurisation  -  ${widget.securisation.nom}"),
+        title: Text("Modifier sécurisation - \n${widget.securisation.nom}"),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -85,12 +85,12 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
                 });
               },
               cotePlateforme: cotePlateforme,
+              onChangedCotePlateforme: (value) => updateCoteASecuriserValue(),
               profondeurASecuriser: profondeurASecuriser,
+              onChangedProfondeurASecuriser: (value) =>
+                  updateCoteASecuriserValue(),
               coteASecuriser: coteASecuriser,
               planSondage: planSondage,
-              initialCoteASecuriser: widget.securisation.coteASecuriser,
-              /*initialProfondeurASecuriser:
-                  widget.securisation.profondeurASecuriser,*/
             ),
             Padding(
               padding: EdgeInsets.all(40.0),
@@ -106,10 +106,10 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
                             SecurisationModel(
                               nom: nom.text,
                               munitionReference: _selectedMunitionReference,
-                              coteASecuriser: int.parse(coteASecuriser.text),
                               cotePlateforme: int.parse(cotePlateforme.text),
                               profondeurASecuriser:
                                   int.parse(profondeurASecuriser.text),
+                              coteASecuriser: int.parse(coteASecuriser.text),
                             ),
                             widget.securisation.id!);
                       }
@@ -151,5 +151,19 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
       _planSondages = list;
       planSondage.text = _planSondages.first.file!;
     }
+  }
+
+  void updateCoteASecuriserValue() {
+    String firstValue = cotePlateforme.text;
+    String secondValue = profondeurASecuriser.text;
+
+    if (firstValue.isEmpty || secondValue.isEmpty) {
+      coteASecuriser.text = '';
+      return;
+    }
+
+    int result = int.parse(firstValue) - int.parse(secondValue);
+    coteASecuriser.text = result.toString();
+    setState(() {});
   }
 }

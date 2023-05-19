@@ -15,43 +15,54 @@ class PrelevementRepository {
 
   Future<PrelevementModel?> getPrelevementByPlanSondage(
       String coord, BuildContext context) async {
-    http.Response response = await _apiServices.get("/Prelevement/show/$coord");
-    if (response.statusCode == 200) {
-      if (response.body.isEmpty) {
-        return null;
+    try {
+      http.Response response =
+          await _apiServices.get("/Prelevement/show/$coord");
+      if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          return null;
+        } else {
+          dynamic responseJson = jsonDecode(response.body);
+          final prelevementData = responseJson;
+          return PrelevementModel.fromJson(prelevementData);
+        }
       } else {
-        dynamic responseJson = jsonDecode(response.body);
-        final prelevementData = responseJson;
-        return PrelevementModel.fromJson(prelevementData);
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
       }
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
+    } catch (e) {
+      print('Erreur: $e');
     }
-    throw Exception("Failed get all Prelevement !");
+    throw Exception("Echec !");
   }
 
   Future<PrelevementModel?> getPrelevementByPlanSondageId(
       int id, BuildContext context) async {
-    http.Response response =
-        await _apiServices.get("/Prelevement/show/sondage/$id");
-    if (response.statusCode == 200) {
-      if (response.body.isEmpty) {
-        return null;
+    try {
+      http.Response response =
+          await _apiServices.get("/Prelevement/show/sondage/$id");
+      if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          return null;
+        } else {
+          dynamic responseJson = jsonDecode(response.body);
+          final prelevementData = responseJson;
+          return PrelevementModel.fromJson(prelevementData);
+        }
       } else {
-        dynamic responseJson = jsonDecode(response.body);
-        final prelevementData = responseJson;
-        return PrelevementModel.fromJson(prelevementData);
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
       }
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
+    } catch (e) {
+      print('Erreur: $e');
     }
-    throw Exception("Failed get all Prelevement !");
+    throw Exception("Echec !");
   }
 
   void addPrelevement(
@@ -78,21 +89,7 @@ class PrelevementRepository {
       "securisation": securisation.toJson(securisation)
     });
     if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(
-            content: Text("${response.statusCode}"),
-          ))
-          .closed
-          .then((value) async {
-        List im = await ImagesQuery().showImages();
-        List ps = await PasseQuery().showPasses();
-        for (var i in ps) {
-          PasseQuery().deletePasse(i[0]);
-        }
-        for (var i in im) {
-          ImagesQuery().deleteImage(i[0]);
-        }
-      }).whenComplete(() => Navigator.pop(context, true));
+      Navigator.pop(context, true);
     } else {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -103,39 +100,39 @@ class PrelevementRepository {
 
   void updatePrelevement(
       BuildContext context, PrelevementModel p, int id) async {
-    http.Response response =
-        await _apiServices.put("/Prelevement/update/$id", p.toJson(p));
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(
-            content: Text("${response.statusCode}"),
-          ))
-          .closed
-          .then((value) async {
-        List im = await ImagesQuery().showImages();
-        List ps = await PasseQuery().showPasses();
-        for (var i in ps) {
-          PasseQuery().deletePasse(i[0]);
-        }
-        for (var i in im) {
-          ImagesQuery().deleteImage(i[0]);
-        }
-      }).whenComplete(() => Navigator.pop(context, true));
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
+    try {
+      http.Response response =
+          await _apiServices.put("/Prelevement/update/$id", p.toJson(p));
+      if (response.statusCode == 200) {
+        Navigator.pop(context, true);
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } catch (e) {
+      print('Erreur: $e');
     }
   }
 
   Future<int> nbrBySecurisation(int id, BuildContext context) async {
-    http.Response response = await _apiServices.get("/Prelevement/count/$id");
-    if (response.statusCode == 200) {
-      int count = int.parse(response.body);
-      return count;
-    } else {
-      throw Exception('Failed to retrieve count');
+    try {
+      http.Response response = await _apiServices.get("/Prelevement/count/$id");
+      if (response.statusCode == 200) {
+        int count = int.parse(response.body);
+        return count;
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } catch (e) {
+      print('Erreur: $e');
     }
+    throw Exception("Echec !");
   }
 }

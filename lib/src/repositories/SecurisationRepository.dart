@@ -36,16 +36,26 @@ class SecurisationRepository {
 
   Future<SecurisationModel> getSecurisationById(
       int id, BuildContext context) async {
-    http.Response response = await _apiServices.get("/Securisation/show/$id");
-    if (response.statusCode == 200) {
-      dynamic responseJson = jsonDecode(response.body);
-      final securisationData = responseJson;
-      SecurisationModel securisation = securisationData
-          .map((json) => SecurisationModel.fromJson(json))
-          .toList();
-      return securisation;
+    try {
+      http.Response response = await _apiServices.get("/Securisation/show/$id");
+      if (response.statusCode == 200) {
+        dynamic responseJson = jsonDecode(response.body);
+        final securisationData = responseJson;
+        SecurisationModel securisation = securisationData
+            .map((json) => SecurisationModel.fromJson(json))
+            .toList();
+        return securisation;
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } catch (e) {
+      print('Erreur: $e');
     }
-    throw Exception("Failed get all Securisation !");
+    throw Exception("Echec !");
   }
 
   Future<SecurisationModel> addSecurisation(
@@ -65,12 +75,24 @@ class SecurisationRepository {
 
   void updateSecurisation(
       BuildContext context, SecurisationModel s, int id) async {
-    http.Response response =
-        await _apiServices.put("/Securisation/update/$id", s.toJson(s));
-    if (response.statusCode == 200) {
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context, true);
+    try {
+      http.Response response =
+          await _apiServices.put("/Securisation/update/$id", s.toJson(s));
+      print("--------------------------- ${response.statusCode}");
+      if (response.statusCode == 200) {
+        // ignore: use_build_context_synchronously
+        Navigator.pop(context, true);
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } catch (e) {
+      print('Erreur: $e');
     }
+    //throw Exception("Echec !");
   }
 
   deleteSecurisation(int id, BuildContext context) async {

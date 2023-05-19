@@ -7,7 +7,7 @@ import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
 import 'package:flutter_application/src/repositories/SecurisationRepository.dart';
 import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
-import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
+import 'package:flutter_application/src/repositories/PlanSondageRepository.dart';
 import 'package:flutter_application/src/screens/MapPrelevement.dart';
 import 'package:flutter_application/src/screens/ModifierSecurisation.dart';
 import 'package:flutter_application/src/screens/NouvelleSecurisation.dart';

@@ -5,7 +5,7 @@ import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
-import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
+import 'package:flutter_application/src/repositories/PlanSondageRepository.dart';
 import 'package:flutter_application/src/screens/ModifierPrelevement.dart';
 import 'package:flutter_application/src/screens/NouveauPrelevement.dart';
 import 'package:flutter_application/src/widget/DrawerWidget.dart';
@@ -18,6 +18,7 @@ class MapPrelevement extends StatefulWidget {
   final List<PlanSondageModel?> planSondage;
   final ParcelleModel? parcelle;
   final SecurisationModel securisation;
+
   const MapPrelevement(
       {required this.planSondage,
       required this.parcelle,
@@ -112,6 +113,7 @@ class _MapPrelevementState extends State<MapPrelevement>
   void refreshPage() {
     setState(() {
       _loadPlanSondage();
+      _fetchPlanSondageList();
     });
   }
 
@@ -231,6 +233,7 @@ class _MapPrelevementState extends State<MapPrelevement>
   }
 
   void _addPrelevement(BuildContext context, PlanSondageModel ps) async {
+    Navigator.pop(context);
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -243,10 +246,26 @@ class _MapPrelevementState extends State<MapPrelevement>
     }
   }
 
+  void _updatePrelevement(
+      BuildContext context, PrelevementModel prelevement) async {
+    Navigator.pop(context);
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ModifierPrelevement(
+          prelevement: prelevement,
+          securisation: widget.securisation,
+        ),
+      ),
+    );
+    if (result == true) {
+      refreshPage();
+    }
+  }
+
   Future<List<PlanSondageModel?>> _fetchPlanSondageList() async {
     final list =
         widget.planSondage.where((element) => element != null).toList();
-    //await Future.delayed(Duration(seconds: 1));
     return list;
   }
 
@@ -267,7 +286,6 @@ class _MapPrelevementState extends State<MapPrelevement>
                       if (snapshot.hasData) {
                         final planSondageList = snapshot.data!;
                         return ListView.builder(
-                          //scrollDirection: Axis.vertical,
                           shrinkWrap: true,
                           itemCount: planSondageList.length,
                           itemBuilder: (context, index) {
@@ -304,19 +322,11 @@ class _MapPrelevementState extends State<MapPrelevement>
                                     ),
                                   ),
                                   onTap: () {
-                                    if (statusColor == Colors.green) {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              ModifierPrelevement(
-                                            prelevement: snapshot.data!,
-                                            securisation: widget.securisation,
-                                          ),
-                                        ),
-                                      );
-                                    } else {
+                                    if (statusColor == Colors.grey) {
                                       _addPrelevement(context, planSondage);
+                                    } else {
+                                      _updatePrelevement(
+                                          context, snapshot.data!);
                                     }
                                   },
                                 );
@@ -327,7 +337,6 @@ class _MapPrelevementState extends State<MapPrelevement>
                       } else if (snapshot.hasError) {
                         return Text("${snapshot.error}");
                       }
-                      // By default, show a loading spinner.
                       return Center(child: CircularProgressIndicator());
                     },
                   ),

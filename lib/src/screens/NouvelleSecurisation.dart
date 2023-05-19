@@ -6,7 +6,7 @@ import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
-import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
+import 'package:flutter_application/src/repositories/PlanSondageRepository.dart';
 import 'package:flutter_application/src/screens/MapPrelevement.dart';
 import 'package:flutter_application/src/widget/NouvelleSecurisationFormWidget.dart';
 
@@ -20,30 +20,30 @@ class NouvelleSecurisation extends StatefulWidget {
 class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController nom = TextEditingController();
-  TextEditingController cotePlateforme = TextEditingController();
-  TextEditingController coteASecurise = TextEditingController();
-  TextEditingController profondeurASecurise = TextEditingController();
+  TextEditingController cotePlateforme = TextEditingController(text: "0");
+  TextEditingController coteASecuriser = TextEditingController(text: "0");
+  TextEditingController profondeurASecuriser = TextEditingController(text: "0");
   TextEditingController planSondage = TextEditingController();
   List<ParcelleModel> _parcelles = [];
-  List<PlanSondageModel> _planSondages = [];
   ParcelleModel? _selectedParcelle;
+  List<PlanSondageModel> _planSondages = [];
   MunitionReferenceEnum? _selectedMunitionReference;
-  num? initialCoteASecuriser;
 
   @override
   initState() {
     super.initState();
     _loadParcelles();
-    initialCoteASecuriser =
-        int.parse(cotePlateforme.text) - int.parse(profondeurASecurise.text);
+    final val =
+        (int.parse(cotePlateforme.text) - int.parse(profondeurASecuriser.text))
+            .toString();
   }
 
   @override
   void dispose() {
     nom.dispose();
     cotePlateforme.dispose();
-    coteASecurise.dispose();
-    profondeurASecurise.dispose();
+    coteASecuriser.dispose();
+    profondeurASecuriser.dispose();
     planSondage.dispose();
     super.dispose();
   }
@@ -88,10 +88,12 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                 });
               },
               cotePlateforme: cotePlateforme,
-              profondeurASecuriser: profondeurASecurise,
-              coteASecuriser: coteASecurise,
+              onChangedCotePlateforme: (value) => updateCoteASecuriserValue(),
+              profondeurASecuriser: profondeurASecuriser,
+              onChangedProfondeurASecuriser: (value) =>
+                  updateCoteASecuriserValue(),
+              coteASecuriser: coteASecuriser,
               planSondage: planSondage,
-              initialCoteASecuriser: initialCoteASecuriser,
             ),
             Padding(
               padding: EdgeInsets.all(40.0),
@@ -108,11 +110,12 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                                 SecurisationModel(
                                   nom: nom.text,
                                   munitionReference: _selectedMunitionReference,
-                                  coteASecuriser: int.parse(coteASecurise.text),
+                                  coteASecuriser:
+                                      int.parse(coteASecuriser.text),
                                   cotePlateforme:
                                       int.parse(cotePlateforme.text),
                                   profondeurASecuriser:
-                                      int.parse(profondeurASecurise.text),
+                                      int.parse(profondeurASecuriser.text),
                                 ),
                                 _selectedParcelle!);
                         Navigator.of(context).push(MaterialPageRoute(
@@ -154,5 +157,19 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
       _planSondages = list;
       planSondage.text = _planSondages.first.file!;
     }
+  }
+
+  void updateCoteASecuriserValue() {
+    String firstValue = cotePlateforme.text;
+    String secondValue = profondeurASecuriser.text;
+
+    if (firstValue.isEmpty || secondValue.isEmpty) {
+      coteASecuriser.text = '';
+      return;
+    }
+
+    int result = int.parse(firstValue) - int.parse(secondValue);
+    coteASecuriser.text = result.toString();
+    setState(() {});
   }
 }
