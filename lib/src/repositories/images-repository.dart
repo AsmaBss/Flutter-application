@@ -8,82 +8,33 @@ import 'package:http/http.dart' as http;
 class ImagesRepository {
   final ApiServices _apiServices = ApiServices();
 
-  Future<List> getAllImages(BuildContext context) async {
-    http.Response response = await _apiServices.get("/Images/show");
-    if (response.statusCode == 200) {
-      dynamic responseJson = jsonDecode(response.body);
-      final imagesData = responseJson as List;
-      List<ImagesModel> imagesList =
-          imagesData.map((json) => ImagesModel.fromJson(json)).toList();
-      return imagesList;
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
-    }
-    throw Exception("Failed get all images !");
-  }
-
-  Future<ImagesModel> getImagesByPositionId(
+  Future<List<ImagesModel>> getImagesByPrelevement(
       int id, BuildContext context) async {
-    http.Response response = await _apiServices.get("/Images/show/$id");
-    if (response.statusCode == 200) {
-      dynamic responseJson = jsonDecode(response.body);
-      final imagesData = responseJson;
-      ImagesModel images =
-          imagesData.map((json) => ImagesModel.fromJson(json)).toList();
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server success : ${response.statusCode}"),
-      ));
-      return images;
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
+    try {
+      http.Response response =
+          await _apiServices.get("/Images/show/prelevement/$id");
+      if (response.statusCode == 200) {
+        dynamic responseJson = jsonDecode(response.body);
+        final imagesData = responseJson as List;
+        List<ImagesModel> images =
+            imagesData.map((json) => ImagesModel.fromJson(json)).toList();
+        return images;
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } catch (e) {
+      print('Erreur: $e');
     }
-    throw Exception("Failed get all images !");
-  }
-
-  Future<List<ImagesModel>> getByPrelevement(
-      int id, BuildContext context) async {
-    http.Response response =
-        await _apiServices.get("/Images/show/prelevement/$id");
-    if (response.statusCode == 200) {
-      dynamic responseJson = jsonDecode(response.body);
-      final imagesData = responseJson as List;
-      List<ImagesModel> images =
-          imagesData.map((json) => ImagesModel.fromJson(json)).toList();
-
-      return images;
-    } else {
-      //
-    }
-    throw Exception("Failed get all images !");
+    throw Exception("Echec !");
   }
 
   addImage(ImagesModel img, int id, BuildContext context) async {
     await _apiServices.post("/Images/add/$id", img.toJson(img));
   }
-
-  /*void addImages(
-      ImagesModel img, FormMarkerModel fm, BuildContext context) async {
-    http.Response response =
-        await _apiServices.post("/FormMarker/add/${fm.id}", img.toJson(img));
-    if (response.statusCode == 200) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(response.body),
-      ));
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Server error : ${response.statusCode}"),
-      ));
-    }
-  }*/
 
   Future<ImagesModel> editImages(ImagesModel i) async {
     http.Response response =

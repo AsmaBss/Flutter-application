@@ -8,21 +8,28 @@ import 'package:http/http.dart' as http;
 class PasseRepository {
   final ApiServices _apiServices = ApiServices();
 
-  Future<List<PasseModel>> getByPrelevement(
+  Future<List<PasseModel>> getPassesByPrelevement(
       int id, BuildContext context) async {
-    http.Response response =
-        await _apiServices.get("/Passe/show/prelevement/$id");
-    if (response.statusCode == 200) {
-      dynamic responseJson = jsonDecode(response.body);
-      final passesData = responseJson as List;
-      List<PasseModel> passes =
-          passesData.map((json) => PasseModel.fromJson(json)).toList();
-
-      return passes;
-    } else {
-      //
+    try {
+      http.Response response =
+          await _apiServices.get("/Passe/show/prelevement/$id");
+      if (response.statusCode == 200) {
+        dynamic responseJson = jsonDecode(response.body);
+        final passesData = responseJson as List;
+        List<PasseModel> passes =
+            passesData.map((json) => PasseModel.fromJson(json)).toList();
+        return passes;
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } catch (e) {
+      print('Erreur: $e');
     }
-    throw Exception("Failed get all passes !");
+    throw Exception("Echec !");
   }
 
   void addPasse(PasseModel p, int id, BuildContext context) async {

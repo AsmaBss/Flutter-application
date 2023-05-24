@@ -13,6 +13,7 @@ import 'package:flutter_application/src/models/images-model.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
 import 'package:flutter_application/src/screens/CameraPage.dart';
 import 'package:flutter_application/src/screens/NouveauPasse.dart';
+import 'package:flutter_application/src/widget/MyDialog.dart';
 import 'package:flutter_application/src/widget/NouveauPrelevementFormWidget.dart';
 
 class NouveauPrelevement extends StatefulWidget {
@@ -34,11 +35,11 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   TextEditingController coteASecuriser = TextEditingController();
   TextEditingController profondeurASecuriser = TextEditingController();
   TextEditingController remarques = TextEditingController();
+  MunitionReferenceEnum? _selectedMunitionReference;
+  PlanSondageModel? _selectedSondage;
+  StatutEnum? _selectedStatut;
   List<ImagesTemp> _images = [];
   List<PassesTemp> _passes = [];
-  PlanSondageModel? _selectedSondage;
-  MunitionReferenceEnum? _selectedMunitionReference;
-  StatutEnum? _selectedStatut;
 
   @override
   initState() {
@@ -59,6 +60,10 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
     profondeurASecuriser.dispose();
     remarques.dispose();
     super.dispose();
+  }
+
+  void refreshPage() {
+    setState(() {});
   }
 
   @override
@@ -132,17 +137,27 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
               onChangedStatut: (value) {
                 setState(() {
                   _selectedStatut = value;
-                  print(_selectedStatut);
                 });
               },
-              nvPasse: () => {
+              nvPasse: () {
+                final profSonde;
+                if (_passes.isEmpty) {
+                  profSonde = 0;
+                } else {
+                  profSonde = _passes.last.profondeurSonde;
+                }
+                print("profSonde => $profSonde");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => NouveauPasse(
-                        nvPasse: _addPasse, securisation: widget.securisation),
+                      nvPasse: _addPasse,
+                      securisation: widget.securisation,
+                      cotePlateforme: cotePlateforme.text,
+                      profSonde: profSonde,
+                    ),
                   ),
-                )
+                );
               },
               listPasse: (_passes.isEmpty)
                   ? Center(child: Text("Il n'y a pas encore des passes"))
@@ -151,13 +166,21 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                       itemCount: _passes.length,
                       itemBuilder: (context, index) {
                         final item = _passes[index];
-                        var ps = item.profondeurSonde - 50;
                         return ListTile(
-                          title: Text('$ps - ${item.profondeurSonde}',
+                          title: Text('${item.profondeurSonde}',
                               style: TextStyle(fontSize: 17)),
                           trailing: Text(
                             'Gradient Mag : ${item.gradientMag}',
                             style: TextStyle(fontSize: 15),
+                          ),
+                          leading: IconButton(
+                            icon: Icon(
+                              Icons.edit,
+                              color: Colors.red,
+                            ),
+                            onPressed: () {
+                              //_updatePasse(item, context);
+                            },
                           ),
                           onTap: () {
                             _deletePasse(index);
@@ -176,8 +199,20 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        List<ImagesModel> images = _allImages();
-                        List<PasseModel> passes = _allPasses();
+                        List<ImagesModel> images = _images
+                            .map((i) => ImagesModel(image: i.image))
+                            .toList();
+                        List<PasseModel> passes = _passes
+                            .map((i) => PasseModel(
+                                munitionReference: i.munitionReference,
+                                gradientMag: i.gradientMag,
+                                profondeurSonde: i.profondeurSonde,
+                                profondeurSecurisee: i.profondeurSecurisee,
+                                coteSecurisee: i.coteSecurisee))
+                            .toList();
+                        for (var element in passes) {
+                          print('prof => ${element.profondeurSonde}');
+                        }
                         PrelevementRepository().addPrelevement(
                             context,
                             PrelevementModel(
@@ -215,12 +250,10 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   void updateCoteASecuriserValue() {
     String firstValue = cotePlateforme.text;
     String secondValue = profondeurASecuriser.text;
-
     if (firstValue.isEmpty || secondValue.isEmpty) {
       coteASecuriser.text = '';
       return;
     }
-
     int result = int.parse(firstValue) - int.parse(secondValue);
     coteASecuriser.text = result.toString();
     setState(() {});
@@ -233,27 +266,50 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   }
 
   void _deleteImage(int index) {
-    setState(() {
-      _images.removeAt(index);
-    });
+    ImagesTemp i = _images.elementAt(index);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return MyDialog(
+          onPressed: () async {
+            _images.removeAt(index);
+            Navigator.pop(context);
+            refreshPage();
+          },
+        );
+      },
+    );
   }
 
-  void _addPasse(MunitionReferenceEnum munitionReference, int profondeurSonde,
-      int gradientMag, int profondeurSecurisee, int coteSecurisee) {
+  void _addPasse(MunitionReferenceEnum munitionReference, int gradientMag,
+      int profondeurSonde, int profondeurSecurisee, int coteSecurisee) {
     setState(() {
       _passes.add(PassesTemp(
           munitionReference: munitionReference,
-          profondeurSonde: profondeurSonde,
           gradientMag: gradientMag,
-          profondeurSecurisee: profondeurSecurisee,
-          coteSecurisee: coteSecurisee));
+          profondeurSonde: profondeurSonde,
+          coteSecurisee: coteSecurisee,
+          profondeurSecurisee: profondeurSecurisee));
     });
+    for (var element in _passes) {
+      print("profondeurSonde => ${element.profondeurSonde}");
+    }
   }
 
   void _deletePasse(int index) {
-    setState(() {
-      _passes.removeAt(index);
-    });
+    PassesTemp i = _passes.elementAt(index);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return MyDialog(
+          onPressed: () async {
+            _passes.removeAt(index);
+            Navigator.pop(context);
+            refreshPage();
+          },
+        );
+      },
+    );
   }
 
   List<ImagesModel> _allImages() {
@@ -285,8 +341,8 @@ class PassesTemp {
 
   PassesTemp(
       {required this.munitionReference,
-      required this.profondeurSonde,
       required this.gradientMag,
+      required this.profondeurSonde,
       required this.coteSecurisee,
       required this.profondeurSecurisee});
 }

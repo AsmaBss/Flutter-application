@@ -4,26 +4,25 @@ import 'package:number_inc_dec/number_inc_dec.dart';
 
 class NouveauPasseFormWidget extends StatelessWidget {
   final formKey;
-  final MunitionReferenceEnum? valueMunitionRef;
-  final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
-  final onChangedDropdownMunitionRef;
   final TextEditingController? profondeurSonde,
       gradient,
       coteSecurisee,
       profondeurSecurisee;
-  final num? initialCoteSecurisee, initialProfondeurSecurisee;
+  final MunitionReferenceEnum? valueMunitionRef;
+  final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
+  final onChangedDropdownMunitionRef;
+  final Function(String)? onChangedProfondeurSecurisee;
 
   NouveauPasseFormWidget(
       {this.formKey,
       this.valueMunitionRef,
       this.itemsMunitionRef,
       this.onChangedDropdownMunitionRef,
-      this.profondeurSonde,
       this.gradient,
-      this.coteSecurisee,
-      this.initialCoteSecurisee,
+      this.profondeurSonde,
       this.profondeurSecurisee,
-      this.initialProfondeurSecurisee});
+      this.onChangedProfondeurSecurisee,
+      this.coteSecurisee});
 
   @override
   Widget build(BuildContext context) {
@@ -42,25 +41,11 @@ class NouveauPasseFormWidget extends StatelessWidget {
               onChanged: onChangedDropdownMunitionRef,
             ),
           ),
-          Text(
-            "Profondeur de la sonde",
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 16,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(bottom: 15.0),
-            child: NumberInputPrefabbed.roundedEdgeButtons(
-              controller: profondeurSonde!,
-              initialValue: 0,
-              //incDecFactor: 50,
-            ),
-          ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
             child: TextFormField(
               controller: gradient,
+              textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Gradient Mag (nT)',
@@ -70,32 +55,65 @@ class NouveauPasseFormWidget extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            "Profondeur sécurisée (m)",
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 16,
+          Padding(
+            padding: EdgeInsets.only(bottom: 15.0),
+            child: TextFormField(
+              controller: profondeurSonde,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                labelText: "Profondeur de la sonde",
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 1, color: Colors.green),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez renseigner ce champ';
+                }
+                return null;
+              },
             ),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: NumberInputPrefabbed.roundedEdgeButtons(
-              controller: profondeurSecurisee!,
-              //initialValue: initialProfondeurSecurisee!,
-            ),
-          ),
-          Text(
-            "Côte sécurisée (m)",
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 16,
+            child: TextFormField(
+              controller: profondeurSecurisee,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                labelText: "Profondeur sécurisée (m)",
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 1, color: Colors.green),
+                ),
+              ),
+              onChanged: onChangedProfondeurSecurisee,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez renseigner ce champ';
+                }
+                return null;
+              },
             ),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
-            child: NumberInputPrefabbed.roundedEdgeButtons(
-              controller: coteSecurisee!,
-              //initialValue: initialCoteSecurisee!,
+            child: TextFormField(
+              controller: coteSecurisee,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                labelText: "Côte sécurisée (m)",
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 1, color: Colors.green),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez renseigner ce champ';
+                }
+                return null;
+              },
             ),
           ),
         ],

@@ -40,17 +40,21 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   TextEditingController remarques = TextEditingController();
   MunitionReferenceEnum? _selectedMunitionReference;
   StatutEnum? _selectedStatut;
+  List<ImagesTemp> _images = [];
+  List<PassesTemp> _passes = [];
 
   @override
   initState() {
     numero.text = widget.prelevement.numero.toString();
     _selectedMunitionReference = widget.prelevement.munitionReference;
     cotePlateforme.text = widget.prelevement.cotePlateforme.toString();
-    coteASecuriser.text = widget.prelevement.coteASecuriser.toString();
     profondeurASecuriser.text =
         widget.prelevement.profondeurASecuriser.toString();
+    coteASecuriser.text = widget.prelevement.coteASecuriser.toString();
     remarques.text = widget.prelevement.remarques.toString();
     _selectedStatut = widget.prelevement.statut;
+    _fetchImages();
+    _fetchPasses();
     super.initState();
   }
 
@@ -63,12 +67,6 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Modifier Prélèvement - \n${widget.prelevement.numero}"),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -95,21 +93,11 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
               onChangedProfondeurASecuriser: (value) =>
                   updateCoteASecuriserValue(),
               coteASecuriser: coteASecuriser,
-              imageGrid: FutureBuilder(
-                future: ImagesRepository()
-                    .getByPrelevement(widget.prelevement.id!, context),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.data == null || snapshot.data!.isEmpty) {
-                    return Center(
-                        child: Text("Il n'y a pas encore des images"));
-                  } else {
-                    return GridView.builder(
+              imageGrid: (_images.isEmpty)
+                  ? Center(child: Text("Il n'y a pas encore des images"))
+                  : GridView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.all(10.0),
+                      padding: EdgeInsets.all(5.0),
                       addAutomaticKeepAlives: true,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 1,
@@ -119,21 +107,17 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                         mainAxisExtent: 170,
                       ),
                       shrinkWrap: true,
-                      itemCount: snapshot.data?.length,
+                      itemCount: _images.length,
                       itemBuilder: (BuildContext context, int index) {
-                        final item = snapshot.data![index];
                         return GestureDetector(
                           child: Image.memory(
-                              Base64Decoder().convert(item.image!)),
+                              Base64Decoder().convert(_images[index].image)),
                           onTap: () {
-                            _deleteImage(context, item.id!);
+                            _deleteImage(index);
                           },
                         );
                       },
-                    );
-                  }
-                },
-              ),
+                    ),
               onPressedCam: () async {
                 await availableCameras().then((value) async {
                   Navigator.push(
@@ -152,55 +136,56 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                   _selectedStatut = value;
                 });
               },
-              nvPasse: () => {
+              nvPasse: () {
+                final profSonde;
+                if (_passes.isEmpty) {
+                  profSonde = 0;
+                } else {
+                  profSonde = _passes.last.profondeurSonde;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => NouveauPasse(
                       nvPasse: _addPasse,
                       securisation: widget.securisation,
+                      cotePlateforme: cotePlateforme.text,
+                      profSonde: profSonde,
                     ),
                   ),
-                )
+                );
               },
-              listPasse: FutureBuilder(
-                future: PasseRepository()
-                    .getByPrelevement(widget.prelevement.id!, context),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.data == null || snapshot.data!.isEmpty) {
-                    return Center(
-                        child: Text("Il n'y a pas encore des passes"));
-                  } else {
-                    return ListView.builder(
+              listPasse: (_passes.isEmpty)
+                  ? Center(child: Text("Il n'y a pas encore des passes"))
+                  : ListView.builder(
                       padding: EdgeInsets.all(8),
-                      itemCount: snapshot.data?.length,
+                      itemCount: _passes.length,
                       itemBuilder: (context, index) {
-                        final item = snapshot.data![index];
-                        var ps = item.profondeurSonde! - 50;
+                        final item = _passes[index];
                         return ListTile(
-                          title: Text('$ps - ${item.profondeurSonde}',
+                          title: Text('${item.profondeurSonde}',
                               style: TextStyle(fontSize: 17)),
                           trailing: Text(
                             'Gradient Mag : ${item.gradientMag}',
                             style: TextStyle(fontSize: 15),
                           ),
+                          leading: IconButton(
+                            icon: Icon(
+                              Icons.edit,
+                              color: Colors.red,
+                            ),
+                            onPressed: () {
+                              //_updatePasse(item, context);
+                            },
+                          ),
                           onTap: () {
-                            _updatePasse(context, item);
-                          },
-                          onLongPress: () {
-                            _deletePasse(context, item.id!);
+                            _deletePasse(context, index);
                           },
                         );
                       },
-                    );
-                  }
-                },
-              ),
+                    ),
             ),
+            Image.asset("assets/Profondeur-vs-intensité - ESID.JPG"),
             Padding(
               padding: EdgeInsets.all(40.0),
               child: Row(
@@ -210,6 +195,19 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
+                        List<ImagesModel> images = _images
+                            .where((element) => element.id == 0)
+                            .map((i) => ImagesModel(image: i.image))
+                            .toList();
+                        List<PasseModel> passes = _passes
+                            .where((element) => element.id == 0)
+                            .map((i) => PasseModel(
+                                munitionReference: i.munitionReference,
+                                gradientMag: i.gradientMag,
+                                profondeurSonde: i.profondeurSonde,
+                                profondeurSecurisee: i.profondeurSecurisee,
+                                coteSecurisee: i.coteSecurisee))
+                            .toList();
                         PrelevementRepository().updatePrelevement(
                             context,
                             PrelevementModel(
@@ -222,6 +220,8 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                                     int.parse(profondeurASecuriser.text),
                                 statut: _selectedStatut,
                                 remarques: remarques.text),
+                            images,
+                            passes,
                             widget.prelevement.id!);
                       }
                     },
@@ -245,30 +245,13 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   void updateCoteASecuriserValue() {
     String firstValue = cotePlateforme.text;
     String secondValue = profondeurASecuriser.text;
-
     if (firstValue.isEmpty || secondValue.isEmpty) {
       coteASecuriser.text = '';
       return;
     }
-
     int result = int.parse(firstValue) - int.parse(secondValue);
     coteASecuriser.text = result.toString();
     setState(() {});
-  }
-
-  void _addPasse(MunitionReferenceEnum munitionReference, int profondeurSonde,
-      int gradientMag, int profondeurSecurisee, int coteSecurisee) {
-    setState(() {
-      PasseRepository().addPasse(
-          PasseModel(
-              munitionReference: munitionReference,
-              profondeurSonde: profondeurSonde,
-              gradientMag: gradientMag,
-              profondeurSecurisee: profondeurSecurisee,
-              coteSecurisee: coteSecurisee),
-          widget.prelevement.id!,
-          context);
-    });
   }
 
   void _updatePasse(BuildContext context, PasseModel item) {
@@ -282,13 +265,35 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
     });
   }
 
-  void _deletePasse(BuildContext context, int idPass) {
+  _fetchImages() async {
+    List<ImagesModel> list = await ImagesRepository()
+        .getImagesByPrelevement(widget.prelevement.id!, context);
+    for (var element in list) {
+      _images.add(ImagesTemp(id: element.id!, image: element.image!));
+    }
+    setState(() {});
+  }
+
+  void _addImage(String image) {
+    setState(() {
+      _images.add(ImagesTemp(id: 0, image: image));
+    });
+  }
+
+  void _deleteImage(int index) {
+    ImagesTemp i = _images.elementAt(index);
     showDialog(
       context: context,
-      builder: (BuildContext ctx) {
+      builder: (BuildContext context) {
         return MyDialog(
           onPressed: () async {
-            await PasseRepository().deletePasse(idPass, context);
+            if (i.id == 0) {
+              _images.removeAt(index);
+              Navigator.pop(context);
+            } else {
+              await ImagesRepository().deleteImage(i.id, context);
+              _images.removeAt(index);
+            }
             refreshPage();
           },
         );
@@ -296,23 +301,73 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
     );
   }
 
-  void _addImage(String image) async {
-    await ImagesRepository()
-        .addImage(ImagesModel(image: image), widget.prelevement.id!, context);
-    refreshPage();
+  _fetchPasses() async {
+    List<PasseModel> list = await PasseRepository()
+        .getPassesByPrelevement(widget.prelevement.id!, context);
+    for (var element in list) {
+      _passes.add(PassesTemp(
+          id: element.id!,
+          munitionReference: element.munitionReference!,
+          gradientMag: element.gradientMag!,
+          profondeurSonde: element.profondeurSonde!,
+          profondeurSecurisee: element.profondeurSecurisee!,
+          coteSecurisee: element.coteSecurisee!));
+    }
+    setState(() {});
   }
 
-  void _deleteImage(BuildContext context, int idImg) {
+  void _addPasse(MunitionReferenceEnum munitionReference, int gradientMag,
+      int profondeurSonde, int profondeurSecurisee, int coteSecurisee) {
+    setState(() {
+      _passes.add(PassesTemp(
+          id: 0,
+          munitionReference: munitionReference,
+          gradientMag: gradientMag,
+          profondeurSonde: profondeurSonde,
+          coteSecurisee: coteSecurisee,
+          profondeurSecurisee: profondeurSecurisee));
+    });
+  }
+
+  void _deletePasse(BuildContext context, int index) {
+    PassesTemp i = _passes.elementAt(index);
     showDialog(
       context: context,
-      builder: (BuildContext ctx) {
+      builder: (BuildContext context) {
         return MyDialog(
           onPressed: () async {
-            await ImagesRepository().deleteImage(idImg, context);
+            if (i.id == 0) {
+              _passes.removeAt(index);
+              Navigator.pop(context);
+            } else {
+              PasseRepository().deletePasse(i.id, context);
+              _passes.removeAt(index);
+            }
             refreshPage();
           },
         );
       },
     );
   }
+}
+
+class ImagesTemp {
+  int id;
+  String image;
+
+  ImagesTemp({required this.id, required this.image});
+}
+
+class PassesTemp {
+  int id;
+  MunitionReferenceEnum munitionReference;
+  int profondeurSonde, gradientMag, profondeurSecurisee, coteSecurisee;
+
+  PassesTemp(
+      {required this.id,
+      required this.munitionReference,
+      required this.gradientMag,
+      required this.profondeurSonde,
+      required this.coteSecurisee,
+      required this.profondeurSecurisee});
 }

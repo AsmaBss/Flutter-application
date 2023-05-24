@@ -72,7 +72,6 @@ class PrelevementRepository {
       List<ImagesModel> images,
       SecurisationModel securisation,
       PlanSondageModel planSondage) async {
-    print("passes => ${passes.runtimeType}");
     http.Response response = await _apiServices.post("/Prelevement/add", {
       "prelevement": {
         'numero': s.numero,
@@ -98,11 +97,15 @@ class PrelevementRepository {
     }
   }
 
-  void updatePrelevement(
-      BuildContext context, PrelevementModel p, int id) async {
+  void updatePrelevement(BuildContext context, PrelevementModel p,
+      List<ImagesModel> images, List<PasseModel> passes, int id) async {
     try {
       http.Response response =
-          await _apiServices.put("/Prelevement/update/$id", p.toJson(p));
+          await _apiServices.put("/Prelevement/update/$id", {
+        'prelevement': p.toJson(p),
+        'images': images.map((image) => image.toJson(image)).toList(),
+        'passes': passes.map((passes) => passes.toJson(passes)).toList(),
+      });
       if (response.statusCode == 200) {
         Navigator.pop(context, true);
       } else {

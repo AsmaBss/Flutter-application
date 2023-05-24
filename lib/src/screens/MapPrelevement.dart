@@ -66,7 +66,7 @@ class _MapPrelevementState extends State<MapPrelevement>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text("Map  -  ${widget.securisation.nom}"),
+        title: Text("${widget.securisation.nom}"),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.arrow_back),
@@ -182,7 +182,18 @@ class _MapPrelevementState extends State<MapPrelevement>
                 Icons.location_on,
                 color: Colors.grey,
               ),
-              onTap: () => _addPrelevement(context, ps),
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NouveauPrelevement(
+                        planSondage: ps, securisation: widget.securisation),
+                  ),
+                );
+                if (result == true) {
+                  refreshPage();
+                }
+              },
             ),
           ),
         );
