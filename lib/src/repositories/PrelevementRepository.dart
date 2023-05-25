@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/api-services/api-services.dart';
-import 'package:flutter_application/src/database/images-query.dart';
-import 'package:flutter_application/src/database/passe-query.dart';
+import 'package:flutter_application/src/sqlite/images-query.dart';
+import 'package:flutter_application/src/sqlite/passe-query.dart';
 import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
-import 'package:flutter_application/src/models/images-model.dart';
+import 'package:flutter_application/src/models/ImageModel.dart';
 import 'package:http/http.dart' as http;
 
 class PrelevementRepository {
@@ -69,7 +69,7 @@ class PrelevementRepository {
       BuildContext context,
       PrelevementModel s,
       List<PasseModel> passes,
-      List<ImagesModel> images,
+      List<ImageModel> images,
       SecurisationModel securisation,
       PlanSondageModel planSondage) async {
     http.Response response = await _apiServices.post("/Prelevement/add", {
@@ -98,7 +98,7 @@ class PrelevementRepository {
   }
 
   void updatePrelevement(BuildContext context, PrelevementModel p,
-      List<ImagesModel> images, List<PasseModel> passes, int id) async {
+      List<ImageModel> images, List<PasseModel> passes, int id) async {
     try {
       http.Response response =
           await _apiServices.put("/Prelevement/update/$id", {
@@ -137,5 +137,11 @@ class PrelevementRepository {
       print('Erreur: $e');
     }
     throw Exception("Echec !");
+  }
+
+  deletePrelevement(int id, BuildContext context) async {
+    await _apiServices
+        .delete("/Prelevement/delete/$id")
+        .then((value) => Navigator.pop(context));
   }
 }

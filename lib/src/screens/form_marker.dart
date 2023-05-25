@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/database/images-query.dart';
+import 'package:flutter_application/src/sqlite/images-query.dart';
 import 'package:flutter_application/src/models/position-model.dart';
 import 'package:flutter_application/src/repositories/position-repository.dart';
 import 'package:flutter_application/src/screens/cam.dart';

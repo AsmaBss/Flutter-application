@@ -78,7 +78,6 @@ class SecurisationRepository {
     try {
       http.Response response =
           await _apiServices.put("/Securisation/update/$id", s.toJson(s));
-      print("--------------------------- ${response.statusCode}");
       if (response.statusCode == 200) {
         // ignore: use_build_context_synchronously
         Navigator.pop(context, true);

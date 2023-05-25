@@ -9,6 +9,7 @@ import 'package:flutter_application/src/repositories/PlanSondageRepository.dart'
 import 'package:flutter_application/src/screens/ModifierPrelevement.dart';
 import 'package:flutter_application/src/screens/NouveauPrelevement.dart';
 import 'package:flutter_application/src/widget/DrawerWidget.dart';
+import 'package:flutter_application/src/widget/MyDialog.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geojson/geojson.dart';
 import 'package:latlong2/latlong.dart';
@@ -214,8 +215,8 @@ class _MapPrelevementState extends State<MapPrelevement>
                 Icons.location_on,
                 color: statusColor,
               ),
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => ModifierPrelevement(
@@ -223,6 +224,9 @@ class _MapPrelevementState extends State<MapPrelevement>
                         securisation: widget.securisation),
                   ),
                 );
+                if (result == true) {
+                  refreshPage();
+                }
               },
             ),
           ),
@@ -332,6 +336,16 @@ class _MapPrelevementState extends State<MapPrelevement>
                                       borderRadius: BorderRadius.circular(30),
                                     ),
                                   ),
+                                  leading: IconButton(
+                                    icon: Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () async {
+                                      _showDeleteDialog(
+                                          context, snapshot.data!);
+                                    },
+                                  ),
                                   onTap: () {
                                     if (statusColor == Colors.grey) {
                                       _addPrelevement(context, planSondage);
@@ -355,6 +369,21 @@ class _MapPrelevementState extends State<MapPrelevement>
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  _showDeleteDialog(BuildContext context, PrelevementModel item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return MyDialog(
+          onPressed: () async {
+            await PrelevementRepository().deletePrelevement(item.id!, context);
+            Navigator.pop(context);
+            refreshPage();
+          },
         );
       },
     );

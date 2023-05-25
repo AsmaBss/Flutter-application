@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/repositories/images-repository.dart';
+import 'package:flutter_application/src/repositories/ImageRepository.dart';
 import 'package:flutter_application/src/repositories/position-repository.dart';
 
 class DetailPosition extends StatefulWidget {
@@ -31,7 +31,7 @@ class _DetailPositionState extends State<DetailPosition> {
       ),
       body: Container(
         child: FutureBuilder(
-          future: ImagesRepository().getFormMarkerById(widget.id!, context),
+          future: ImageRepository().getFormMarkerById(widget.id!, context),
           builder: (context, snapshot) {
             if (snapshot.data == null) {
               return Container(

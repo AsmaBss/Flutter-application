@@ -1,4 +1,4 @@
-import 'package:flutter_application/src/models/images-model.dart';
+import 'package:flutter_application/src/models/ImageModel.dart';
 import 'package:sqlite_wrapper/sqlite_wrapper.dart';
 
 class ImagesQuery {
@@ -8,7 +8,7 @@ class ImagesQuery {
 
   void addImage(String image) async {
     await SQLiteWrapper()
-        .insert(ImagesModel(image: image, position_id: null).toMap(), "images");
+        .insert(ImageModel(image: image, prelevement: null).toMap(), "images");
     print("Data inserted in local !");
   }
 
@@ -18,7 +18,7 @@ class ImagesQuery {
     print("Data deleted in local !");
   }
 
-  void delete(ImagesModel img) async {
+  void delete(ImageModel img) async {
     await SQLiteWrapper().delete(img.toMap(), "images", keys: ["id"]);
     print("Data deleted in local !");
   }

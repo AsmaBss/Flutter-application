@@ -1,6 +1,3 @@
-import 'package:dart_jts/dart_jts.dart';
-import 'package:geojson/geojson.dart';
-
 class ParcelleModel {
   int? id;
   String? file;
@@ -21,9 +18,6 @@ class ParcelleModel {
       file: json['file'] as String,
       type: json['type'] as String,
       geometry: json['geometry']['coordinates'] as String,
-      /*geometry: WKTReader().read(json['geometry'] is String
-          ? json['geometry']
-          : json['geometry'].toString()),*/
     );
   }
 
@@ -32,7 +26,7 @@ class ParcelleModel {
       'id': p.id,
       'file': p.file,
       'type': p.type,
-      'geometry': p.geometry, //?.toText()
+      'geometry': p.geometry,
     };
   }
 

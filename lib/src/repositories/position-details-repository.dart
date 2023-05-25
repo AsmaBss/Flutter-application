@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/api-services/api-services.dart';
-import 'package:flutter_application/src/database/position-details-query.dart';
+import 'package:flutter_application/src/sqlite/position-details-query.dart';
 import 'package:flutter_application/src/models/position-details-model.dart';
 import 'package:flutter_application/src/models/position-model.dart';
 import 'package:flutter_application/src/widget/my-alert-dialog.dart';

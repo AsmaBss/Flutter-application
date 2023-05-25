@@ -8,12 +8,16 @@ class NouveauPasse extends StatefulWidget {
   final SecurisationModel securisation;
   final String cotePlateforme;
   final int profSonde;
+  final int profSec;
+  final bool first;
 
   const NouveauPasse(
       {required this.nvPasse,
       required this.securisation,
       required this.cotePlateforme,
-      required this.profSonde});
+      required this.profSonde,
+      required this.profSec,
+      required this.first});
 
   @override
   _NouveauPasseState createState() => _NouveauPasseState();
@@ -30,6 +34,17 @@ class _NouveauPasseState extends State<NouveauPasse> {
   @override
   initState() {
     _selectedMunitionReference = widget.securisation.munitionReference;
+    print(
+        "----------------------------------- prof sonde => ${widget.profSonde}");
+    print(
+        "----------------------------------- prof sondsec => ${widget.profSec}");
+    if (widget.first == true) {
+      profondeurSonde.text = "0";
+      profondeurSecurisee.text = "0";
+    } else {
+      int result2 = widget.profSonde + widget.profSec;
+      profondeurSonde.text = result2.toString();
+    }
     super.initState();
   }
 
@@ -58,7 +73,7 @@ class _NouveauPasseState extends State<NouveauPasse> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text("Nouveau Passe + ${widget.profSonde}"),
+        title: Text("Nouveau Passe"),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -85,14 +100,11 @@ class _NouveauPasseState extends State<NouveauPasse> {
                 String cotePlat = widget.cotePlateforme;
                 String profSecurisee = profondeurSecurisee.text;
                 if (profSecurisee.isEmpty || cotePlat.isEmpty) {
-                  profondeurSonde.text = '';
                   coteSecurisee.text = '';
                   return;
                 }
                 int result1 = int.parse(cotePlat) - int.parse(profSecurisee);
                 coteSecurisee.text = result1.toString();
-                int result2 = widget.profSonde + int.parse(profSecurisee);
-                profondeurSonde.text = result2.toString();
                 setState(() {});
               },
               coteSecurisee: coteSecurisee,

@@ -7,10 +7,10 @@ import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
-import 'package:flutter_application/src/models/images-model.dart';
+import 'package:flutter_application/src/models/ImageModel.dart';
 import 'package:flutter_application/src/repositories/PasseRepository.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
-import 'package:flutter_application/src/repositories/images-repository.dart';
+import 'package:flutter_application/src/repositories/ImageRepository.dart';
 import 'package:flutter_application/src/screens/CameraPage.dart';
 import 'package:flutter_application/src/screens/ModifierPasse.dart';
 import 'package:flutter_application/src/screens/NouveauPasse.dart';
@@ -137,23 +137,30 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                 });
               },
               nvPasse: () {
-                final profSonde;
+                final profSonde, profSec;
+                final first;
                 if (_passes.isEmpty) {
                   profSonde = 0;
+                  profSec = 0;
+                  first = true;
                 } else {
                   profSonde = _passes.last.profondeurSonde;
+                  profSec = _passes.last.profondeurSecurisee;
+                  first = false;
                 }
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => NouveauPasse(
-                      nvPasse: _addPasse,
-                      securisation: widget.securisation,
-                      cotePlateforme: cotePlateforme.text,
-                      profSonde: profSonde,
-                    ),
+                        nvPasse: _addPasse,
+                        securisation: widget.securisation,
+                        cotePlateforme: cotePlateforme.text,
+                        profSonde: profSonde,
+                        profSec: profSec,
+                        first: first),
                   ),
                 );
+                refreshPage();
               },
               listPasse: (_passes.isEmpty)
                   ? Center(child: Text("Il n'y a pas encore des passes"))
@@ -195,9 +202,9 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        List<ImagesModel> images = _images
+                        List<ImageModel> images = _images
                             .where((element) => element.id == 0)
-                            .map((i) => ImagesModel(image: i.image))
+                            .map((i) => ImageModel(image: i.image))
                             .toList();
                         List<PasseModel> passes = _passes
                             .where((element) => element.id == 0)
@@ -266,7 +273,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   }
 
   _fetchImages() async {
-    List<ImagesModel> list = await ImagesRepository()
+    List<ImageModel> list = await ImageRepository()
         .getImagesByPrelevement(widget.prelevement.id!, context);
     for (var element in list) {
       _images.add(ImagesTemp(id: element.id!, image: element.image!));
@@ -291,7 +298,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
               _images.removeAt(index);
               Navigator.pop(context);
             } else {
-              await ImagesRepository().deleteImage(i.id, context);
+              await ImageRepository().deleteImage(i.id, context);
               _images.removeAt(index);
             }
             refreshPage();
