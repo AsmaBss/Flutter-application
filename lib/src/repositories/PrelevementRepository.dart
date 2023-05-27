@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/api-services/api-services.dart';
-import 'package:flutter_application/src/sqlite/images-query.dart';
-import 'package:flutter_application/src/sqlite/passe-query.dart';
+import 'package:flutter_application/src/api-services/ApiServices.dart';
 import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
@@ -88,6 +86,7 @@ class PrelevementRepository {
       "securisation": securisation.toJson(securisation)
     });
     if (response.statusCode == 200) {
+      // ignore: use_build_context_synchronously
       Navigator.pop(context, true);
     } else {
       // ignore: use_build_context_synchronously
@@ -107,6 +106,7 @@ class PrelevementRepository {
         'passes': passes.map((passes) => passes.toJson(passes)).toList(),
       });
       if (response.statusCode == 200) {
+        // ignore: use_build_context_synchronously
         Navigator.pop(context, true);
       } else {
         // ignore: use_build_context_synchronously

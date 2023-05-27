@@ -1,14 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
-
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/sqlite/images-query.dart';
 import 'package:flutter_application/src/models/position-model.dart';
 import 'package:flutter_application/src/repositories/position-repository.dart';
-import 'package:flutter_application/src/screens/cam.dart';
 import 'package:flutter_application/src/widget/my-grid_images.dart';
-import 'package:geocoder/geocoder.dart';
 import 'package:latlong2/latlong.dart';
 
 class FormMarker extends StatefulWidget {
@@ -26,7 +21,6 @@ class _FormMarkerState extends State<FormMarker> {
   TextEditingController address = TextEditingController();
   TextEditingController latlong = TextEditingController();
   TextEditingController description = TextEditingController();
-  bool _isShown = true;
 
   @override
   void initState() {
@@ -114,18 +108,6 @@ class _FormMarkerState extends State<FormMarker> {
     );
   }
 
-  _launchCamera(LatLng point) async {
-    /*await availableCameras().then((value) async {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Cam(cameras: value, point: point),
-        ),
-      );
-    });*/
-    setState(() {});
-  }
-
   void _deleteImage(BuildContext context, int idImg) {
     showDialog(
       context: context,
@@ -137,7 +119,6 @@ class _FormMarkerState extends State<FormMarker> {
             TextButton(
                 onPressed: () {
                   setState(() {
-                    _isShown = false;
                     ImagesQuery().deleteImage(idImg);
                   });
                   Navigator.of(context).pop();

@@ -42,13 +42,12 @@ class _CameraPageState extends State<CameraPage> {
       final bytes = File(file.path).readAsBytesSync();
       String img64 = base64Encode(bytes);
       widget.onPictureTaken(img64);
+      // ignore: use_build_context_synchronously
       Navigator.pop(context);
     } catch (e) {
       print('Error taking picture: $e');
     }
   }
-
-  late File _imageFile;
 
   @override
   Widget build(BuildContext context) {

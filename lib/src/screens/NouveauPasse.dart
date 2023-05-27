@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
-import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/widget/NouveauPasseFormWidget.dart';
 
 class NouveauPasse extends StatefulWidget {
   final Function(MunitionReferenceEnum, int, int, int, int) nvPasse;
-  final SecurisationModel securisation;
   final String cotePlateforme;
+  final MunitionReferenceEnum munitionRef;
   final int profSonde;
   final int profSec;
+  final int count;
   final bool first;
 
   const NouveauPasse(
       {required this.nvPasse,
-      required this.securisation,
       required this.cotePlateforme,
+      required this.munitionRef,
       required this.profSonde,
       required this.profSec,
+      required this.count,
       required this.first});
 
   @override
@@ -33,18 +34,15 @@ class _NouveauPasseState extends State<NouveauPasse> {
 
   @override
   initState() {
-    _selectedMunitionReference = widget.securisation.munitionReference;
-    print(
-        "----------------------------------- prof sonde => ${widget.profSonde}");
-    print(
-        "----------------------------------- prof sondsec => ${widget.profSec}");
+    _selectedMunitionReference = widget.munitionRef;
     if (widget.first == true) {
       profondeurSonde.text = "0";
-      profondeurSecurisee.text = "0";
     } else {
-      int result2 = widget.profSonde + widget.profSec;
-      profondeurSonde.text = result2.toString();
+      int result1 = widget.profSonde + widget.profSec;
+      profondeurSonde.text = result1.toString();
     }
+    int result2 = int.parse(widget.cotePlateforme) - widget.count;
+    coteSecurisee.text = result2.toString();
     super.initState();
   }
 
@@ -58,7 +56,6 @@ class _NouveauPasseState extends State<NouveauPasse> {
   }
 
   Future<void> _addNvPasse() async {
-    print("profondeurSonde.text nvpasse => ${profondeurSonde.text}");
     widget.nvPasse(
         _selectedMunitionReference!,
         int.parse(gradient.text),
@@ -96,17 +93,6 @@ class _NouveauPasseState extends State<NouveauPasse> {
               gradient: gradient,
               profondeurSonde: profondeurSonde,
               profondeurSecurisee: profondeurSecurisee,
-              onChangedProfondeurSecurisee: (value) {
-                String cotePlat = widget.cotePlateforme;
-                String profSecurisee = profondeurSecurisee.text;
-                if (profSecurisee.isEmpty || cotePlat.isEmpty) {
-                  coteSecurisee.text = '';
-                  return;
-                }
-                int result1 = int.parse(cotePlat) - int.parse(profSecurisee);
-                coteSecurisee.text = result1.toString();
-                setState(() {});
-              },
               coteSecurisee: coteSecurisee,
             ),
             Image.asset("assets/Profondeur-vs-intensité - ESID.JPG"),
@@ -135,3 +121,19 @@ class _NouveauPasseState extends State<NouveauPasse> {
     );
   }
 }
+
+/*onChangedProfondeurSecurisee: (value) {
+                /*String cotePlat = widget.cotePlateforme;
+                String profSecurisee = profondeurSecurisee.text;
+                if (profSecurisee.isEmpty || cotePlat.isEmpty) {
+                  coteSecurisee.text = '';
+                  return;
+                }
+                if (widget.count == 0) {
+                  coteSecurisee.text = cotePlat;
+                } else {
+                  int result1 = int.parse(cotePlat) - widget.count;
+                  coteSecurisee.text = result1.toString();
+                }
+                setState(() {});*/
+              },*/

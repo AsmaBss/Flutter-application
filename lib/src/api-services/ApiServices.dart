@@ -25,7 +25,6 @@ class ApiServices {
       String bodyString = json.encode(body);
       http.Response response =
           await http.post(uri, headers: _headers, body: bodyString);
-
       return response;
     } catch (e) {
       return http.Response({"message ": e}.toString(), 400);
@@ -49,9 +48,6 @@ class ApiServices {
       Uri uri = Uri.parse(_apiUrl + url);
       http.Response response =
           await http.delete(uri, headers: _headers); // headers: _headers
-      print(response.request);
-      print(response.body);
-      print(response.headers);
       return response;
     } catch (e) {
       return http.Response({"message ": e}.toString(), 400);

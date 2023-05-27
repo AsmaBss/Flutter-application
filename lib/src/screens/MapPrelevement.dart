@@ -11,7 +11,6 @@ import 'package:flutter_application/src/screens/NouveauPrelevement.dart';
 import 'package:flutter_application/src/widget/DrawerWidget.dart';
 import 'package:flutter_application/src/widget/MyDialog.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geojson/geojson.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:dart_jts/dart_jts.dart' as jts;
 
@@ -35,9 +34,9 @@ class _MapPrelevementState extends State<MapPrelevement>
     with AutomaticKeepAliveClientMixin<MapPrelevement> {
   List<Marker> allMarkers = [];
   late final MapController _mapController;
-  LatLng? center;
   List<LatLng> multipolygon = [];
   List<Marker> markers = [];
+  LatLng? center;
 
   @override
   bool get wantKeepAlive => true;
@@ -56,14 +55,16 @@ class _MapPrelevementState extends State<MapPrelevement>
     super.dispose();
   }
 
+  void refreshPage() {
+    setState(() {
+      _loadPlanSondage();
+      _fetchPlanSondageList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final polygon = Polygon(
-      points: multipolygon,
-      color: Colors.green.withOpacity(0.5),
-      borderColor: Colors.red,
-      borderStrokeWidth: 2,
-    );
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
@@ -72,7 +73,7 @@ class _MapPrelevementState extends State<MapPrelevement>
           IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.pop(context, true);
             },
           ),
         ],
@@ -85,7 +86,7 @@ class _MapPrelevementState extends State<MapPrelevement>
                 mapController: _mapController,
                 options: MapOptions(
                   center: center,
-                  zoom: 16.5, //5
+                  zoom: 16.5,
                 ),
                 children: [
                   TileLayer(
@@ -93,7 +94,13 @@ class _MapPrelevementState extends State<MapPrelevement>
                         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                     subdomains: ['a', 'b', 'c'],
                   ),
-                  PolygonLayer(polygons: [polygon]),
+                  PolygonLayer(polygons: [
+                    Polygon(
+                      points: multipolygon,
+                      color: Colors.green.withOpacity(0.5),
+                      borderStrokeWidth: 3,
+                    ),
+                  ]),
                   MarkerLayer(
                     markers: markers,
                   ),
@@ -111,13 +118,6 @@ class _MapPrelevementState extends State<MapPrelevement>
     );
   }
 
-  void refreshPage() {
-    setState(() {
-      _loadPlanSondage();
-      _fetchPlanSondageList();
-    });
-  }
-
   _loadParcelle() {
     List<List<List<double>>> coordinates = [];
     String polygonString = widget.parcelle!.geometry
@@ -125,22 +125,22 @@ class _MapPrelevementState extends State<MapPrelevement>
         .replaceAll("MULTIPOLYGON (((", "")
         .replaceAll(")))", "");
     List<String> polygons = polygonString.split("), (");
-    polygons.forEach((p) {
+    for (var p in polygons) {
       List<List<double>> points = [];
       p.split(", ").forEach((c) {
         List<double> point = c.split(" ").map((e) => double.parse(e)).toList();
         points.add(point);
       });
       coordinates.add(points);
-    });
+    }
     List<List<LatLng>> points = [];
-    coordinates.forEach((p) {
+    for (var p in coordinates) {
       List<LatLng> polyPoints = [];
-      p.forEach((c) {
+      for (var c in p) {
         polyPoints.add(LatLng(c[1], c[0]));
-      });
+      }
       points.add(polyPoints);
-    });
+    }
     multipolygon = points[0];
     center = _calculateCentroid(multipolygon);
   }
@@ -154,26 +154,29 @@ class _MapPrelevementState extends State<MapPrelevement>
         .toList();
     List<List<List<double>>> coordinates = [];
     List<List<double>> list = [];
-    geometries.forEach((e) {
+    for (var e in geometries) {
       List<double> point = e!.split(" ").map((e) => double.parse(e)).toList();
       list.add(point);
-    });
+    }
     coordinates.add(list);
     List<List<LatLng>> points = [];
-    coordinates.forEach((p) {
+    for (var p in coordinates) {
       List<LatLng> list = [];
-      p.forEach((c) {
+      for (var c in p) {
         list.add(LatLng(c[1], c[0]));
-      });
+      }
       points.add(list);
-    });
+    }
     List<LatLng> multipoints = points[0];
     for (var point in multipoints) {
       String coord = "(${point.longitude}, ${point.latitude})";
       PrelevementModel? prelevement = await PrelevementRepository()
-          .getPrelevementByPlanSondage(coord, context);
-      PlanSondageModel ps =
-          await PlanSondageRepository().getByCoords(coord, context);
+          .getPrelevementByPlanSondage(coord, context)
+          .catchError((error) {});
+      // ignore: use_build_context_synchronously
+      PlanSondageModel ps = await PlanSondageRepository()
+          .getPlanSondageByCoords(coord, context)
+          .catchError((error) {});
       if (prelevement == null) {
         markers.add(
           Marker(
@@ -199,13 +202,15 @@ class _MapPrelevementState extends State<MapPrelevement>
           ),
         );
       } else {
-        var statusColor;
+        MaterialColor statusColor;
         if (prelevement.statut == StatutEnum.Securise) {
           statusColor = Colors.green;
         } else if (prelevement.statut == StatutEnum.A_Verifier) {
           statusColor = Colors.orange;
-        } else {
+        } else if (prelevement.statut == StatutEnum.Non_Securise) {
           statusColor = Colors.red;
+        } else {
+          statusColor = Colors.orange;
         }
         markers.add(
           Marker(
@@ -220,8 +225,8 @@ class _MapPrelevementState extends State<MapPrelevement>
                   context,
                   MaterialPageRoute(
                     builder: (context) => ModifierPrelevement(
-                        prelevement: prelevement,
-                        securisation: widget.securisation),
+                      prelevement: prelevement,
+                    ),
                   ),
                 );
                 if (result == true) {
@@ -269,13 +274,28 @@ class _MapPrelevementState extends State<MapPrelevement>
       MaterialPageRoute(
         builder: (context) => ModifierPrelevement(
           prelevement: prelevement,
-          securisation: widget.securisation,
         ),
       ),
     );
     if (result == true) {
       refreshPage();
     }
+  }
+
+  _deletePrelevement(BuildContext context, PrelevementModel item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return MyDialog(
+          onPressed: () async {
+            await PrelevementRepository().deletePrelevement(item.id!, context);
+            // ignore: use_build_context_synchronously
+            Navigator.pop(context);
+            refreshPage();
+          },
+        );
+      },
+    );
   }
 
   Future<List<PlanSondageModel?>> _fetchPlanSondageList() async {
@@ -295,6 +315,8 @@ class _MapPrelevementState extends State<MapPrelevement>
             child: Center(
               child: Column(
                 children: <Widget>[
+                  Text(widget.parcelle!.file!,
+                      style: TextStyle(fontSize: 20, color: Colors.green)),
                   FutureBuilder<List<PlanSondageModel?>>(
                     future: _fetchPlanSondageList(),
                     builder: (context, snapshot) {
@@ -308,7 +330,8 @@ class _MapPrelevementState extends State<MapPrelevement>
                             return FutureBuilder<PrelevementModel?>(
                               future: PrelevementRepository()
                                   .getPrelevementByPlanSondageId(
-                                      planSondage.id!, context),
+                                      planSondage.id!, context)
+                                  .catchError((error) {}),
                               builder: (context, snapshot) {
                                 Color statusColor;
                                 if (snapshot.hasData && snapshot.data != null) {
@@ -318,16 +341,17 @@ class _MapPrelevementState extends State<MapPrelevement>
                                   } else if (snapshot.data!.statut ==
                                       StatutEnum.A_Verifier) {
                                     statusColor = Colors.orange;
-                                  } else {
+                                  } else if (snapshot.data!.statut ==
+                                      StatutEnum.Non_Securise) {
                                     statusColor = Colors.red;
+                                  } else {
+                                    statusColor = Colors.orange;
                                   }
                                 } else {
                                   statusColor = Colors.grey;
                                 }
                                 return ListTile(
-                                  title: Text(planSondage.file!),
-                                  subtitle:
-                                      Text(planSondage.baseRef.toString()),
+                                  title: Text(planSondage.baseRef.toString()),
                                   trailing: Container(
                                     width: 20,
                                     height: 20,
@@ -342,8 +366,17 @@ class _MapPrelevementState extends State<MapPrelevement>
                                       color: Colors.red,
                                     ),
                                     onPressed: () async {
-                                      _showDeleteDialog(
-                                          context, snapshot.data!);
+                                      if (statusColor != Colors.grey) {
+                                        _deletePrelevement(
+                                            context, snapshot.data!);
+                                      } else {
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                          content: Text(
+                                              "Il n'y a pas encore de prélèvement"),
+                                        ));
+                                      }
                                     },
                                   ),
                                   onTap: () {
@@ -369,21 +402,6 @@ class _MapPrelevementState extends State<MapPrelevement>
               ),
             ),
           ),
-        );
-      },
-    );
-  }
-
-  _showDeleteDialog(BuildContext context, PrelevementModel item) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return MyDialog(
-          onPressed: () async {
-            await PrelevementRepository().deletePrelevement(item.id!, context);
-            Navigator.pop(context);
-            refreshPage();
-          },
         );
       },
     );

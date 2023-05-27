@@ -1,31 +1,30 @@
 class PositionDetailsModel {
   int? id;
-  int? position_id;
+  int? positionId;
   String? image;
 
-  PositionDetailsModel({this.position_id, this.image});
+  PositionDetailsModel({this.positionId, this.image});
 
   @override
   String toString() {
-    return 'PositionDetails { id: $id, position_id: ${position_id.toString()}, image: $image}\n';
+    return 'PositionDetails { id: $id, positionId: ${positionId.toString()}, image: $image}\n';
   }
 
   factory PositionDetailsModel.fromJson(Map<String, dynamic> json) {
     return PositionDetailsModel(
-        position_id: json['position_id'] as int,
-        image: json['image'] as String);
+        positionId: json['positionId'] as int, image: json['image'] as String);
   }
 
   Map<String, dynamic> toJson(PositionDetailsModel p) {
-    return {'image': p.image, 'position_id': p.position_id};
+    return {'image': p.image, 'positionId': p.positionId};
   }
 
   factory PositionDetailsModel.fromMap(Map<String, dynamic> map) {
-    return PositionDetailsModel(position_id: map['position_id'] ?? "")
+    return PositionDetailsModel(positionId: map['positionId'] ?? "")
       ..image = (map['image'] ?? "");
   }
 
   Map<String, dynamic> toMap() {
-    return {'position_id': position_id, 'image': image};
+    return {'positionId': positionId, 'image': image};
   }
 }

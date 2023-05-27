@@ -26,48 +26,44 @@ class _ListFormMarkerState extends State<ListFormMarker> {
           },
         ),
       ),
-      body: Container(
-        child: FutureBuilder(
-          future: FormMarkerRepository().getByPositionId(widget.id!, context),
-          builder: (context, snapshot) {
-            print(snapshot.data.toString());
-            if (snapshot.data == null) {
-              return Container(
-                child: Center(child: Icon(Icons.error)),
-              );
-            }
-            return ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: snapshot.data?.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text('${snapshot.data![index].numero}',
-                      style: TextStyle(fontSize: 17)),
-                  subtitle: Text(
-                    '${snapshot.data![index].description}',
-                    style: TextStyle(fontSize: 15),
+      body: FutureBuilder(
+        future: FormMarkerRepository().getByPositionId(widget.id!, context),
+        builder: (context, snapshot) {
+          print(snapshot.data.toString());
+          if (snapshot.data == null) {
+            return Center(child: Icon(Icons.error));
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: snapshot.data?.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text('${snapshot.data![index].numero}',
+                    style: TextStyle(fontSize: 17)),
+                subtitle: Text(
+                  '${snapshot.data![index].description}',
+                  style: TextStyle(fontSize: 15),
+                ),
+                trailing: TextButton(
+                  child: Icon(
+                    Icons.delete,
+                    color: Colors.red,
                   ),
-                  trailing: TextButton(
-                    child: Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ),
-                    onPressed: () {
-                      /*PositionRepository()
-                          .deletePosition(snapshot.data![index], context);
-                      setState(() {});*/
-                    },
-                  ),
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            DetailPosition(id: snapshot.data![index].id)));
+                  onPressed: () {
+                    /*PositionRepository()
+                        .deletePosition(snapshot.data![index], context);
+                    setState(() {});*/
                   },
-                );
-              },
-            );
-          },
-        ),
+                ),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          DetailPosition(id: snapshot.data![index].id)));
+                },
+              );
+            },
+          );
+        },
       ),
     );
   }

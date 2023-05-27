@@ -8,7 +8,7 @@ class PositionDetailsQuery {
 
   void addPositionDetails(int? id, String image) async {
     await SQLiteWrapper().insert(
-        PositionDetailsModel(image: image, position_id: id).toMap(),
+        PositionDetailsModel(image: image, positionId: id).toMap(),
         "position_details");
     print("Data inserted in local !");
   }

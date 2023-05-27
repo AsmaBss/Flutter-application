@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/api-services/api-services.dart';
+import 'package:flutter_application/src/api-services/ApiServices.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:http/http.dart' as http;
@@ -95,8 +95,13 @@ class SecurisationRepository {
   }
 
   deleteSecurisation(int id, BuildContext context) async {
-    await _apiServices
-        .delete("/Securisation/delete/$id")
-        .then((value) => Navigator.pop(context));
+    try {
+      await _apiServices
+          .delete("/Securisation/delete/$id")
+          .then((value) => Navigator.pop(context))
+          .catchError((error) {});
+    } catch (e) {
+      print('Erreur: $e');
+    }
   }
 }

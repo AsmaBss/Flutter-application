@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/classes/images_temp.dart';
+import 'package:flutter_application/src/classes/passes_temp.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
-import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/models/ImageModel.dart';
 import 'package:flutter_application/src/repositories/PasseRepository.dart';
@@ -18,11 +19,9 @@ import 'package:flutter_application/src/widget/MyDialog.dart';
 import 'package:flutter_application/src/widget/NouveauPrelevementFormWidget.dart';
 
 class ModifierPrelevement extends StatefulWidget {
-  final SecurisationModel securisation;
   final PrelevementModel prelevement;
 
-  const ModifierPrelevement(
-      {required this.prelevement, required this.securisation, Key? key})
+  const ModifierPrelevement({required this.prelevement, Key? key})
       : super(key: key);
 
   @override
@@ -38,7 +37,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   TextEditingController coteASecuriser = TextEditingController();
   TextEditingController profondeurASecuriser = TextEditingController();
   TextEditingController remarques = TextEditingController();
-  MunitionReferenceEnum? _selectedMunitionReference;
+  late MunitionReferenceEnum _selectedMunitionReference;
   StatutEnum? _selectedStatut;
   List<ImagesTemp> _images = [];
   List<PassesTemp> _passes = [];
@@ -52,7 +51,9 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
         widget.prelevement.profondeurASecuriser.toString();
     coteASecuriser.text = widget.prelevement.coteASecuriser.toString();
     remarques.text = widget.prelevement.remarques.toString();
-    _selectedStatut = widget.prelevement.statut;
+    if (widget.prelevement.statut != null) {
+      _selectedStatut = widget.prelevement.statut!;
+    }
     _fetchImages();
     _fetchPasses();
     super.initState();
@@ -66,7 +67,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Modifier Prélèvement - \n${widget.prelevement.numero}"),
+        title: Text("Modifier Prélèvement - ${widget.prelevement.numero}"),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -101,7 +102,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                       addAutomaticKeepAlives: true,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 1,
-                        mainAxisSpacing: 0,
+                        mainAxisSpacing: 5,
                         crossAxisSpacing: 5,
                         childAspectRatio: 1,
                         mainAxisExtent: 170,
@@ -112,9 +113,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                         return GestureDetector(
                           child: Image.memory(
                               Base64Decoder().convert(_images[index].image)),
-                          onTap: () {
-                            _deleteImage(index);
-                          },
+                          onTap: () => _deleteImage(index),
                         );
                       },
                     ),
@@ -137,13 +136,18 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                 });
               },
               nvPasse: () {
-                final profSonde, profSec;
-                final first;
+                final int profSonde, profSec;
+                int count = 0;
+                final bool first;
                 if (_passes.isEmpty) {
                   profSonde = 0;
                   profSec = 0;
+                  count = 0;
                   first = true;
                 } else {
+                  for (var element in _passes) {
+                    count += element.profondeurSecurisee;
+                  }
                   profSonde = _passes.last.profondeurSonde;
                   profSec = _passes.last.profondeurSecurisee;
                   first = false;
@@ -152,12 +156,14 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => NouveauPasse(
-                        nvPasse: _addPasse,
-                        securisation: widget.securisation,
-                        cotePlateforme: cotePlateforme.text,
-                        profSonde: profSonde,
-                        profSec: profSec,
-                        first: first),
+                      nvPasse: _addPasse,
+                      munitionRef: _selectedMunitionReference,
+                      cotePlateforme: cotePlateforme.text,
+                      profSonde: profSonde,
+                      profSec: profSec,
+                      count: count,
+                      first: first,
+                    ),
                   ),
                 );
                 refreshPage();
@@ -182,7 +188,16 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                               color: Colors.red,
                             ),
                             onPressed: () {
-                              //_updatePasse(item, context);
+                              setState(() {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ModifierPasse(
+                                          passe: item,
+                                          index: index,
+                                          updatePasse: _updatePasse)),
+                                );
+                              });
                             },
                           ),
                           onTap: () {
@@ -261,15 +276,23 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
     setState(() {});
   }
 
-  void _updatePasse(BuildContext context, PasseModel item) {
-    setState(() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ModifierPasse(passe: item),
-        ),
-      );
-    });
+  void _updatePasse(
+      int index,
+      MunitionReferenceEnum munitionReference,
+      int gradientMag,
+      int profondeurSonde,
+      int coteSecurisee,
+      int profondeurSecurisee) {
+    for (var element in _passes) {
+      if (_passes.indexOf(element) == index) {
+        element.munitionReference = munitionReference;
+        element.gradientMag = gradientMag;
+        element.profondeurSonde = profondeurSonde;
+        element.profondeurSecurisee = profondeurSecurisee;
+        element.coteSecurisee = coteSecurisee;
+      }
+    }
+    setState(() {});
   }
 
   _fetchImages() async {
@@ -324,7 +347,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   }
 
   void _addPasse(MunitionReferenceEnum munitionReference, int gradientMag,
-      int profondeurSonde, int profondeurSecurisee, int coteSecurisee) {
+      int profondeurSonde, int coteSecurisee, int profondeurSecurisee) {
     setState(() {
       _passes.add(PassesTemp(
           id: 0,
@@ -356,25 +379,4 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
       },
     );
   }
-}
-
-class ImagesTemp {
-  int id;
-  String image;
-
-  ImagesTemp({required this.id, required this.image});
-}
-
-class PassesTemp {
-  int id;
-  MunitionReferenceEnum munitionReference;
-  int profondeurSonde, gradientMag, profondeurSecurisee, coteSecurisee;
-
-  PassesTemp(
-      {required this.id,
-      required this.munitionReference,
-      required this.gradientMag,
-      required this.profondeurSonde,
-      required this.coteSecurisee,
-      required this.profondeurSecurisee});
 }

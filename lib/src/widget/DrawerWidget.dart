@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/screens/ListSecurisation.dart';
 import 'package:flutter_application/src/screens/NouvelleSecurisation.dart';
-import 'package:flutter_application/src/screens/list-positions.dart';
-import 'package:flutter_application/test.dart';
 
 class MyDrawer extends StatefulWidget {
   @override
@@ -19,8 +17,8 @@ class _MyDrawerState extends State<MyDrawer> {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            child: Text("header"),
             decoration: BoxDecoration(color: Colors.green),
+            child: Text("header"),
           ),
           ListTile(
             title: Text('Liste des sécurisations'),

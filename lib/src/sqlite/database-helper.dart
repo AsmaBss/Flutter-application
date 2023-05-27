@@ -1,10 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:convert/convert.dart';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -24,7 +18,6 @@ class DatabaseHelper {
 
     if (!inMemory) {
       final docDir = await getApplicationDocumentsDirectory();
-
       if (!await docDir.exists()) {
         await docDir.create(recursive: true);
       }
@@ -33,11 +26,11 @@ class DatabaseHelper {
 
     // Step 1: Connect to MySQL
     final settings = ConnectionSettings(
-      host: '192.168.1.4',
-      port: 3306,
-      user: 'root',
-      password: 'mysql',
-      db: 'mydatabase',
+      host: '${dotenv.env['HOST_NAME']}',
+      port: int.parse(dotenv.env['PORT']!),
+      user: '${dotenv.env['USER_NAME']}',
+      password: '${dotenv.env['PASSWORD']}',
+      db: '${dotenv.env['DATABASE_NAME']}',
       timeout: Duration(seconds: 30),
     );
     final conn = await MySqlConnection.connect(settings);
@@ -81,8 +74,8 @@ class DatabaseHelper {
             "coteasecuriser" integer NOT NULL,
             "plan_sondage_id" integer NOT NULL,
             "securisation_id" integer NOT NULL,
-            "statut" varchar(255) NOT NULL,
-            "remarques" varchar(255) NOT NULL
+            "statut" varchar(255) NULL,
+            "remarques" varchar(255) NULL
           );""";
       const String sql5 = """
         CREATE TABLE IF NOT EXISTS "passe" (
@@ -141,20 +134,7 @@ class DatabaseHelper {
           }
           await SQLiteWrapper()
               .query("SELECT * FROM images")
-              .then((value) => print("value =>$value"));
-          /*final results = await conn.query('SELECT * from images');
-          isEmpty(tableName).then((value) async {
-            if (value == 0) {
-              for (var row in results) {
-                Blob blobData = row['image'];
-                await SQLiteWrapper().insert({
-                  'id': row['id'],
-                  'image': blobData.toString(),
-                  'prelevement_id': row['prelevement_id'],
-                }, "images");
-              }
-            }
-          });*/
+              .then((value) => print("value => $value"));
           break;
         case "passe":
           print("passe");
@@ -266,49 +246,4 @@ class DatabaseHelper {
   closeDB() {
     SQLiteWrapper().closeDB();
   }
-
-  Future<int> isEmpty(String tableName) async {
-    final result =
-        await SQLiteWrapper().query("SELECT count(*) FROM $tableName");
-    return result[0];
-  }
-
-/*
-  Future<void> extractDataFromMySQLToSQLite() async {
-  // Step 1: Connect to MySQL
-  final settings = ConnectionSettings(
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: 'mysql',
-    db: 'mydatabase',
-  );
-  final conn = await MySqlConnection.connect(settings);
-
-  // Step 2: Fetch data from MySQL
-  final results = await conn.query('SELECT * FROM parcelle');
-
-  // Step 3: Create SQLite database
-  final dbPath = await DatabaseHelper().initDB();
-  final sqliteDb = await openDatabase('$dbPath/your_database.db',
-      version: 1, onCreate: (db, version) {
-    // Step 4: Define SQLite table structure
-    db.execute('CREATE TABLE your_table (...)');
-  });
-
-  // Step 5: Transform and insert data into SQLite
-  for (var row in results) {
-    final data = transformMySQLData(row); // Transform data if needed
-    await sqliteDb.insert('your_table', data);
-  }
-
-  // Close the connections
-  await conn.close();
-  await sqliteDb.close();
-}
-*/
-  /*
-  await SQLiteWrapper()
-              .query("SELECT * FROM image")
-              .then((value) => print(value));*/
 }

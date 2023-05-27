@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/api-services/api-services.dart';
+import 'package:flutter_application/src/api-services/ApiServices.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:http/http.dart' as http;
 
@@ -78,7 +78,7 @@ class PlanSondageRepository {
     throw Exception("Echec !");
   }
 
-  Future<PlanSondageModel> getByCoords(
+  Future<PlanSondageModel> getPlanSondageByCoords(
       String point, BuildContext context) async {
     try {
       http.Response response =

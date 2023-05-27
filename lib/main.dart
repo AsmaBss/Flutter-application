@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/sqlite/database-helper.dart';
-import 'package:flutter_application/src/screens/ListSecurisation.dart';
-import 'package:flutter_application/src/screens/NouvelleSecurisation.dart';
 import 'package:flutter_application/src/screens/maps.dart';
+import 'package:flutter_application/src/sqlite/database-helper.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -17,18 +15,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Google Maps',
+      title: 'Maps',
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
       home: Maps(),
       debugShowCheckedModeBanner: false,
-      routes: {
-        //'/': (context) => Maps(),
-        '/list-securisation': (context) => ListSecurisation(),
-        '/add-securisation': (context) => NouvelleSecurisation(),
-        //'/update-securisation': (context) => ModifierSecurisation(),
-      },
     );
   }
 }

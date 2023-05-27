@@ -2,14 +2,14 @@ class FormMarkerModel {
   int? id;
   String? numero;
   String? description;
-  int? position_id;
+  int? positionId;
 
-  FormMarkerModel({this.id, this.numero, this.description, this.position_id});
+  FormMarkerModel({this.id, this.numero, this.description, this.positionId});
 
   @override
   String toString() {
     return 'FormMarker { id: $id, numero: $numero, '
-        'description: $description, position_id: $position_id}\n';
+        'description: $description, positionId: $positionId}\n';
   }
 
   factory FormMarkerModel.fromJson(Map<String, dynamic> json) {
@@ -17,7 +17,7 @@ class FormMarkerModel {
         id: json['id'] as int,
         numero: json['numero'] as String,
         description: json['description'] as String,
-        position_id: json['position_id'] as int);
+        positionId: json['positionId'] as int);
   }
 
   Map<String, dynamic> toJson(FormMarkerModel fm) {
@@ -25,21 +25,21 @@ class FormMarkerModel {
       //'id': fm.id,
       'numero': fm.numero,
       'description': fm.description,
-      'position_id': fm.position_id
+      'positionId': fm.positionId
     };
   }
 
   factory FormMarkerModel.fromMap(Map<String, dynamic> map) {
     return FormMarkerModel(numero: map['numero'] ?? "")
       ..description = (map['description'] ?? "")
-      ..position_id = (map['position_id'] ?? "");
+      ..positionId = (map['positionId'] ?? "");
   }
 
   Map<String, dynamic> toMap() {
     return {
       'numero': numero,
       'description': description,
-      'position_id': position_id
+      'positionId': positionId
     };
   }
 }

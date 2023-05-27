@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
-import 'package:number_inc_dec/number_inc_dec.dart';
 
 class NouveauPasseFormWidget extends StatelessWidget {
   final formKey;
@@ -11,7 +10,7 @@ class NouveauPasseFormWidget extends StatelessWidget {
   final MunitionReferenceEnum? valueMunitionRef;
   final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
   final onChangedDropdownMunitionRef;
-  final Function(String)? onChangedProfondeurSecurisee;
+  //final Function(String)? onChangedProfondeurSecurisee;
 
   NouveauPasseFormWidget(
       {this.formKey,
@@ -21,7 +20,6 @@ class NouveauPasseFormWidget extends StatelessWidget {
       this.gradient,
       this.profondeurSonde,
       this.profondeurSecurisee,
-      this.onChangedProfondeurSecurisee,
       this.coteSecurisee});
 
   @override
@@ -67,12 +65,6 @@ class NouveauPasseFormWidget extends StatelessWidget {
                   borderSide: BorderSide(width: 1, color: Colors.green),
                 ),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez renseigner ce champ';
-                }
-                return null;
-              },
             ),
           ),
           Padding(
@@ -87,13 +79,6 @@ class NouveauPasseFormWidget extends StatelessWidget {
                   borderSide: BorderSide(width: 1, color: Colors.green),
                 ),
               ),
-              onChanged: onChangedProfondeurSecurisee,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez renseigner ce champ';
-                }
-                return null;
-              },
             ),
           ),
           Padding(
@@ -108,12 +93,6 @@ class NouveauPasseFormWidget extends StatelessWidget {
                   borderSide: BorderSide(width: 1, color: Colors.green),
                 ),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez renseigner ce champ';
-                }
-                return null;
-              },
             ),
           ),
         ],

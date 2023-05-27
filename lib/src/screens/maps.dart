@@ -1,15 +1,9 @@
-import 'dart:math';
-
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/models/position-model.dart';
-import 'package:flutter_application/src/repositories/position-repository.dart';
 import 'package:flutter_application/src/widget/DrawerWidget.dart';
 import 'package:flutter_application/src/widget/my-popup-marker.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'package:geocoder/geocoder.dart';
 import 'package:latlong2/latlong.dart';
 
 class Maps extends StatefulWidget {
@@ -20,7 +14,6 @@ class Maps extends StatefulWidget {
 }
 
 class _MapsState extends State<Maps> {
-  final String _apiUrl = "${dotenv.env['GEOSERVER_URL']}";
   List<Marker> allMarkers = [];
 
   CustomInfoWindowController _customInfoWindowController =
@@ -60,13 +53,6 @@ class _MapsState extends State<Maps> {
                   zoom: 8, //5
                   onTap: (tapPosition, point) async {
                     // Get Address
-                    var addresses = await Geocoder.local
-                        .findAddressesFromCoordinates(
-                            Coordinates(point.latitude, point.longitude));
-                    var first = addresses.first;
-                    var adresse =
-                        "${first.locality}, ${first.adminArea}, ${first.countryName}";
-                    var street = first.addressLine;
                     // Add Marker
                     allMarkers.add(
                       Marker(

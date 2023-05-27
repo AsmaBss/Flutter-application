@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/classes/images_temp.dart';
+import 'package:flutter_application/src/classes/passes_temp.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
@@ -12,6 +12,7 @@ import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/models/ImageModel.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
 import 'package:flutter_application/src/screens/CameraPage.dart';
+import 'package:flutter_application/src/screens/ModifierPasse.dart';
 import 'package:flutter_application/src/screens/NouveauPasse.dart';
 import 'package:flutter_application/src/widget/MyDialog.dart';
 import 'package:flutter_application/src/widget/NouveauPrelevementFormWidget.dart';
@@ -35,7 +36,7 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   TextEditingController coteASecuriser = TextEditingController();
   TextEditingController profondeurASecuriser = TextEditingController();
   TextEditingController remarques = TextEditingController();
-  MunitionReferenceEnum? _selectedMunitionReference;
+  late MunitionReferenceEnum _selectedMunitionReference;
   PlanSondageModel? _selectedSondage;
   StatutEnum? _selectedStatut;
   List<ImagesTemp> _images = [];
@@ -44,7 +45,7 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   @override
   initState() {
     _selectedSondage = widget.planSondage;
-    _selectedMunitionReference = widget.securisation.munitionReference;
+    _selectedMunitionReference = widget.securisation.munitionReference!;
     cotePlateforme.text = widget.securisation.cotePlateforme.toString();
     coteASecuriser.text = widget.securisation.coteASecuriser.toString();
     profondeurASecuriser.text =
@@ -106,7 +107,7 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                       addAutomaticKeepAlives: true,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 1,
-                        mainAxisSpacing: 0,
+                        mainAxisSpacing: 5,
                         crossAxisSpacing: 5,
                         childAspectRatio: 1,
                         mainAxisExtent: 170,
@@ -140,13 +141,18 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                 });
               },
               nvPasse: () {
-                final profSonde, profSec;
-                final first;
+                final int profSonde, profSec;
+                int count = 0;
+                final bool first;
                 if (_passes.isEmpty) {
                   profSonde = 0;
                   profSec = 0;
+                  count = 0;
                   first = true;
                 } else {
+                  for (var element in _passes) {
+                    count += element.profondeurSecurisee;
+                  }
                   profSonde = _passes.last.profondeurSonde;
                   profSec = _passes.last.profondeurSecurisee;
                   first = false;
@@ -155,12 +161,14 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => NouveauPasse(
-                        nvPasse: _addPasse,
-                        securisation: widget.securisation,
-                        cotePlateforme: cotePlateforme.text,
-                        profSonde: profSonde,
-                        profSec: profSec,
-                        first: first),
+                      nvPasse: _addPasse,
+                      munitionRef: _selectedMunitionReference,
+                      cotePlateforme: cotePlateforme.text,
+                      profSonde: profSonde,
+                      profSec: profSec,
+                      count: count,
+                      first: first,
+                    ),
                   ),
                 );
                 refreshPage();
@@ -185,7 +193,16 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                               color: Colors.red,
                             ),
                             onPressed: () {
-                              //_updatePasse(item, context);
+                              setState(() {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ModifierPasse(
+                                          passe: item,
+                                          index: index,
+                                          updatePasse: _updatePasse)),
+                                );
+                              });
                             },
                           ),
                           onTap: () {
@@ -251,20 +268,20 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   }
 
   void updateCoteASecuriserValue() {
-    String firstValue = cotePlateforme.text;
-    String secondValue = profondeurASecuriser.text;
-    if (firstValue.isEmpty || secondValue.isEmpty) {
+    String cotePlat = cotePlateforme.text;
+    String profASec = profondeurASecuriser.text;
+    if (cotePlat.isEmpty || profASec.isEmpty) {
       coteASecuriser.text = '';
       return;
     }
-    int result = int.parse(firstValue) - int.parse(secondValue);
+    int result = int.parse(cotePlat) - int.parse(profASec);
     coteASecuriser.text = result.toString();
     setState(() {});
   }
 
   void _addImage(String image) {
     setState(() {
-      _images.add(ImagesTemp(image: image));
+      _images.add(ImagesTemp(id: 0, image: image));
     });
   }
 
@@ -288,12 +305,32 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
       int profondeurSonde, int coteSecurisee, int profondeurSecurisee) {
     setState(() {
       _passes.add(PassesTemp(
+          id: 0,
           munitionReference: munitionReference,
           gradientMag: gradientMag,
           profondeurSonde: profondeurSonde,
           coteSecurisee: coteSecurisee,
           profondeurSecurisee: profondeurSecurisee));
     });
+  }
+
+  void _updatePasse(
+      int index,
+      MunitionReferenceEnum munitionReference,
+      int gradientMag,
+      int profondeurSonde,
+      int coteSecurisee,
+      int profondeurSecurisee) {
+    for (var element in _passes) {
+      if (_passes.indexOf(element) == index) {
+        element.munitionReference = munitionReference;
+        element.gradientMag = gradientMag;
+        element.profondeurSonde = profondeurSonde;
+        element.profondeurSecurisee = profondeurSecurisee;
+        element.coteSecurisee = coteSecurisee;
+      }
+    }
+    setState(() {});
   }
 
   void _deletePasse(int index) {
@@ -310,38 +347,4 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
       },
     );
   }
-
-  List<ImageModel> _allImages() {
-    return _images.map((i) => ImageModel(image: i.image)).toList();
-  }
-
-  List<PasseModel> _allPasses() {
-    return _passes
-        .map((i) => PasseModel(
-            munitionReference: i.munitionReference,
-            profondeurSonde: i.profondeurSonde,
-            gradientMag: i.gradientMag,
-            profondeurSecurisee: i.profondeurSecurisee,
-            coteSecurisee: i.coteSecurisee,
-            prelevement: null))
-        .toList();
-  }
-}
-
-class ImagesTemp {
-  String image;
-
-  ImagesTemp({required this.image});
-}
-
-class PassesTemp {
-  MunitionReferenceEnum munitionReference;
-  int profondeurSonde, gradientMag, profondeurSecurisee, coteSecurisee;
-
-  PassesTemp(
-      {required this.munitionReference,
-      required this.gradientMag,
-      required this.profondeurSonde,
-      required this.coteSecurisee,
-      required this.profondeurSecurisee});
 }

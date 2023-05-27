@@ -3,11 +3,11 @@ import 'package:flutter_application/src/models/StatutEnum.dart';
 
 class PrelevementModel {
   int? id;
-  int? numero;
-  MunitionReferenceEnum? munitionReference;
-  int? cotePlateforme;
-  int? profondeurASecuriser;
-  int? coteASecuriser;
+  int numero;
+  MunitionReferenceEnum munitionReference;
+  int cotePlateforme;
+  int profondeurASecuriser;
+  int coteASecuriser;
   int? planSondage;
   int? securisation;
   StatutEnum? statut;
@@ -15,15 +15,15 @@ class PrelevementModel {
 
   PrelevementModel(
       {this.id,
-      this.numero,
-      this.munitionReference,
-      this.cotePlateforme,
-      this.profondeurASecuriser,
-      this.coteASecuriser,
+      required this.numero,
+      required this.munitionReference,
+      required this.cotePlateforme,
+      required this.profondeurASecuriser,
+      required this.coteASecuriser,
       this.planSondage,
       this.securisation,
-      this.remarques,
-      this.statut});
+      required this.remarques,
+      required this.statut});
 
   @override
   String toString() {
@@ -39,8 +39,10 @@ class PrelevementModel {
       numero: json['numero'] as int,
       munitionReference:
           MunitionReferenceEnum.fromJson(json['munitionReference']),
-      statut: StatutEnum.fromJson(json['statut']),
-      remarques: json['remarques'] as String,
+      statut:
+          json['statut'] != null ? StatutEnum.fromJson(json['statut']) : null,
+      //statut: StatutEnum.fromJson(json['statut']),
+      remarques: json['remarques'] != null ? json['remarques'] as String : null,
       cotePlateforme: json['cotePlateforme'] as int,
       profondeurASecuriser: json['profondeurASecuriser'] as int,
       coteASecuriser: json['coteASecuriser'] as int,
@@ -53,7 +55,7 @@ class PrelevementModel {
     return {
       'id': p.id,
       'numero': p.numero,
-      'munitionReference': p.munitionReference!.toJson(),
+      'munitionReference': p.munitionReference.toJson(),
       'remarques': p.remarques,
       'statut': p.statut!.toJson(),
       'cotePlateforme': p.cotePlateforme,
@@ -65,15 +67,17 @@ class PrelevementModel {
   }
 
   factory PrelevementModel.fromMap(Map<String, dynamic> map) {
-    return PrelevementModel(numero: map['numero'] ?? "")
-      ..munitionReference = (map['munitionReference'] ?? "")
-      ..remarques = (map['remarques'] ?? "")
-      ..statut = (map['statut'] ?? "")
-      ..cotePlateforme = (map['cotePlateforme'] ?? "")
-      ..profondeurASecuriser = (map['profondeurASecuriser'] ?? "")
-      ..coteASecuriser = (map['coteASecuriser'] ?? "")
-      ..planSondage = (map['planSondage'] ?? "")
-      ..securisation = (map['securisation'] ?? "");
+    return PrelevementModel(
+        id: map['id'],
+        numero: map['numero'],
+        munitionReference: map['munitionReference'],
+        remarques: map['remarques'],
+        statut: map['statut'],
+        cotePlateforme: map['cotePlateforme'],
+        profondeurASecuriser: map['profondeurASecuriser'],
+        coteASecuriser: map['coteASecuriser'],
+        planSondage: map['planSondage'],
+        securisation: map['securisation']);
   }
 
   Map<String, dynamic> toMap() {

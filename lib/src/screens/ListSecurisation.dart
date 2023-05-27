@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
@@ -22,8 +20,6 @@ class ListSecurisation extends StatefulWidget {
 }
 
 class _ListSecurisationState extends State<ListSecurisation> {
-  bool _isShown = true;
-
   @override
   void initState() {
     super.initState();
@@ -42,12 +38,12 @@ class _ListSecurisationState extends State<ListSecurisation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Liste  des sécurisations"),
+        title: Text("Liste des sécurisations"),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.pop(context);
             },
           ),
         ],
@@ -80,7 +76,7 @@ class _ListSecurisationState extends State<ListSecurisation> {
                         child: Row(
                           children: [
                             Text(
-                              'Nombre prélèvement :  ',
+                              'Nombre prélèvements :  ',
                               style: TextStyle(fontSize: 15),
                             ),
                             FutureBuilder<int>(
@@ -114,7 +110,7 @@ class _ListSecurisationState extends State<ListSecurisation> {
                         child: Row(
                           children: [
                             Text(
-                              'Plateforme à sécuriser:  ',
+                              'Plateforme à sécuriser :  ',
                               style: TextStyle(fontSize: 15),
                             ),
                             Text(
@@ -142,7 +138,7 @@ class _ListSecurisationState extends State<ListSecurisation> {
                     ],
                   ),
                   trailing: Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.end,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     direction: Axis.vertical,
                     children: [
                       IconButton(
@@ -160,14 +156,14 @@ class _ListSecurisationState extends State<ListSecurisation> {
                           color: Colors.red,
                         ),
                         onPressed: () {
-                          print("problem");
-                          _showDeleteDialog(context, item);
+                          _deleteItem(context, item);
                         },
                       ),
                     ],
                   ),
                   onTap: () {
                     _navigateToMapPrelevement(item);
+                    //refreshPage();
                   },
                 );
               },
@@ -186,7 +182,7 @@ class _ListSecurisationState extends State<ListSecurisation> {
     );
   }
 
-  _showDeleteDialog(BuildContext context, SecurisationModel item) {
+  _deleteItem(BuildContext context, SecurisationModel item) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -202,8 +198,9 @@ class _ListSecurisationState extends State<ListSecurisation> {
   }
 
   void _updateItem(SecurisationModel item, BuildContext context) async {
-    ParcelleModel parcelle =
-        await ParcelleRepository().getSecurisation(item.id!, context);
+    ParcelleModel parcelle = await ParcelleRepository()
+        .getSecurisation(item.id!, context)
+        .catchError((error) {});
     // ignore: use_build_context_synchronously
     final result = await Navigator.push(
         context,
@@ -213,7 +210,6 @@ class _ListSecurisationState extends State<ListSecurisation> {
                   parcelle: parcelle,
                 )));
     if (result == true) {
-      print("true");
       setState(() {});
     }
   }
@@ -224,7 +220,7 @@ class _ListSecurisationState extends State<ListSecurisation> {
     List<PlanSondageModel> planSondage =
         await PlanSondageRepository().getPlanSondageByParcelle(parcelle.id!);
     // ignore: use_build_context_synchronously
-    Navigator.push(
+    final result = await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (BuildContext context) => MapPrelevement(
@@ -232,14 +228,8 @@ class _ListSecurisationState extends State<ListSecurisation> {
                   parcelle: parcelle,
                   planSondage: planSondage,
                 )));
-  }
-
-  void loadSecurisations() {
-    SecurisationRepository()
-        .getAllSecurisations(context)
-        .then((securisations) {})
-        .catchError((error) {
-      print("Error loading securisations: $error");
-    });
+    if (result == true) {
+      refreshPage();
+    }
   }
 }
