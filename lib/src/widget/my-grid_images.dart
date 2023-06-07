@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 class MyGridImages extends StatelessWidget {
-  //final List images;
   final int? itemCount;
-  final itemBuilder;
+  final Widget? Function(BuildContext, int) itemBuilder;
 
   MyGridImages({super.key, required this.itemCount, required this.itemBuilder});
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/classes/passes_temp.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
-import 'package:flutter_application/src/widget/NouveauPasseFormWidget.dart';
+import 'package:flutter_application/src/widget/nouveau-passe-form-widget.dart';
 
 class ModifierPasse extends StatefulWidget {
   final PassesTemp passe;
@@ -9,10 +9,14 @@ class ModifierPasse extends StatefulWidget {
   final Function(int, MunitionReferenceEnum, int, int, int, int) updatePasse;
 
   const ModifierPasse(
-      {required this.passe, required this.index, required this.updatePasse});
+      {required this.passe,
+      required this.index,
+      required this.updatePasse,
+      Key? key})
+      : super(key: key);
 
   @override
-  _ModifierPasseState createState() => _ModifierPasseState();
+  State<StatefulWidget> createState() => _ModifierPasseState();
 }
 
 class _ModifierPasseState extends State<ModifierPasse> {
@@ -73,9 +77,9 @@ class _ModifierPasseState extends State<ModifierPasse> {
                         child: Text(value.sentence),
                       ))
                   .toList(),
-              onChangedDropdownMunitionRef: (MunitionReferenceEnum newValue) {
+              onChangedDropdownMunitionRef: (newValue) {
                 setState(() {
-                  _selectedMunitionReference = newValue;
+                  _selectedMunitionReference = newValue!;
                 });
               },
               gradient: gradient,

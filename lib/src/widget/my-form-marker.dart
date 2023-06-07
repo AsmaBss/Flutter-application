@@ -13,7 +13,6 @@ class MyFormMarker extends StatelessWidget {
     return AlertDialog(
       scrollable: true,
       insetPadding: EdgeInsets.all(20),
-      //contentPadding: EdgeInsets.all(0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(10.0),

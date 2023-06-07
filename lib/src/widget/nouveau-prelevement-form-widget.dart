@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
-import 'package:number_inc_dec/number_inc_dec.dart';
 
 class NouveauPrelevementFormWidget extends StatelessWidget {
-  final formKey;
+  final Key? formKey;
   final TextEditingController? numero,
       cotePlateforme,
       coteASecuriser,
@@ -14,10 +13,10 @@ class NouveauPrelevementFormWidget extends StatelessWidget {
       onChangedProfondeurASecuriser;
   final MunitionReferenceEnum? valueMunitionRef;
   final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
-  final onChangedDropdownMunitionRef;
-  final onPressedCam, onChangedStatut;
+  final void Function(MunitionReferenceEnum?)? onChangedDropdownMunitionRef;
+  final void Function(StatutEnum?)? onChangedStatut;
   final StatutEnum? selectedStatut;
-  final nvPasse;
+  final void Function()? onPressedCam, nvPasse;
   final Widget? imageGrid, listPasse;
 
   NouveauPrelevementFormWidget(

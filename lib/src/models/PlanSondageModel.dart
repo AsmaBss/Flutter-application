@@ -1,6 +1,10 @@
 class PlanSondageModel {
   int? id;
-  String? file;
+  String? nom;
+  String? fichierShp;
+  String? fichierShx;
+  String? fichierDbf;
+  String? fichierPrj;
   String? type;
   String? geometry;
   int? baseRef;
@@ -8,7 +12,11 @@ class PlanSondageModel {
 
   PlanSondageModel(
       {this.id,
-      this.file,
+      this.nom,
+      this.fichierShp,
+      this.fichierShx,
+      this.fichierDbf,
+      this.fichierPrj,
       this.type,
       this.geometry,
       this.baseRef,
@@ -16,7 +24,9 @@ class PlanSondageModel {
 
   @override
   String toString() {
-    return 'PlanSondage { id: $id, file: $file, '
+    return 'PlanSondage { id: $id, nom: $nom, '
+        'fichierShp: $fichierShp, fichierShx: $fichierShx, '
+        'fichierDbf: $fichierDbf, fichierPrj: $fichierPrj, '
         'type: $type, geometry: $geometry, '
         'baseRef: $baseRef, parcelle: $parcelle}\n';
   }
@@ -24,7 +34,11 @@ class PlanSondageModel {
   factory PlanSondageModel.fromJson(Map<String, dynamic> json) {
     return PlanSondageModel(
       id: json['id'] as int,
-      file: json['file'] as String,
+      nom: json['nom'] as String,
+      fichierShp: json['fichierShp'] as String,
+      fichierShx: json['fichierShx'] as String,
+      fichierDbf: json['fichierDbf'] as String,
+      fichierPrj: json['fichierPrj'] as String,
       type: json['type'] as String,
       geometry: json['geometry']['coordinates'] as String,
       baseRef: json['baseRef'] as int,
@@ -35,7 +49,11 @@ class PlanSondageModel {
   Map<String, dynamic> toJson(PlanSondageModel p) {
     return {
       'id': p.id,
-      'file': p.file,
+      'nom': p.nom,
+      'fichierShp': p.fichierShp,
+      'fichierShx': p.fichierShx,
+      'fichierDbf': p.fichierDbf,
+      'fichierPrj': p.fichierPrj,
       'type': p.type,
       'geometry': p.geometry,
       'baseRef': p.baseRef,
@@ -44,7 +62,11 @@ class PlanSondageModel {
   }
 
   factory PlanSondageModel.fromMap(Map<String, dynamic> map) {
-    return PlanSondageModel(file: map['file'] ?? "")
+    return PlanSondageModel(nom: map['nom'] ?? "")
+      ..fichierShp = (map['fichierShp'] ?? "")
+      ..fichierShx = (map['fichierShx'] ?? "")
+      ..fichierDbf = (map['fichierDbf'] ?? "")
+      ..fichierPrj = (map['fichierPrj'] ?? "")
       ..type = (map['type'] ?? "")
       ..geometry = (map['geometry'] ?? "")
       ..baseRef = (map['baseRef'] ?? "")
@@ -53,7 +75,11 @@ class PlanSondageModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'file': file,
+      'nom': nom,
+      'fichierShp': fichierShp,
+      'fichierShx': fichierShx,
+      'fichierDbf': fichierDbf,
+      'fichierPrj': fichierPrj,
       'type': type,
       'geometry': geometry,
       'baseRef': baseRef,

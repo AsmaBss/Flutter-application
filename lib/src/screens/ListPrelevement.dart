@@ -6,7 +6,7 @@ class CustomDrawer extends StatefulWidget {
   const CustomDrawer({Key? key, required this.child}) : super(key: key);
 
   @override
-  _CustomDrawerState createState() => _CustomDrawerState();
+  State<StatefulWidget> createState() => _CustomDrawerState();
 }
 
 class _CustomDrawerState extends State<CustomDrawer> {

@@ -34,9 +34,8 @@ class FormMarkerRepository {
       "formMarker": {"description": fm.description, "numero": fm.numero},
       "images": imgs
     });
-    print(response.statusCode);
     if (response.statusCode == 200) {
-      print("okey");
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(
             content: Text(response.body),

@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 
 class NouveauPasseFormWidget extends StatelessWidget {
-  final formKey;
+  final Key? formKey;
   final TextEditingController? profondeurSonde,
       gradient,
       coteSecurisee,
       profondeurSecurisee;
   final MunitionReferenceEnum? valueMunitionRef;
   final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
-  final onChangedDropdownMunitionRef;
-  //final Function(String)? onChangedProfondeurSecurisee;
+  final void Function(MunitionReferenceEnum?)? onChangedDropdownMunitionRef;
 
   NouveauPasseFormWidget(
       {this.formKey,

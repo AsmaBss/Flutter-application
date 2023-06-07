@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
-import 'package:number_inc_dec/number_inc_dec.dart';
 
 class NouvelleSecurisationFormWidget extends StatelessWidget {
-  final formKey;
+  final Key? formKey;
   final TextEditingController? nom,
       cotePlateforme,
       coteASecuriser,
@@ -14,7 +13,8 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
   final MunitionReferenceEnum? valueMunitionRef;
   final List<DropdownMenuItem<ParcelleModel>>? itemsParcelle;
   final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
-  final onChangedDropdownParcelle, onChangedDropdownMunitionRef;
+  final void Function(ParcelleModel?)? onChangedDropdownParcelle;
+  final void Function(MunitionReferenceEnum?)? onChangedDropdownMunitionRef;
   final Function(String)? onChangedCotePlateforme,
       onChangedProfondeurASecuriser;
 
@@ -69,9 +69,10 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
               items: itemsParcelle,
               onChanged: onChangedDropdownParcelle,
               validator: (value) {
-                if (value == null || value == "") {
+                if (value == null) {
                   return 'Veuillez renseigner ce champ';
                 }
+                return null;
               },
             ),
           ),
@@ -86,6 +87,7 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
                 if (value == null || value.sentence.isEmpty) {
                   return 'Veuillez renseigner ce champ';
                 }
+                return null;
               },
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/screens/ListSecurisation.dart';
-import 'package:flutter_application/src/screens/NouvelleSecurisation.dart';
+import 'package:flutter_application/src/screens/nouvelle-securisation.dart';
+import 'package:flutter_application/src/screens/list-observations.dart';
 
 class MyDrawer extends StatefulWidget {
   @override
@@ -19,6 +20,13 @@ class _MyDrawerState extends State<MyDrawer> {
           DrawerHeader(
             decoration: BoxDecoration(color: Colors.green),
             child: Text("header"),
+          ),
+          ListTile(
+            title: Text('Liste des observations'),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => ListObservations()));
+            },
           ),
           ListTile(
             title: Text('Liste des sécurisations'),

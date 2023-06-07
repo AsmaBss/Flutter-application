@@ -7,10 +7,10 @@ import 'package:flutter_application/src/repositories/SecurisationRepository.dart
 import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
 import 'package:flutter_application/src/repositories/PlanSondageRepository.dart';
 import 'package:flutter_application/src/screens/MapPrelevement.dart';
-import 'package:flutter_application/src/screens/ModifierSecurisation.dart';
-import 'package:flutter_application/src/screens/NouvelleSecurisation.dart';
-import 'package:flutter_application/src/widget/DrawerWidget.dart';
-import 'package:flutter_application/src/widget/MyDialog.dart';
+import 'package:flutter_application/src/screens/modifier-securisation.dart';
+import 'package:flutter_application/src/screens/nouvelle-securisation.dart';
+import 'package:flutter_application/src/widget/drawer-widget.dart';
+import 'package:flutter_application/src/widget/my-dialog.dart';
 
 class ListSecurisation extends StatefulWidget {
   @override

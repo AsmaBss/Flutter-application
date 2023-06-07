@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../models/ParcelleModel.dart';
 
-
 class FormWidget extends StatelessWidget {
-  final formKey;
+  final Key? formKey;
   final TextEditingController? nom,
       munitionRef,
       cotePlateforme,
@@ -13,8 +12,7 @@ class FormWidget extends StatelessWidget {
       planSondage;
   final String? nomText;
   final List<DropdownMenuItem<ParcelleModel>>? items;
-  final onChangedDropdown; //, onChangedTextField; //Function(String?)?
-  //final String? value;
+  final void Function(ParcelleModel?)? onChangedDropdown;
   final ParcelleModel? value;
 
   FormWidget(

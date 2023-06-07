@@ -12,7 +12,7 @@ class CameraPage extends StatefulWidget {
   CameraPage({required this.onPictureTaken, required this.cameras});
 
   @override
-  _CameraPageState createState() => _CameraPageState();
+  State<StatefulWidget> createState() => _CameraPageState();
 }
 
 class _CameraPageState extends State<CameraPage> {

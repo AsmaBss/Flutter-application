@@ -6,10 +6,10 @@ import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
 import 'package:flutter_application/src/repositories/PlanSondageRepository.dart';
-import 'package:flutter_application/src/screens/ModifierPrelevement.dart';
-import 'package:flutter_application/src/screens/NouveauPrelevement.dart';
-import 'package:flutter_application/src/widget/DrawerWidget.dart';
-import 'package:flutter_application/src/widget/MyDialog.dart';
+import 'package:flutter_application/src/screens/modifier-prelevement.dart';
+import 'package:flutter_application/src/screens/nouveau-prelevement.dart';
+import 'package:flutter_application/src/widget/drawer-widget.dart';
+import 'package:flutter_application/src/widget/my-dialog.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:dart_jts/dart_jts.dart' as jts;
@@ -315,7 +315,7 @@ class _MapPrelevementState extends State<MapPrelevement>
             child: Center(
               child: Column(
                 children: <Widget>[
-                  Text(widget.parcelle!.file!,
+                  Text(widget.parcelle!.nom!,
                       style: TextStyle(fontSize: 20, color: Colors.green)),
                   FutureBuilder<List<PlanSondageModel?>>(
                     future: _fetchPlanSondageList(),

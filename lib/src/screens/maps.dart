@@ -1,7 +1,6 @@
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/widget/DrawerWidget.dart';
-import 'package:flutter_application/src/widget/my-popup-marker.dart';
+import 'package:flutter_application/src/widget/drawer-widget.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
@@ -97,9 +96,9 @@ class _MapsState extends State<Maps> {
                           _popupLayerController.hideAllPopups();
                           setState(() {});
                         },
-                        child: MyPopupMarker(
+                        /*child: MyPopupMarker(
                           point: marker.point,
-                        ),
+                        ),*/
                       ),
                     ),
                   ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
-import 'package:flutter_application/src/widget/NouveauPasseFormWidget.dart';
+import 'package:flutter_application/src/widget/nouveau-passe-form-widget.dart';
 
 class NouveauPasse extends StatefulWidget {
   final Function(MunitionReferenceEnum, int, int, int, int) nvPasse;
@@ -18,10 +18,12 @@ class NouveauPasse extends StatefulWidget {
       required this.profSonde,
       required this.profSec,
       required this.count,
-      required this.first});
+      required this.first,
+      Key? key})
+      : super(key: key);
 
   @override
-  _NouveauPasseState createState() => _NouveauPasseState();
+  State<StatefulWidget> createState() => _NouveauPasseState();
 }
 
 class _NouveauPasseState extends State<NouveauPasse> {
@@ -85,7 +87,7 @@ class _NouveauPasseState extends State<NouveauPasse> {
                         child: Text(value.sentence),
                       ))
                   .toList(),
-              onChangedDropdownMunitionRef: (MunitionReferenceEnum newValue) {
+              onChangedDropdownMunitionRef: (newValue) {
                 setState(() {
                   _selectedMunitionReference = newValue;
                 });

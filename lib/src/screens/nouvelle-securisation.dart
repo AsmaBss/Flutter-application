@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
@@ -8,7 +6,7 @@ import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
 import 'package:flutter_application/src/repositories/PlanSondageRepository.dart';
 import 'package:flutter_application/src/screens/MapPrelevement.dart';
-import 'package:flutter_application/src/widget/NouvelleSecurisationFormWidget.dart';
+import 'package:flutter_application/src/widget/nouvelle-securisation-form-widget.dart';
 
 import '../repositories/SecurisationRepository.dart';
 
@@ -33,9 +31,6 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   initState() {
     super.initState();
     _loadParcelles();
-    final val =
-        (int.parse(cotePlateforme.text) - int.parse(profondeurASecuriser.text))
-            .toString();
   }
 
   @override
@@ -66,13 +61,13 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
               itemsParcelle: _parcelles.map((ParcelleModel parcelle) {
                 return DropdownMenuItem<ParcelleModel>(
                   value: parcelle,
-                  child: Text(parcelle.file!),
+                  child: Text(parcelle.nom!),
                 );
               }).toList(),
-              onChangedDropdownParcelle: (ParcelleModel newValue) {
+              onChangedDropdownParcelle: (newValue) {
                 setState(() {
                   _selectedParcelle = newValue;
-                  _loadPlanSondage(newValue);
+                  _loadPlanSondage(_selectedParcelle!);
                 });
               },
               valueMunitionRef: _selectedMunitionReference,
@@ -82,7 +77,7 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                         child: Text(value.sentence),
                       ))
                   .toList(),
-              onChangedDropdownMunitionRef: (MunitionReferenceEnum newValue) {
+              onChangedDropdownMunitionRef: (newValue) {
                 setState(() {
                   _selectedMunitionReference = newValue;
                 });
@@ -118,6 +113,7 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                                       int.parse(profondeurASecuriser.text),
                                 ),
                                 _selectedParcelle!);
+                        // ignore: use_build_context_synchronously
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (BuildContext context) => MapPrelevement(
                                   planSondage: _planSondages,
@@ -155,7 +151,7 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
       List<PlanSondageModel> list =
           await PlanSondageRepository().getPlanSondageByParcelle(parcelle.id!);
       _planSondages = list;
-      planSondage.text = _planSondages.first.file!;
+      planSondage.text = _planSondages.first.nom!;
     }
   }
 

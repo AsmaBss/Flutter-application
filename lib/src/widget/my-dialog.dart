@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MyDialog extends StatelessWidget {
-  final onPressed;
+  final void Function()? onPressed;
   MyDialog({this.onPressed});
 
   @override
@@ -10,7 +10,10 @@ class MyDialog extends StatelessWidget {
       title: Text('Veuillez confirmer'),
       content: Text('Vous êtes sûr de supprimer ?'),
       actions: [
-        TextButton(onPressed: onPressed, child: const Text('Yes')),
+        TextButton(
+          onPressed: onPressed,
+          child: const Text('Yes'),
+        ),
         TextButton(
             onPressed: () {
               Navigator.of(context).pop();

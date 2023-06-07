@@ -1,7 +1,9 @@
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
+import 'package:flutter_application/src/models/observation-model.dart';
 import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
+import 'package:flutter_application/src/repositories/observation-repository.dart';
 import 'package:flutter_application/src/screens/nouvelle-observation.dart';
 import 'package:flutter_application/src/widget/drawer-widget.dart';
 import 'package:flutter_application/src/widget/my-popup-marker.dart';
@@ -10,14 +12,14 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:dart_jts/dart_jts.dart' as jts;
 
-class TestPage extends StatefulWidget {
-  const TestPage({Key? key}) : super(key: key);
+class ListObservations extends StatefulWidget {
+  const ListObservations({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _TestPageState();
+  State<StatefulWidget> createState() => _ListObservationsState();
 }
 
-class _TestPageState extends State<TestPage> {
+class _ListObservationsState extends State<ListObservations> {
   late final MapController _mapController;
   final PopupController _popupLayerController = PopupController();
   List<Marker> allMarkers = [];
@@ -149,6 +151,7 @@ class _TestPageState extends State<TestPage> {
                   setState(() {
                     _selectedParcelle = newValue;
                     _loadSelectedParcelle(newValue);
+                    _loadObservations();
                   });
                 },
               ),
@@ -208,21 +211,25 @@ class _TestPageState extends State<TestPage> {
     return LatLng(latitude / n, longitude / n);
   }
 
-  _loadMarkers() async {
-    /*List positions = await PositionRepository().getAllPositions(context);
-    for (PositionModel element in positions) {
-      LatLng tappedPoint = LatLng(
-          double.parse(element.latitude!), double.parse(element.longitude!));
-      allMarkers.add(
-        Marker(
-          point: tappedPoint,
-          builder: (BuildContext context) => Icon(
-            Icons.location_on,
-            color: Colors.red,
+  _loadObservations() async {
+    if (_selectedParcelle != null) {
+      List<ObservationModel> observations = await ObservationRepository()
+          .getAllObservations(_selectedParcelle!.id!, context);
+      for (var element in observations) {
+        allMarkers.add(
+          Marker(
+            width: 30.0,
+            height: 30.0,
+            point: LatLng(double.parse(element.latitude.toString()),
+                double.parse(element.longitude.toString())),
+            builder: (ctx) => Icon(
+              Icons.location_on,
+              color: Colors.red,
+            ),
           ),
-        ),
-      );
+        );
+      }
+      setState(() {});
     }
-    setState(() {});*/
   }
 }
