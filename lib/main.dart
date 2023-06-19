@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/screens/jsonform.dart';
+import 'package:flutter_application/src/screens/login.dart';
 import 'package:flutter_application/src/screens/maps.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: Maps(),
+      home: JsonForm(), //Login(), //Maps(),
       debugShowCheckedModeBanner: false,
     );
   }

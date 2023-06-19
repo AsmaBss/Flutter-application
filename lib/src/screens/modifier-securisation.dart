@@ -132,8 +132,9 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
   }
 
   _loadParcelles() async {
-    List<ParcelleModel> list =
-        await ParcelleRepository().getAllParcelles(context);
+    List<ParcelleModel> list = await ParcelleRepository()
+        .getAllParcelles(context)
+        .catchError((error) {});
     _parcelles = list;
     _parcelles
         .map((ParcelleModel e) => {

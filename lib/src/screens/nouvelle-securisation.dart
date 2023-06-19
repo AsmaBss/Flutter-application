@@ -140,8 +140,9 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   }
 
   _loadParcelles() async {
-    List<ParcelleModel> list =
-        await ParcelleRepository().getAllParcelles(context);
+    List<ParcelleModel> list = await ParcelleRepository()
+        .getAllParcelles(context)
+        .catchError((error) {});
     _parcelles = list;
     setState(() {});
   }

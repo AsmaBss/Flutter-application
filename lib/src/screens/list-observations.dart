@@ -164,8 +164,9 @@ class _ListObservationsState extends State<ListObservations> {
   }
 
   _loadParcelles() async {
-    List<ParcelleModel> list =
-        await ParcelleRepository().getAllParcelles(context);
+    List<ParcelleModel> list = await ParcelleRepository()
+        .getAllParcelles(context)
+        .catchError((error) {});
     _parcelles = list;
     setState(() {});
   }
@@ -214,7 +215,8 @@ class _ListObservationsState extends State<ListObservations> {
   _loadObservations() async {
     if (_selectedParcelle != null) {
       List<ObservationModel> observations = await ObservationRepository()
-          .getAllObservations(_selectedParcelle!.id!, context);
+          .getAllObservations(_selectedParcelle!.id!, context)
+          .catchError((error) {});
       for (var element in observations) {
         allMarkers.add(
           Marker(
