@@ -2,20 +2,20 @@ import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 
 class SecurisationModel {
   int? id;
-  String? nom;
-  MunitionReferenceEnum? munitionReference;
-  int? cotePlateforme;
-  int? profondeurASecuriser;
-  int? coteASecuriser;
+  String nom;
+  MunitionReferenceEnum munitionReference;
+  int cotePlateforme;
+  int profondeurASecuriser;
+  int coteASecuriser;
   int? parcelle;
 
   SecurisationModel(
       {this.id,
-      this.nom,
-      this.munitionReference,
-      this.cotePlateforme,
-      this.profondeurASecuriser,
-      this.coteASecuriser,
+      required this.nom,
+      required this.munitionReference,
+      required this.cotePlateforme,
+      required this.profondeurASecuriser,
+      required this.coteASecuriser,
       this.parcelle});
 
   @override
@@ -42,8 +42,7 @@ class SecurisationModel {
     return {
       'id': p.id,
       'nom': p.nom,
-      'munitionReference': munitionReference!.toJson(),
-      //'munitionReference': p.munitionReference,
+      'munitionReference': munitionReference.toJson(),
       'cotePlateforme': p.cotePlateforme,
       'profondeurASecuriser': p.profondeurASecuriser,
       'coteASecuriser': p.coteASecuriser,
@@ -52,12 +51,14 @@ class SecurisationModel {
   }
 
   factory SecurisationModel.fromMap(Map<String, dynamic> map) {
-    return SecurisationModel(nom: map['nom'] ?? "")
-      ..munitionReference = (map['munitionReference'] ?? "")
-      ..cotePlateforme = (map['cotePlateforme'] ?? "")
-      ..profondeurASecuriser = (map['profondeurASecuriser'] ?? "")
-      ..coteASecuriser = (map['coteASecuriser'] ?? "")
-      ..parcelle = (map['parcelle'] ?? "");
+    return SecurisationModel(
+      id: map['id'],
+        nom: map['nom'],
+        munitionReference: map['munitionReference'],
+        cotePlateforme: map['cotePlateforme'],
+        profondeurASecuriser: map['profondeurASecuriser'],
+        coteASecuriser: map['coteASecuriser'],
+      parcelle: map['parcelle']);
   }
 
   Map<String, dynamic> toMap() {

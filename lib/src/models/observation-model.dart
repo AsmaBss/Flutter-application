@@ -10,8 +10,8 @@ class ObservationModel {
     this.id,
     required this.nom,
     required this.description,
-    required this.latitude,
-    required this.longitude,
+    this.latitude,
+    this.longitude,
     this.parcelle,
   });
 

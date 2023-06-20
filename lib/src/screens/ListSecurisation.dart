@@ -189,8 +189,10 @@ class _ListSecurisationState extends State<ListSecurisation> {
         return MyDialog(
           onPressed: () async {
             await SecurisationRepository()
-                .deleteSecurisation(item.id!, context);
-            refreshPage();
+                .deleteSecurisation(item.id!, context)
+                .then((value) => refreshPage())
+                .catchError(
+                    (error) => print('Failed to delete object. Error: $error'));
           },
         );
       },

@@ -36,6 +36,32 @@ class ObservationRepository {
     throw Exception("Echec !");
   }
 
+  Future<ObservationModel?> getByLatLng(
+      String latitude, String longitude, BuildContext context) async {
+    try {
+      http.Response response = await _apiServices
+          .get("/Observation/show/lat/$latitude/lng/$longitude");
+      if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          return null;
+        } else {
+          dynamic responseJson = jsonDecode(response.body);
+          final observationData = responseJson;
+          return ObservationModel.fromJson(observationData);
+        }
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } catch (e) {
+      print('Erreur: $e');
+    }
+    throw Exception("Echec !");
+  }
+
   void addObservation(
     BuildContext context,
     ObservationModel s,
@@ -50,6 +76,25 @@ class ObservationRepository {
         'longitude': s.longitude,
       },
       "parcelle": p.toJson(p),
+      "images": images.map((image) => image.toJson(image)).toList(),
+    });
+    print(images.length);
+    print(response.body);
+    if (response.statusCode == 200) {
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context, true);
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Server error : ${response.body}"),
+      ));
+    }
+  }
+
+  void updateObservation(BuildContext context, ObservationModel s,
+      List<ImagesObservationModel> images) async {
+    http.Response response = await _apiServices.put("/Observation/update", {
+      "observation": s.toJson(s),
       "images": images.map((image) => image.toJson(image)).toList(),
     });
     if (response.statusCode == 200) {

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -217,19 +218,41 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        List<ImageModel> images = _images
-                            .where((element) => element.id == 0)
-                            .map((i) => ImageModel(image: i.image))
-                            .toList();
-                        List<PasseModel> passes = _passes
-                            .where((element) => element.id == 0)
-                            .map((i) => PasseModel(
-                                munitionReference: i.munitionReference,
-                                gradientMag: i.gradientMag,
-                                profondeurSonde: i.profondeurSonde,
-                                profondeurSecurisee: i.profondeurSecurisee,
-                                coteSecurisee: i.coteSecurisee))
-                            .toList();
+                        List<ImageModel> images = [];
+                        for (var element in _images) {
+                          if (element.id == 0) {
+                            images.add(ImageModel(
+                              image: element.image,
+                            ));
+                          } else if (element.id != 0) {
+                            images.add(ImageModel(
+                              id: element.id,
+                              image: element.image,
+                            ));
+                          }
+                        }
+
+                        List<PasseModel> passes = [];
+                        for (var element in _passes) {
+                          if (element.id == 0) {
+                            passes.add(PasseModel(
+                              munitionReference: element.munitionReference,
+                              gradientMag: element.gradientMag,
+                              profondeurSonde: element.profondeurSonde,
+                              profondeurSecurisee: element.profondeurSecurisee,
+                              coteSecurisee: element.coteSecurisee,
+                            ));
+                          } else if (element.id != 0) {
+                            passes.add(PasseModel(
+                              id: element.id,
+                              munitionReference: element.munitionReference,
+                              gradientMag: element.gradientMag,
+                              profondeurSonde: element.profondeurSonde,
+                              profondeurSecurisee: element.profondeurSecurisee,
+                              coteSecurisee: element.coteSecurisee,
+                            ));
+                          }
+                        }
                         PrelevementRepository().updatePrelevement(
                             context,
                             PrelevementModel(
@@ -276,31 +299,15 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
     setState(() {});
   }
 
-  void _updatePasse(
-      int index,
-      MunitionReferenceEnum munitionReference,
-      int gradientMag,
-      int profondeurSonde,
-      int coteSecurisee,
-      int profondeurSecurisee) {
-    for (var element in _passes) {
-      if (_passes.indexOf(element) == index) {
-        element.munitionReference = munitionReference;
-        element.gradientMag = gradientMag;
-        element.profondeurSonde = profondeurSonde;
-        element.profondeurSecurisee = profondeurSecurisee;
-        element.coteSecurisee = coteSecurisee;
-      }
-    }
-    setState(() {});
-  }
-
   _fetchImages() async {
-    List<ImageModel> list = await ImageRepository()
-        .getImagesByPrelevement(widget.prelevement.id!, context);
-    for (var element in list) {
-      _images.add(ImagesTemp(id: element.id!, image: element.image!));
-    }
+    await ImageRepository()
+        .getImagesByPrelevement(widget.prelevement.id!, context)
+        .then((value) {
+      for (var element in value) {
+        _images.add(ImagesTemp(id: element.id!, image: element.image!));
+      }
+    }).catchError((error) {});
+
     setState(() {});
   }
 
@@ -332,17 +339,19 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   }
 
   _fetchPasses() async {
-    List<PasseModel> list = await PasseRepository()
-        .getPassesByPrelevement(widget.prelevement.id!, context);
-    for (var element in list) {
-      _passes.add(PassesTemp(
-          id: element.id!,
-          munitionReference: element.munitionReference!,
-          gradientMag: element.gradientMag!,
-          profondeurSonde: element.profondeurSonde!,
-          profondeurSecurisee: element.profondeurSecurisee!,
-          coteSecurisee: element.coteSecurisee!));
-    }
+    await PasseRepository()
+        .getPassesByPrelevement(widget.prelevement.id!, context)
+        .then((value) {
+      for (var element in value) {
+        _passes.add(PassesTemp(
+            id: element.id!,
+            munitionReference: element.munitionReference!,
+            gradientMag: element.gradientMag!,
+            profondeurSonde: element.profondeurSonde!,
+            profondeurSecurisee: element.profondeurSecurisee!,
+            coteSecurisee: element.coteSecurisee!));
+      }
+    }).catchError((error) {});
     setState(() {});
   }
 
@@ -378,5 +387,30 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
         );
       },
     );
+  }
+
+  void _updatePasse(
+      int index,
+      MunitionReferenceEnum munitionReference,
+      int gradientMag,
+      int profondeurSonde,
+      int coteSecurisee,
+      int profondeurSecurisee) {
+    for (var element in _passes) {
+      if (_passes.indexOf(element) == index) {
+        element.munitionReference = munitionReference;
+        element.gradientMag = gradientMag;
+        element.profondeurSonde = profondeurSonde;
+        element.profondeurSecurisee = profondeurSecurisee;
+        element.coteSecurisee = coteSecurisee;
+      }
+    }
+    for (var element in _passes) {
+      print("----");
+      print(element.id);
+      print(element.gradientMag);
+      print(element.profondeurSonde);
+    }
+    setState(() {});
   }
 }

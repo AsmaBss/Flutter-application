@@ -99,20 +99,25 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
+                        print(
+                            "mun ref => ${_selectedMunitionReference.toString()}");
                         SecurisationModel securisation =
-                            await SecurisationRepository().addSecurisation(
-                                context,
-                                SecurisationModel(
-                                  nom: nom.text,
-                                  munitionReference: _selectedMunitionReference,
-                                  coteASecuriser:
-                                      int.parse(coteASecuriser.text),
-                                  cotePlateforme:
-                                      int.parse(cotePlateforme.text),
-                                  profondeurASecuriser:
-                                      int.parse(profondeurASecuriser.text),
-                                ),
-                                _selectedParcelle!);
+                            await SecurisationRepository()
+                                .addSecurisation(
+                                    context,
+                                    SecurisationModel(
+                                      nom: nom.text,
+                                      munitionReference:
+                                          _selectedMunitionReference!,
+                                      coteASecuriser:
+                                          int.parse(coteASecuriser.text),
+                                      cotePlateforme:
+                                          int.parse(cotePlateforme.text),
+                                      profondeurASecuriser:
+                                          int.parse(profondeurASecuriser.text),
+                                    ),
+                                    _selectedParcelle!)
+                                .catchError((error) {});
                         // ignore: use_build_context_synchronously
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (BuildContext context) => MapPrelevement(
@@ -140,10 +145,10 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   }
 
   _loadParcelles() async {
-    List<ParcelleModel> list = await ParcelleRepository()
-        .getAllParcelles(context)
-        .catchError((error) {});
-    _parcelles = list;
+    await ParcelleRepository().getAllParcelles(context).then((value) {
+      _parcelles = value;
+    }).catchError((error) {});
+    //_parcelles = list;
     setState(() {});
   }
 

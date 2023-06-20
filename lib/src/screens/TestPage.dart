@@ -102,6 +102,7 @@ class _TestPageState extends State<TestPage> {
                       setState(() {});
                     },
                     child: MyPopupMarker(
+                      titre: "Modifier observation",
                       onPressed: () async {
                         final result = await Navigator.push(
                           context,

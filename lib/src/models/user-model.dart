@@ -1,9 +1,12 @@
+import 'package:flutter_application/src/models/role-model.dart';
+
 class UserModel {
   int? id;
   String? email;
   String? password;
   String? firstname;
   String? lastname;
+  Set<RoleModel>? roles;
 
   UserModel({
     this.id,
@@ -11,13 +14,14 @@ class UserModel {
     this.password,
     this.firstname,
     this.lastname,
+    this.roles, // = const {},
   });
 
   @override
   String toString() {
     return 'User { id: $id, email: $email, '
         'password: $password, firstname: $firstname, '
-        'lastname: $lastname}\n';
+        'lastname: $lastname, roles: $roles}\n'; //
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +31,9 @@ class UserModel {
       password: json['password'] as String,
       firstname: json['firstname'] as String,
       lastname: json['lastname'] as String,
+      roles: (json['roles'] as List<dynamic>)
+          .map((roleJson) => RoleModel.fromJson(roleJson))
+          .toSet(),
     );
   }
 
@@ -37,6 +44,7 @@ class UserModel {
       'password': p.password,
       'firstname': p.firstname,
       'lastname': p.lastname,
+      'roles': p.roles,
     };
   }
 
@@ -44,7 +52,8 @@ class UserModel {
     return UserModel(email: map['email'] ?? "")
       ..password = (map['password'] ?? "")
       ..firstname = (map['firstname'] ?? "")
-      ..lastname = (map['lastname'] ?? "");
+      ..lastname = (map['lastname'] ?? "")
+      ..roles = (map['roles'] ?? "");
   }
 
   Map<String, dynamic> toMap() {
@@ -52,7 +61,8 @@ class UserModel {
       'email': email,
       'password': password,
       'firstname': firstname,
-      'lastname': lastname
+      'lastname': lastname,
+      'roles': roles,
     };
   }
 }

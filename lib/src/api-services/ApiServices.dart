@@ -51,23 +51,42 @@ class ApiServices {
     }
   }
 
-  Future<http.Response> put(String url, Map<String, dynamic> body) async {
+  Future<http.Response> put(String url, Map<String, dynamic> body,
+      {bool noAuth = false}) async {
     try {
+      if (noAuth) {
+        _headers['No-Auth'] = 'true';
+      } else {
+        final jwtToken = await SharedPreference().getJwtToken();
+        if (jwtToken != null) {
+          _headers['Authorization'] = 'Bearer $jwtToken';
+        }
+      }
       Uri uri = Uri.parse(_apiUrl + url);
       String bodyString = json.encode(body);
       http.Response response =
           await http.put(uri, headers: _headers, body: bodyString);
+      _headers.remove('No-Auth');
       return response;
     } catch (e) {
       return http.Response({"message ": e}.toString(), 400);
     }
   }
 
-  Future<http.Response> delete(String url) async {
+  Future<http.Response> delete(String url, {bool noAuth = false}) async {
     try {
+      if (noAuth) {
+        _headers['No-Auth'] = 'true';
+      } else {
+        final jwtToken = await SharedPreference().getJwtToken();
+        if (jwtToken != null) {
+          _headers['Authorization'] = 'Bearer $jwtToken';
+        }
+      }
       Uri uri = Uri.parse(_apiUrl + url);
       http.Response response =
           await http.delete(uri, headers: _headers); // headers: _headers
+      _headers.remove('No-Auth');
       return response;
     } catch (e) {
       return http.Response({"message ": e}.toString(), 400);

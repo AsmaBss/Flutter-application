@@ -85,6 +85,8 @@ flutter:
     - .env
     - assets/shapefiles/Parcelle_1_wgs84.shp
     - assets/Profondeur-vs-intensité - ESID.JPG
+    - assets/images/login.png
+    - assets/images/register.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

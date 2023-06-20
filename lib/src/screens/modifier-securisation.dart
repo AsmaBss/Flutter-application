@@ -101,17 +101,23 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        SecurisationRepository().updateSecurisation(
-                            context,
-                            SecurisationModel(
-                              nom: nom.text,
-                              munitionReference: _selectedMunitionReference,
-                              cotePlateforme: int.parse(cotePlateforme.text),
-                              profondeurASecuriser:
-                                  int.parse(profondeurASecuriser.text),
-                              coteASecuriser: int.parse(coteASecuriser.text),
-                            ),
-                            widget.securisation.id!);
+                        SecurisationRepository()
+                            .updateSecurisation(
+                                context,
+                                SecurisationModel(
+                                  nom: nom.text,
+                                  munitionReference:
+                                      _selectedMunitionReference!,
+                                  cotePlateforme:
+                                      int.parse(cotePlateforme.text),
+                                  profondeurASecuriser:
+                                      int.parse(profondeurASecuriser.text),
+                                  coteASecuriser:
+                                      int.parse(coteASecuriser.text),
+                                ),
+                                widget.securisation.id!)
+                            .catchError((error) => print(
+                                'Failed to delete object. Error: $error'));
                       }
                     },
                     child: Text("Enregistrer"),

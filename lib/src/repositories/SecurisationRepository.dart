@@ -60,24 +60,41 @@ class SecurisationRepository {
 
   Future<SecurisationModel> addSecurisation(
       BuildContext context, SecurisationModel s, ParcelleModel p) async {
-    http.Response response = await _apiServices.post("/Securisation/add", {
-      "securisation": {
-        'nom': s.nom,
-        'munitionReference': s.munitionReference,
-        'cotePlateforme': s.cotePlateforme,
-        'profondeurASecuriser': s.profondeurASecuriser,
-        'coteASecuriser': s.coteASecuriser,
-      },
-      "parcelle": p.toJson(p)
-    });
-    return SecurisationModel.fromJson(jsonDecode(response.body));
+    try {
+      print("--> $s");
+      http.Response response = await _apiServices.post("/Securisation/add", {
+        "securisation": {
+          'nom': s.nom,
+          'munitionReference': s.munitionReference,
+          'cotePlateforme': s.cotePlateforme,
+          'profondeurASecuriser': s.profondeurASecuriser,
+          'coteASecuriser': s.coteASecuriser,
+        },
+        "parcelle": p.toJson(p)
+      });
+      print(response.statusCode);
+      print(response.body);
+      if (response.statusCode == 200) {
+        return SecurisationModel.fromJson(jsonDecode(response.body));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } catch (e) {
+      print('Erreur: $e');
+    }
+    throw Exception("Echec !");
   }
 
-  void updateSecurisation(
+  Future<void> updateSecurisation(
       BuildContext context, SecurisationModel s, int id) async {
     try {
       http.Response response =
           await _apiServices.put("/Securisation/update/$id", s.toJson(s));
+      print(response.statusCode);
+      print(response.body);
       if (response.statusCode == 200) {
         // ignore: use_build_context_synchronously
         Navigator.pop(context, true);
@@ -94,12 +111,31 @@ class SecurisationRepository {
     //throw Exception("Echec !");
   }
 
-  deleteSecurisation(int id, BuildContext context) async {
+  /*deleteSecurisation(int id, BuildContext context) async {
+    print(id);
     try {
       await _apiServices
           .delete("/Securisation/delete/$id")
           .then((value) => Navigator.pop(context))
           .catchError((error) {});
+    } catch (e) {
+      print('Erreur: $e');
+    }
+  }*/
+
+  Future<void> deleteSecurisation(int id, BuildContext context) async {
+    try {
+      http.Response response =
+          await _apiServices.delete("/Securisation/delete/$id");
+      if (response.statusCode == 200) {
+        Navigator.pop(context);
+      } else {
+        print(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
     } catch (e) {
       print('Erreur: $e');
     }

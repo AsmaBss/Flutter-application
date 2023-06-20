@@ -4,6 +4,7 @@ import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/observation-model.dart';
 import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
 import 'package:flutter_application/src/repositories/observation-repository.dart';
+import 'package:flutter_application/src/screens/modifier-observation.dart';
 import 'package:flutter_application/src/screens/nouvelle-observation.dart';
 import 'package:flutter_application/src/widget/drawer-widget.dart';
 import 'package:flutter_application/src/widget/my-popup-marker.dart';
@@ -22,6 +23,7 @@ class ListObservations extends StatefulWidget {
 class _ListObservationsState extends State<ListObservations> {
   late final MapController _mapController;
   final PopupController _popupLayerController = PopupController();
+  final PopupController _popupLayerController2 = PopupController();
   List<Marker> allMarkers = [];
   List<Marker> markers = [];
 
@@ -46,7 +48,7 @@ class _ListObservationsState extends State<ListObservations> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Maps'),
+        title: Text('Liste des observations'),
       ),
       body: Stack(
         children: [
@@ -57,6 +59,7 @@ class _ListObservationsState extends State<ListObservations> {
               onTap: (tapPosition, point) {
                 if (_selectedParcelle != null) {
                   _popupLayerController.hideAllPopups();
+                  _popupLayerController2.hideAllPopups();
                   markers.clear();
                   markers.add(
                     Marker(
@@ -101,9 +104,11 @@ class _ListObservationsState extends State<ListObservations> {
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
                       _popupLayerController.hideAllPopups();
+                      _popupLayerController2.hideAllPopups();
                       setState(() {});
                     },
                     child: MyPopupMarker(
+                      titre: "Nouvelle observation",
                       onPressed: () async {
                         final result = await Navigator.push(
                           context,
@@ -131,11 +136,49 @@ class _ListObservationsState extends State<ListObservations> {
                   ),
                 ),
               ),
+              PopupMarkerLayerWidget(
+                options: PopupMarkerLayerOptions(
+                  popupController: _popupLayerController2,
+                  markers: allMarkers,
+                  markerRotateAlignment:
+                      PopupMarkerLayerOptions.rotationAlignmentFor(
+                          AnchorAlign.top),
+                  popupBuilder: (BuildContext context, Marker marker) =>
+                      GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      _popupLayerController.hideAllPopups();
+                      _popupLayerController2.hideAllPopups();
+                      setState(() {});
+                    },
+                    child: MyPopupMarker(
+                      titre: "Modifier observation",
+                      onPressed: () async {
+                        ObservationModel? observation =
+                            await ObservationRepository()
+                                .getByLatLng(marker.point.latitude.toString(),
+                                    marker.point.longitude.toString(), context)
+                                .catchError((error) {});
+                        print('--------------> ${observation!.id}');
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ModifierObservation(
+                              observation: observation!,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
           Align(
             alignment: Alignment.topCenter,
             child: Container(
+              margin: EdgeInsets.all(20.0),
               color: Colors.white60,
               width: 250.0,
               child: DropdownButtonFormField<ParcelleModel>(
@@ -220,8 +263,8 @@ class _ListObservationsState extends State<ListObservations> {
       for (var element in observations) {
         allMarkers.add(
           Marker(
-            width: 30.0,
-            height: 30.0,
+            width: 40.0,
+            height: 40.0,
             point: LatLng(double.parse(element.latitude.toString()),
                 double.parse(element.longitude.toString())),
             builder: (ctx) => Icon(
