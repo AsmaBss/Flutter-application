@@ -9,14 +9,13 @@ import 'package:http/http.dart' as http;
 class SecurisationRepository {
   final ApiServices _apiServices = ApiServices();
 
-  Future<List<SecurisationModel>> getAllSecurisations(
+  Future<List<SecurisationModel>?> getAllSecurisations(
       BuildContext context) async {
     try {
       http.Response response = await _apiServices.get("/Securisation/show");
       if (response.statusCode == 200) {
         dynamic responseJson = jsonDecode(response.body);
-        List<dynamic> securisationsData =
-            responseJson is List ? responseJson : [responseJson];
+        final securisationsData = responseJson as List;
         List<SecurisationModel> securisationsList = securisationsData
             .map((json) => SecurisationModel.fromJson(json))
             .toList();
@@ -28,40 +27,14 @@ class SecurisationRepository {
               Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
-    } catch (e) {
-      print('Erreur: $e');
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
-    throw Exception("Echec !");
   }
 
-  Future<SecurisationModel> getSecurisationById(
-      int id, BuildContext context) async {
-    try {
-      http.Response response = await _apiServices.get("/Securisation/show/$id");
-      if (response.statusCode == 200) {
-        dynamic responseJson = jsonDecode(response.body);
-        final securisationData = responseJson;
-        SecurisationModel securisation = securisationData
-            .map((json) => SecurisationModel.fromJson(json))
-            .toList();
-        return securisation;
-      } else {
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content:
-              Text("Problème au niveau de serveur: ${response.statusCode}"),
-        ));
-      }
-    } catch (e) {
-      print('Erreur: $e');
-    }
-    throw Exception("Echec !");
-  }
-
-  Future<SecurisationModel> addSecurisation(
+  Future<SecurisationModel?> addSecurisation(
       BuildContext context, SecurisationModel s, ParcelleModel p) async {
     try {
-      print("--> $s");
       http.Response response = await _apiServices.post("/Securisation/add", {
         "securisation": {
           'nom': s.nom,
@@ -72,20 +45,18 @@ class SecurisationRepository {
         },
         "parcelle": p.toJson(p)
       });
-      print(response.statusCode);
-      print(response.body);
       if (response.statusCode == 200) {
         return SecurisationModel.fromJson(jsonDecode(response.body));
       } else {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content:
               Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
-    } catch (e) {
-      print('Erreur: $e');
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
-    throw Exception("Echec !");
   }
 
   Future<void> updateSecurisation(
@@ -93,8 +64,6 @@ class SecurisationRepository {
     try {
       http.Response response =
           await _apiServices.put("/Securisation/update/$id", s.toJson(s));
-      print(response.statusCode);
-      print(response.body);
       if (response.statusCode == 200) {
         // ignore: use_build_context_synchronously
         Navigator.pop(context, true);
@@ -108,20 +77,7 @@ class SecurisationRepository {
     } catch (e) {
       print('Erreur: $e');
     }
-    //throw Exception("Echec !");
   }
-
-  /*deleteSecurisation(int id, BuildContext context) async {
-    print(id);
-    try {
-      await _apiServices
-          .delete("/Securisation/delete/$id")
-          .then((value) => Navigator.pop(context))
-          .catchError((error) {});
-    } catch (e) {
-      print('Erreur: $e');
-    }
-  }*/
 
   Future<void> deleteSecurisation(int id, BuildContext context) async {
     try {
@@ -130,7 +86,6 @@ class SecurisationRepository {
       if (response.statusCode == 200) {
         Navigator.pop(context);
       } else {
-        print(response.body);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content:
               Text("Problème au niveau de serveur: ${response.statusCode}"),

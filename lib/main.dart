@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/screens/jsonform.dart';
 import 'package:flutter_application/src/screens/login.dart';
-import 'package:flutter_application/src/screens/maps.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -20,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: Login(), //Maps(),JsonForm(),
+      home: Login(), //TestPage(),
       debugShowCheckedModeBanner: false,
     );
   }

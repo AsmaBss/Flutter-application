@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/classes/passes_temp.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/widget/nouveau-passe-form-widget.dart';
+import 'package:photo_view/photo_view.dart';
 
 class ModifierPasse extends StatefulWidget {
   final PassesTemp passe;
@@ -62,7 +63,17 @@ class _ModifierPasseState extends State<ModifierPasse> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text("Modifier Passe"),
+        title: Text(
+            "Modifier Passe \nProfondeur sonde : ${widget.passe.profondeurSonde}"),
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -87,7 +98,15 @@ class _ModifierPasseState extends State<ModifierPasse> {
               coteSecurisee: coteSecurisee,
               profondeurSecurisee: profondeurSecurisee,
             ),
-            Image.asset("assets/Profondeur-vs-intensité - ESID.JPG"),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: 260.0,
+              child: PhotoView(
+                backgroundDecoration: BoxDecoration(color: Colors.white),
+                imageProvider:
+                    AssetImage("assets/Profondeur-vs-intensité - ESID.JPG"),
+              ),
+            ),
             Padding(
               padding: EdgeInsets.all(40.0),
               child: Row(

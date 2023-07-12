@@ -1,3 +1,5 @@
+import 'package:flutter_application/src/models/ParcelleModel.dart';
+
 class PlanSondageModel {
   int? id;
   String? nom;
@@ -8,7 +10,6 @@ class PlanSondageModel {
   String? type;
   String? geometry;
   int? baseRef;
-  int? parcelle;
 
   PlanSondageModel(
       {this.id,
@@ -19,8 +20,7 @@ class PlanSondageModel {
       this.fichierPrj,
       this.type,
       this.geometry,
-      this.baseRef,
-      this.parcelle});
+      this.baseRef});
 
   @override
   String toString() {
@@ -28,7 +28,7 @@ class PlanSondageModel {
         'fichierShp: $fichierShp, fichierShx: $fichierShx, '
         'fichierDbf: $fichierDbf, fichierPrj: $fichierPrj, '
         'type: $type, geometry: $geometry, '
-        'baseRef: $baseRef, parcelle: $parcelle}\n';
+        'baseRef: $baseRef}\n';
   }
 
   factory PlanSondageModel.fromJson(Map<String, dynamic> json) {
@@ -42,7 +42,7 @@ class PlanSondageModel {
       type: json['type'] as String,
       geometry: json['geometry']['coordinates'] as String,
       baseRef: json['baseRef'] as int,
-      parcelle: json['parcelle'] as int,
+      //parcelle: ParcelleModel.fromJson(json['parcelle'] as ParcelleModel),
     );
   }
 
@@ -57,7 +57,6 @@ class PlanSondageModel {
       'type': p.type,
       'geometry': p.geometry,
       'baseRef': p.baseRef,
-      'parcelle': p.parcelle,
     };
   }
 
@@ -69,8 +68,7 @@ class PlanSondageModel {
       ..fichierPrj = (map['fichierPrj'] ?? "")
       ..type = (map['type'] ?? "")
       ..geometry = (map['geometry'] ?? "")
-      ..baseRef = (map['baseRef'] ?? "")
-      ..parcelle = (map['parcelle'] ?? "");
+      ..baseRef = (map['baseRef'] ?? "");
   }
 
   Map<String, dynamic> toMap() {
@@ -82,8 +80,7 @@ class PlanSondageModel {
       'fichierPrj': fichierPrj,
       'type': type,
       'geometry': geometry,
-      'baseRef': baseRef,
-      'parcelle': parcelle
+      'baseRef': baseRef
     };
   }
 }

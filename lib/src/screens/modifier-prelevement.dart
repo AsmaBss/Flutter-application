@@ -10,14 +10,15 @@ import 'package:flutter_application/src/models/PasseModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/models/ImageModel.dart';
-import 'package:flutter_application/src/repositories/PasseRepository.dart';
-import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
-import 'package:flutter_application/src/repositories/ImageRepository.dart';
+import 'package:flutter_application/src/repositories/passe-repository.dart';
+import 'package:flutter_application/src/repositories/prelevement-repository.dart';
+import 'package:flutter_application/src/repositories/images-prelevement-repository.dart';
 import 'package:flutter_application/src/screens/camera-page.dart';
 import 'package:flutter_application/src/screens/modifier-passe.dart';
 import 'package:flutter_application/src/screens/nouveau-passe.dart';
 import 'package:flutter_application/src/widget/my-dialog.dart';
 import 'package:flutter_application/src/widget/nouveau-prelevement-form-widget.dart';
+import 'package:photo_view/photo_view.dart';
 
 class ModifierPrelevement extends StatefulWidget {
   final PrelevementModel prelevement;
@@ -69,6 +70,15 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Modifier Prélèvement - ${widget.prelevement.numero}"),
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -208,7 +218,15 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                       },
                     ),
             ),
-            Image.asset("assets/Profondeur-vs-intensité - ESID.JPG"),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: 260.0,
+              child: PhotoView(
+                backgroundDecoration: BoxDecoration(color: Colors.white),
+                imageProvider:
+                    AssetImage("assets/Profondeur-vs-intensité - ESID.JPG"),
+              ),
+            ),
             Padding(
               padding: EdgeInsets.all(40.0),
               child: Row(
@@ -231,7 +249,6 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
                             ));
                           }
                         }
-
                         List<PasseModel> passes = [];
                         for (var element in _passes) {
                           if (element.id == 0) {
@@ -300,14 +317,13 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
   }
 
   _fetchImages() async {
-    await ImageRepository()
+    await ImagesPrelevementRepository()
         .getImagesByPrelevement(widget.prelevement.id!, context)
         .then((value) {
-      for (var element in value) {
+      for (var element in value!) {
         _images.add(ImagesTemp(id: element.id!, image: element.image!));
       }
-    }).catchError((error) {});
-
+    });
     setState(() {});
   }
 
@@ -328,7 +344,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
               _images.removeAt(index);
               Navigator.pop(context);
             } else {
-              await ImageRepository().deleteImage(i.id, context);
+              await ImagesPrelevementRepository().deleteImage(i.id, context);
               _images.removeAt(index);
             }
             refreshPage();
@@ -340,9 +356,9 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
 
   _fetchPasses() async {
     await PasseRepository()
-        .getPassesByPrelevement(widget.prelevement.id!, context)
+        .getByPrelevement(widget.prelevement.id!, context)
         .then((value) {
-      for (var element in value) {
+      for (var element in value!) {
         _passes.add(PassesTemp(
             id: element.id!,
             munitionReference: element.munitionReference!,
@@ -351,7 +367,7 @@ class _ModifierPrelevementState extends State<ModifierPrelevement> {
             profondeurSecurisee: element.profondeurSecurisee!,
             coteSecurisee: element.coteSecurisee!));
       }
-    }).catchError((error) {});
+    });
     setState(() {});
   }
 

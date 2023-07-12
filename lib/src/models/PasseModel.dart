@@ -7,7 +7,6 @@ class PasseModel {
   int? gradientMag;
   int? profondeurSecurisee;
   int? coteSecurisee;
-  int? prelevement;
 
   PasseModel(
       {this.id,
@@ -15,14 +14,13 @@ class PasseModel {
       this.profondeurSonde,
       this.gradientMag,
       this.profondeurSecurisee,
-      this.coteSecurisee,
-      this.prelevement});
+      this.coteSecurisee});
 
   @override
   String toString() {
     return 'Passe { id: $id, munitionReference: $munitionReference, '
         'profondeurSonde: $profondeurSonde, gradientMag: $gradientMag,  '
-        'profondeurSecurisee: $profondeurSecurisee, coteSecurisee: $coteSecurisee, prelevement: $prelevement}\n';
+        'profondeurSecurisee: $profondeurSecurisee, coteSecurisee: $coteSecurisee}\n';
   }
 
   factory PasseModel.fromJson(Map<String, dynamic> json) {
@@ -34,7 +32,6 @@ class PasseModel {
       gradientMag: json['gradientMag'] as int,
       profondeurSecurisee: json['profondeurSecurisee'] as int,
       coteSecurisee: json['coteSecurisee'] as int,
-      prelevement: json['prelevement'] as int,
     );
   }
 
@@ -46,7 +43,6 @@ class PasseModel {
       'gradientMag': p.gradientMag,
       'profondeurSecurisee': p.profondeurSecurisee,
       'coteSecurisee': p.coteSecurisee,
-      'prelevement': p.prelevement,
     };
   }
 
@@ -55,8 +51,7 @@ class PasseModel {
       ..profondeurSonde = (map['profondeurSonde'] ?? "")
       ..gradientMag = (map['gradientMag'] ?? "")
       ..profondeurSecurisee = (map['profondeurSecurisee'] ?? "")
-      ..coteSecurisee = (map['coteSecurisee'] ?? "")
-      ..prelevement = (map['prelevement'] ?? "");
+      ..coteSecurisee = (map['coteSecurisee'] ?? "");
   }
 
   Map<String, dynamic> toMap() {
@@ -66,7 +61,6 @@ class PasseModel {
       'gradientMag': gradientMag,
       'profondeurSecurisee': profondeurSecurisee,
       'coteSecurisee': coteSecurisee,
-      'prelevement': prelevement,
     };
   }
 }

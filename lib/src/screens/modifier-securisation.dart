@@ -3,11 +3,11 @@ import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
-import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
-import 'package:flutter_application/src/repositories/PlanSondageRepository.dart';
+import 'package:flutter_application/src/repositories/parcelle-repository.dart';
+import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
 import 'package:flutter_application/src/widget/nouvelle-securisation-form-widget.dart';
 
-import '../repositories/SecurisationRepository.dart';
+import '../repositories/securisation-repository.dart';
 
 class ModifierSecurisation extends StatefulWidget {
   final SecurisationModel securisation;
@@ -50,7 +50,16 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text("Modifier sécurisation - \n${widget.securisation.nom}"),
+        title: Text("Modifier sécurisation \n${widget.securisation.nom}"),
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -101,23 +110,17 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        SecurisationRepository()
-                            .updateSecurisation(
-                                context,
-                                SecurisationModel(
-                                  nom: nom.text,
-                                  munitionReference:
-                                      _selectedMunitionReference!,
-                                  cotePlateforme:
-                                      int.parse(cotePlateforme.text),
-                                  profondeurASecuriser:
-                                      int.parse(profondeurASecuriser.text),
-                                  coteASecuriser:
-                                      int.parse(coteASecuriser.text),
-                                ),
-                                widget.securisation.id!)
-                            .catchError((error) => print(
-                                'Failed to delete object. Error: $error'));
+                        SecurisationRepository().updateSecurisation(
+                            context,
+                            SecurisationModel(
+                              nom: nom.text,
+                              munitionReference: _selectedMunitionReference!,
+                              cotePlateforme: int.parse(cotePlateforme.text),
+                              profondeurASecuriser:
+                                  int.parse(profondeurASecuriser.text),
+                              coteASecuriser: int.parse(coteASecuriser.text),
+                            ),
+                            widget.securisation.id!);
                       }
                     },
                     child: Text("Enregistrer"),
@@ -138,10 +141,9 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
   }
 
   _loadParcelles() async {
-    List<ParcelleModel> list = await ParcelleRepository()
-        .getAllParcelles(context)
-        .catchError((error) {});
-    _parcelles = list;
+    List<ParcelleModel>? list =
+        await ParcelleRepository().getAllParcelles(context);
+    _parcelles = list!;
     _parcelles
         .map((ParcelleModel e) => {
               if (e.toString() == widget.parcelle.toString())
@@ -153,9 +155,9 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
 
   _loadPlanSondage(ParcelleModel parcelle) async {
     if (_selectedParcelle != "") {
-      List<PlanSondageModel> list =
-          await PlanSondageRepository().getPlanSondageByParcelle(parcelle.id!);
-      _planSondages = list;
+      List<PlanSondageModel>? list =
+          await PlanSondageRepository().getByParcelle(parcelle.id!, context);
+      _planSondages = list!;
       planSondage.text = _planSondages.first.nom!;
     }
   }

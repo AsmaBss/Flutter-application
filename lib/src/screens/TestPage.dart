@@ -1,14 +1,8 @@
-import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/models/ParcelleModel.dart';
-import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
-import 'package:flutter_application/src/screens/nouvelle-observation.dart';
-import 'package:flutter_application/src/widget/drawer-widget.dart';
-import 'package:flutter_application/src/widget/my-popup-marker.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:dart_jts/dart_jts.dart' as jts;
+import 'package:flutter_application/src/screens/list-securisation.dart';
+import 'package:flutter_application/src/screens/form-example.dart';
+import 'package:flutter_application/src/screens/list-observations.dart';
+import 'package:flutter_application/src/screens/testSecurisation.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({Key? key}) : super(key: key);
@@ -17,213 +11,73 @@ class TestPage extends StatefulWidget {
   State<StatefulWidget> createState() => _TestPageState();
 }
 
-class _TestPageState extends State<TestPage> {
-  late final MapController _mapController;
-  final PopupController _popupLayerController = PopupController();
-  List<Marker> allMarkers = [];
-  List<Marker> markers = [];
-
-  List<ParcelleModel> _parcelles = [];
-  ParcelleModel? _selectedParcelle;
-  List<LatLng> multipolygon = [];
+class _TestPageState extends State<TestPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
   @override
   void initState() {
-    _mapController = MapController();
-    _loadParcelles();
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
-    _mapController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Maps'),
-      ),
-      body: Stack(
-        children: [
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              zoom: 5.0,
-              onTap: (tapPosition, point) {
-                if (_selectedParcelle != null) {
-                  _popupLayerController.hideAllPopups();
-                  markers.clear();
-                  markers.add(
-                    Marker(
-                      width: 30.0,
-                      height: 30.0,
-                      point: point,
-                      builder: (ctx) => Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                      ),
-                    ),
-                  );
-                }
-              },
+    return WillPopScope(
+      onWillPop: () => Future.value(false),
+      child: Scaffold(
+        body: TabBarView(
+          physics: const NeverScrollableScrollPhysics(),
+          controller: _tabController,
+          children: [
+            Navigator(
+              onGenerateRoute: (settings) => MaterialPageRoute(
+                builder: (context) => ListSecurisation(),
+                settings: settings,
+              ),
             ),
-            children: [
-              TileLayer(
-                urlTemplate:
-                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: ['a', 'b', 'c'],
+            Navigator(
+              onGenerateRoute: (settings) => MaterialPageRoute(
+                builder: (context) => ListObservations(),
+                settings: settings,
               ),
-              if (multipolygon != null)
-                PolygonLayer(polygons: [
-                  Polygon(
-                    points: multipolygon,
-                    color: Colors.blue.withOpacity(0.3),
-                    borderStrokeWidth: 3,
-                  ),
-                ]),
-              MarkerLayer(
-                markers: allMarkers,
+            ),
+            Navigator(
+              onGenerateRoute: (settings) => MaterialPageRoute(
+                builder: (context) => FormExample(),
+                settings: settings,
               ),
-              PopupMarkerLayerWidget(
-                options: PopupMarkerLayerOptions(
-                  popupController: _popupLayerController,
-                  markers: markers,
-                  markerRotateAlignment:
-                      PopupMarkerLayerOptions.rotationAlignmentFor(
-                          AnchorAlign.top),
-                  popupBuilder: (BuildContext context, Marker marker) =>
-                      GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      _popupLayerController.hideAllPopups();
-                      setState(() {});
-                    },
-                    child: MyPopupMarker(
-                      titre: "Modifier observation",
-                      onPressed: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NouvelleObservation(
-                                latLng: marker.point,
-                                parcelle: _selectedParcelle!),
-                          ),
-                        );
-                        if (result == true) {
-                          allMarkers.add(
-                            Marker(
-                              width: 30.0,
-                              height: 30.0,
-                              point: marker.point,
-                              builder: (ctx) => Icon(
-                                Icons.location_on,
-                                color: Colors.red,
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: BottomAppBar(
+          color: Colors.green,
+          child: TabBar(
+            isScrollable: false,
+            controller: _tabController,
+            tabs: [
+              Tab(
+                text: "Sécurisations",
+              ),
+              Tab(
+                text: "Observations",
+              ),
+              Tab(
+                text: "Formulaires",
               ),
             ],
           ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              color: Colors.white60,
-              width: 250.0,
-              child: DropdownButtonFormField<ParcelleModel>(
-                value: _selectedParcelle,
-                hint: Text('Sélectionner un lot'),
-                items: _parcelles.map((ParcelleModel parcelle) {
-                  return DropdownMenuItem<ParcelleModel>(
-                    value: parcelle,
-                    child: Text(parcelle.nom!),
-                  );
-                }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedParcelle = newValue;
-                    _loadSelectedParcelle(newValue);
-                  });
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-      drawer: MyDrawer(),
-    );
-  }
-
-  _loadParcelles() async {
-    List<ParcelleModel> list =
-        await ParcelleRepository().getAllParcelles(context);
-    _parcelles = list;
-    setState(() {});
-  }
-
-  _loadSelectedParcelle(ParcelleModel? parcelle) {
-    List<List<List<double>>> coordinates = [];
-    String polygonString = parcelle!.geometry
-        .toString()
-        .replaceAll("MULTIPOLYGON (((", "")
-        .replaceAll(")))", "");
-    List<String> polygons = polygonString.split("), (");
-    for (var p in polygons) {
-      List<List<double>> points = [];
-      p.split(", ").forEach((c) {
-        List<double> point = c.split(" ").map((e) => double.parse(e)).toList();
-        points.add(point);
-      });
-      coordinates.add(points);
-    }
-    List<List<LatLng>> points = [];
-    for (var p in coordinates) {
-      List<LatLng> polyPoints = [];
-      for (var c in p) {
-        polyPoints.add(LatLng(c[1], c[0]));
-      }
-      points.add(polyPoints);
-    }
-    setState(() {
-      multipolygon = points[0];
-      var center = _calculateCentroid(multipolygon);
-      _mapController.move(center, 16.5);
-    });
-  }
-
-  LatLng _calculateCentroid(List<LatLng> polygon) {
-    double latitude = 0;
-    double longitude = 0;
-    int n = polygon.length;
-    for (var i = 0; i < n; i++) {
-      latitude += polygon[i].latitude;
-      longitude += polygon[i].longitude;
-    }
-    return LatLng(latitude / n, longitude / n);
-  }
-
-  _loadMarkers() async {
-    /*List positions = await PositionRepository().getAllPositions(context);
-    for (PositionModel element in positions) {
-      LatLng tappedPoint = LatLng(
-          double.parse(element.latitude!), double.parse(element.longitude!));
-      allMarkers.add(
-        Marker(
-          point: tappedPoint,
-          builder: (BuildContext context) => Icon(
-            Icons.location_on,
-            color: Colors.red,
-          ),
         ),
-      );
-    }
-    setState(() {});*/
+      ),
+    );
   }
 }

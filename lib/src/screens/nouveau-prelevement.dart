@@ -10,12 +10,13 @@ import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/models/ImageModel.dart';
-import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
+import 'package:flutter_application/src/repositories/prelevement-repository.dart';
 import 'package:flutter_application/src/screens/camera-page.dart';
 import 'package:flutter_application/src/screens/modifier-passe.dart';
 import 'package:flutter_application/src/screens/nouveau-passe.dart';
 import 'package:flutter_application/src/widget/my-dialog.dart';
 import 'package:flutter_application/src/widget/nouveau-prelevement-form-widget.dart';
+import 'package:photo_view/photo_view.dart';
 
 class NouveauPrelevement extends StatefulWidget {
   final PlanSondageModel planSondage;
@@ -41,6 +42,8 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   StatutEnum? _selectedStatut;
   List<ImagesTemp> _images = [];
   List<PassesTemp> _passes = [];
+  late TransformationController transformController;
+  TapDownDetails? tapDownDetails;
 
   @override
   initState() {
@@ -50,6 +53,7 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
     coteASecuriser.text = widget.securisation.coteASecuriser.toString();
     profondeurASecuriser.text =
         widget.securisation.profondeurASecuriser.toString();
+    transformController = TransformationController();
     super.initState();
   }
 
@@ -60,6 +64,7 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
     coteASecuriser.dispose();
     profondeurASecuriser.dispose();
     remarques.dispose();
+    transformController.dispose();
     super.dispose();
   }
 
@@ -73,6 +78,15 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
       appBar: AppBar(
         backgroundColor: Colors.green,
         title: Text("Nouveau Prélèvement"),
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -212,7 +226,15 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                       },
                     ),
             ),
-            Image.asset("assets/Profondeur-vs-intensité - ESID.JPG"),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: 260.0,
+              child: PhotoView(
+                backgroundDecoration: BoxDecoration(color: Colors.white),
+                imageProvider:
+                    AssetImage("assets/Profondeur-vs-intensité - ESID.JPG"),
+              ),
+            ),
             Padding(
               padding: EdgeInsets.all(40.0),
               child: Row(

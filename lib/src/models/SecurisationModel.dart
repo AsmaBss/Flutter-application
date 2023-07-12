@@ -1,4 +1,5 @@
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
+import 'package:flutter_application/src/models/ParcelleModel.dart';
 
 class SecurisationModel {
   int? id;
@@ -7,7 +8,6 @@ class SecurisationModel {
   int cotePlateforme;
   int profondeurASecuriser;
   int coteASecuriser;
-  int? parcelle;
 
   SecurisationModel(
       {this.id,
@@ -15,13 +15,12 @@ class SecurisationModel {
       required this.munitionReference,
       required this.cotePlateforme,
       required this.profondeurASecuriser,
-      required this.coteASecuriser,
-      this.parcelle});
+      required this.coteASecuriser});
 
   @override
   String toString() {
     return 'Securisation { id: $id, nom: $nom, munitionReference: $munitionReference, '
-        'cotePlateforme: $cotePlateforme, profondeurASecuriser: $profondeurASecuriser, coteASecuriser: $coteASecuriser, parcelle: $parcelle}\n';
+        'cotePlateforme: $cotePlateforme, profondeurASecuriser: $profondeurASecuriser, coteASecuriser: $coteASecuriser}\n';
   }
 
   factory SecurisationModel.fromJson(Map<String, dynamic> json) {
@@ -30,11 +29,9 @@ class SecurisationModel {
       nom: json['nom'] as String,
       munitionReference:
           MunitionReferenceEnum.fromJson(json['munitionReference']),
-      //munitionReference: json['munitionReference'] as MunitionReferenceEnum, //String,
       cotePlateforme: json['cotePlateforme'] as int,
       profondeurASecuriser: json['profondeurASecuriser'] as int,
       coteASecuriser: json['coteASecuriser'] as int,
-      parcelle: json['parcelle'] as int, //['id']
     );
   }
 
@@ -46,19 +43,18 @@ class SecurisationModel {
       'cotePlateforme': p.cotePlateforme,
       'profondeurASecuriser': p.profondeurASecuriser,
       'coteASecuriser': p.coteASecuriser,
-      'parcelle': p.parcelle,
     };
   }
 
   factory SecurisationModel.fromMap(Map<String, dynamic> map) {
     return SecurisationModel(
       id: map['id'],
-        nom: map['nom'],
-        munitionReference: map['munitionReference'],
-        cotePlateforme: map['cotePlateforme'],
-        profondeurASecuriser: map['profondeurASecuriser'],
-        coteASecuriser: map['coteASecuriser'],
-      parcelle: map['parcelle']);
+      nom: map['nom'],
+      munitionReference: map['munitionReference'],
+      cotePlateforme: map['cotePlateforme'],
+      profondeurASecuriser: map['profondeurASecuriser'],
+      coteASecuriser: map['coteASecuriser'],
+    );
   }
 
   Map<String, dynamic> toMap() {
@@ -68,7 +64,6 @@ class SecurisationModel {
       'cotePlateforme': cotePlateforme,
       'profondeurASecuriser': profondeurASecuriser,
       'coteASecuriser': coteASecuriser,
-      'parcelle': parcelle,
     };
   }
 }

@@ -44,7 +44,7 @@ class UserModel {
       'password': p.password,
       'firstname': p.firstname,
       'lastname': p.lastname,
-      'roles': p.roles,
+      'roles': p.roles?.map((role) => role.toJson(role)).toList(),
     };
   }
 

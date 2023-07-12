@@ -50,6 +50,15 @@ class _NouvelleObservationState extends State<NouvelleObservation> {
       appBar: AppBar(
         backgroundColor: Colors.green,
         title: Text("Nouvelle Observation \n${widget.parcelle.nom}"),
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),

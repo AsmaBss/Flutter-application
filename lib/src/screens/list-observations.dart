@@ -1,17 +1,19 @@
-import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/api-services/SharedPreference.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
+import 'package:flutter_application/src/models/TypeRoleEnum.dart';
 import 'package:flutter_application/src/models/observation-model.dart';
-import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
+import 'package:flutter_application/src/models/user-model.dart';
+import 'package:flutter_application/src/repositories/parcelle-repository.dart';
 import 'package:flutter_application/src/repositories/observation-repository.dart';
 import 'package:flutter_application/src/screens/modifier-observation.dart';
 import 'package:flutter_application/src/screens/nouvelle-observation.dart';
-import 'package:flutter_application/src/widget/drawer-widget.dart';
 import 'package:flutter_application/src/widget/my-popup-marker.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:dart_jts/dart_jts.dart' as jts;
+import 'package:location/location.dart';
 
 class ListObservations extends StatefulWidget {
   const ListObservations({Key? key}) : super(key: key);
@@ -22,10 +24,14 @@ class ListObservations extends StatefulWidget {
 
 class _ListObservationsState extends State<ListObservations> {
   late final MapController _mapController;
+  LocationData? _currentLocation;
+  Location? _locationService = Location();
   final PopupController _popupLayerController = PopupController();
   final PopupController _popupLayerController2 = PopupController();
+  final PopupController _popupLayerController3 = PopupController();
   List<Marker> allMarkers = [];
   List<Marker> markers = [];
+  Marker? myPosition;
 
   List<ParcelleModel> _parcelles = [];
   ParcelleModel? _selectedParcelle;
@@ -57,12 +63,17 @@ class _ListObservationsState extends State<ListObservations> {
             options: MapOptions(
               zoom: 5.0,
               onTap: (tapPosition, point) {
+                _popupLayerController.hideAllPopups();
+                _popupLayerController2.hideAllPopups();
+                _popupLayerController3.hideAllPopups();
                 if (_selectedParcelle != null) {
-                  _popupLayerController.hideAllPopups();
-                  _popupLayerController2.hideAllPopups();
                   markers.clear();
+                  if (myPosition != null) {
+                    markers.add(myPosition!);
+                  }
                   markers.add(
                     Marker(
+                      rotate: false,
                       width: 30.0,
                       height: 30.0,
                       point: point,
@@ -85,13 +96,17 @@ class _ListObservationsState extends State<ListObservations> {
                 PolygonLayer(polygons: [
                   Polygon(
                     points: multipolygon,
-                    color: Colors.blue.withOpacity(0.3),
+                    color: Colors.blue.withOpacity(0.2),
                     borderStrokeWidth: 3,
                   ),
                 ]),
               MarkerLayer(
                 markers: allMarkers,
               ),
+              if (myPosition != null)
+                MarkerLayer(
+                  markers: [myPosition!],
+                ),
               PopupMarkerLayerWidget(
                 options: PopupMarkerLayerOptions(
                   popupController: _popupLayerController,
@@ -121,11 +136,12 @@ class _ListObservationsState extends State<ListObservations> {
                         if (result == true) {
                           allMarkers.add(
                             Marker(
+                              rotate: false,
                               width: 30.0,
                               height: 30.0,
                               point: marker.point,
                               builder: (ctx) => Icon(
-                                Icons.location_on,
+                                Icons.remove_red_eye,
                                 color: Colors.red,
                               ),
                             ),
@@ -155,11 +171,10 @@ class _ListObservationsState extends State<ListObservations> {
                       titre: "Modifier observation",
                       onPressed: () async {
                         ObservationModel? observation =
-                            await ObservationRepository()
-                                .getByLatLng(marker.point.latitude.toString(),
-                                    marker.point.longitude.toString(), context)
-                                .catchError((error) {});
-                        print('--------------> ${observation!.id}');
+                            await ObservationRepository().getByLatLng(
+                                marker.point.latitude.toString(),
+                                marker.point.longitude.toString(),
+                                context);
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -173,6 +188,53 @@ class _ListObservationsState extends State<ListObservations> {
                   ),
                 ),
               ),
+              /*if (myPosition != null)
+                PopupMarkerLayerWidget(
+                  options: PopupMarkerLayerOptions(
+                    popupController: _popupLayerController3,
+                    markers: [myPosition!],
+                    markerRotateAlignment:
+                        PopupMarkerLayerOptions.rotationAlignmentFor(
+                            AnchorAlign.top),
+                    popupBuilder: (BuildContext context, Marker marker) =>
+                        GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        _popupLayerController.hideAllPopups();
+                        _popupLayerController2.hideAllPopups();
+                        setState(() {});
+                      },
+                      child: MyPopupMarker(
+                        titre: "Nouvelle observation",
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NouvelleObservation(
+                                  latLng: marker.point,
+                                  parcelle: _selectedParcelle!),
+                            ),
+                          );
+                          if (result == true) {
+                            allMarkers.add(
+                              Marker(
+                                rotate: false,
+                                width: 30.0,
+                                height: 30.0,
+                                point: marker.point,
+                                builder: (ctx) => Icon(
+                                  Icons.location_on,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+            */
             ],
           ),
           Align(
@@ -202,15 +264,26 @@ class _ListObservationsState extends State<ListObservations> {
           ),
         ],
       ),
-      drawer: MyDrawer(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _getLocation();
+        },
+        child: Icon(Icons.my_location),
+      ),
     );
   }
 
   _loadParcelles() async {
-    List<ParcelleModel> list = await ParcelleRepository()
-        .getAllParcelles(context)
-        .catchError((error) {});
-    _parcelles = list;
+    UserModel? user = await SharedPreference().getUser();
+    if (user?.roles?.first.type == TypeRoleEnum.ADMIN) {
+      List<ParcelleModel>? list =
+          await ParcelleRepository().getAllParcelles(context);
+      _parcelles = list!;
+    } else {
+      List<ParcelleModel> list =
+          await ParcelleRepository().getByUser(user!.id!, context);
+      _parcelles = list;
+    }
     setState(() {});
   }
 
@@ -257,24 +330,73 @@ class _ListObservationsState extends State<ListObservations> {
 
   _loadObservations() async {
     if (_selectedParcelle != null) {
-      List<ObservationModel> observations = await ObservationRepository()
-          .getAllObservations(_selectedParcelle!.id!, context)
-          .catchError((error) {});
-      for (var element in observations) {
+      List<ObservationModel>? observations = await ObservationRepository()
+          .getAllObservations(_selectedParcelle!.id!, context);
+      for (var element in observations!) {
         allMarkers.add(
           Marker(
+            rotate: false,
             width: 40.0,
             height: 40.0,
             point: LatLng(double.parse(element.latitude.toString()),
                 double.parse(element.longitude.toString())),
             builder: (ctx) => Icon(
-              Icons.location_on,
+              Icons.remove_red_eye,
               color: Colors.red,
             ),
           ),
         );
       }
       setState(() {});
+    }
+  }
+
+  Future<void> _getLocation() async {
+    try {
+      bool serviceEnabled;
+      PermissionStatus permissionGranted;
+
+      serviceEnabled = await _locationService!.serviceEnabled();
+      if (!serviceEnabled) {
+        serviceEnabled = await _locationService!.requestService();
+        if (!serviceEnabled) {
+          return;
+        }
+      }
+
+      permissionGranted = await _locationService!.hasPermission();
+      if (permissionGranted == PermissionStatus.denied) {
+        permissionGranted = await _locationService!.requestPermission();
+        if (permissionGranted != PermissionStatus.granted) {
+          return;
+        }
+      }
+
+      LocationData locationData = await _locationService!.getLocation();
+      setState(() {
+        _currentLocation = locationData;
+      });
+      myPosition = Marker(
+        rotate: false,
+        width: 30.0,
+        height: 30.0,
+        point: LatLng(
+          _currentLocation!.latitude!,
+          _currentLocation!.longitude!,
+        ),
+        builder: (ctx) => Container(
+          child: IconButton(
+            icon: Icon(Icons.location_on),
+            color: Colors.blue,
+            onPressed: () {
+              print("tap");
+            },
+          ),
+        ),
+      );
+      setState(() {});
+    } catch (e) {
+      print(e.toString());
     }
   }
 }

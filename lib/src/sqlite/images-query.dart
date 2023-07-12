@@ -7,8 +7,7 @@ class ImagesQuery {
   }
 
   void addImage(String image) async {
-    await SQLiteWrapper()
-        .insert(ImageModel(image: image, prelevement: null).toMap(), "images");
+    await SQLiteWrapper().insert(ImageModel(image: image).toMap(), "images");
     print("Data inserted in local !");
   }
 

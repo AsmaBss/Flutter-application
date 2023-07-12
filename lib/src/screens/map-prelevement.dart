@@ -4,11 +4,11 @@ import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
-import 'package:flutter_application/src/repositories/PrelevementRepository.dart';
-import 'package:flutter_application/src/repositories/PlanSondageRepository.dart';
+import 'package:flutter_application/src/repositories/prelevement-repository.dart';
+import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
+import 'package:flutter_application/src/screens/list-securisation.dart';
 import 'package:flutter_application/src/screens/modifier-prelevement.dart';
 import 'package:flutter_application/src/screens/nouveau-prelevement.dart';
-import 'package:flutter_application/src/widget/drawer-widget.dart';
 import 'package:flutter_application/src/widget/my-dialog.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -16,13 +16,15 @@ import 'package:dart_jts/dart_jts.dart' as jts;
 
 class MapPrelevement extends StatefulWidget {
   final List<PlanSondageModel?> planSondage;
-  final ParcelleModel? parcelle;
   final SecurisationModel securisation;
+  final ParcelleModel parcelle;
+  final bool leading;
 
   const MapPrelevement(
       {required this.planSondage,
-      required this.parcelle,
       required this.securisation,
+      required this.parcelle,
+      required this.leading,
       Key? key})
       : super(key: key);
 
@@ -68,14 +70,22 @@ class _MapPrelevementState extends State<MapPrelevement>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text("${widget.securisation.nom}"),
+        title: Text(widget.securisation.nom),
+        automaticallyImplyLeading: false,
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context, true);
-            },
-          ),
+          (widget.leading == false)
+              ? IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (BuildContext context) => ListSecurisation()));
+                  },
+                )
+              : IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  }),
         ],
       ),
       body: Center(
@@ -110,7 +120,6 @@ class _MapPrelevementState extends State<MapPrelevement>
           ],
         ),
       ),
-      drawer: MyDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: _showModal,
         child: Icon(Icons.menu),
@@ -120,7 +129,7 @@ class _MapPrelevementState extends State<MapPrelevement>
 
   _loadParcelle() {
     List<List<List<double>>> coordinates = [];
-    String polygonString = widget.parcelle!.geometry
+    String polygonString = widget.parcelle.geometry
         .toString()
         .replaceAll("MULTIPOLYGON (((", "")
         .replaceAll(")))", "");
@@ -170,13 +179,11 @@ class _MapPrelevementState extends State<MapPrelevement>
     List<LatLng> multipoints = points[0];
     for (var point in multipoints) {
       String coord = "(${point.longitude}, ${point.latitude})";
-      PrelevementModel? prelevement = await PrelevementRepository()
-          .getPrelevementByPlanSondage(coord, context)
-          .catchError((error) {});
+      PrelevementModel? prelevement =
+          await PrelevementRepository().getByPlanSondage(coord, context);
       // ignore: use_build_context_synchronously
-      PlanSondageModel ps = await PlanSondageRepository()
-          .getPlanSondageByCoords(coord, context)
-          .catchError((error) {});
+      PlanSondageModel? ps =
+          await PlanSondageRepository().getPlanSondageByCoords(coord, context);
       if (prelevement == null) {
         markers.add(
           Marker(
@@ -191,7 +198,7 @@ class _MapPrelevementState extends State<MapPrelevement>
                   context,
                   MaterialPageRoute(
                     builder: (context) => NouveauPrelevement(
-                        planSondage: ps, securisation: widget.securisation),
+                        planSondage: ps!, securisation: widget.securisation),
                   ),
                 );
                 if (result == true) {
@@ -288,10 +295,15 @@ class _MapPrelevementState extends State<MapPrelevement>
       builder: (BuildContext context) {
         return MyDialog(
           onPressed: () async {
-            await PrelevementRepository().deletePrelevement(item.id!, context);
+            await PrelevementRepository()
+                .deletePrelevement(item.id!, context)
+                .then((value) {
+              //Navigator.pop(context);
+              refreshPage();
+            });
             // ignore: use_build_context_synchronously
-            Navigator.pop(context);
-            refreshPage();
+            //Navigator.pop(context);
+            //refreshPage();
           },
         );
       },
@@ -329,9 +341,7 @@ class _MapPrelevementState extends State<MapPrelevement>
                             final planSondage = planSondageList[index]!;
                             return FutureBuilder<PrelevementModel?>(
                               future: PrelevementRepository()
-                                  .getPrelevementByPlanSondageId(
-                                      planSondage.id!, context)
-                                  .catchError((error) {}),
+                                  .getByPlanSondageId(planSondage.id!, context),
                               builder: (context, snapshot) {
                                 Color statusColor;
                                 if (snapshot.hasData && snapshot.data != null) {
@@ -369,6 +379,8 @@ class _MapPrelevementState extends State<MapPrelevement>
                                       if (statusColor != Colors.grey) {
                                         _deletePrelevement(
                                             context, snapshot.data!);
+                                        Navigator.pop(context);
+                                        refreshPage();
                                       } else {
                                         Navigator.pop(context);
                                         ScaffoldMessenger.of(context)

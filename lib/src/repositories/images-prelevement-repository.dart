@@ -2,23 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/api-services/ApiServices.dart';
-import 'package:flutter_application/src/models/images-observation-model.dart';
+import 'package:flutter_application/src/models/ImageModel.dart';
 import 'package:http/http.dart' as http;
 
-class ImagesObservationRepository {
+class ImagesPrelevementRepository {
   final ApiServices _apiServices = ApiServices();
 
-  Future<List<ImagesObservationModel>?> getImagesByObservation(
+  Future<List<ImageModel>?> getImagesByPrelevement(
       int id, BuildContext context) async {
     try {
       http.Response response =
-          await _apiServices.get("/ImagesObservations/show/$id");
+          await _apiServices.get("/Images/show/prelevement/$id");
       if (response.statusCode == 200) {
         dynamic responseJson = jsonDecode(response.body);
         final imagesData = responseJson as List;
-        List<ImagesObservationModel> images = imagesData
-            .map((json) => ImagesObservationModel.fromJson(json))
-            .toList();
+        List<ImageModel> images =
+            imagesData.map((json) => ImageModel.fromJson(json)).toList();
         return images;
       } else {
         // ignore: use_build_context_synchronously
@@ -32,9 +31,9 @@ class ImagesObservationRepository {
     }
   }
 
-  Future<void> deleteImageObservation(int id, BuildContext context) async {
+  Future<void> deleteImage(int id, BuildContext context) async {
     await _apiServices
-        .delete("/ImagesObservations/delete/$id")
+        .delete("/Images/delete/$id")
         .then((value) => Navigator.pop(context));
   }
 }

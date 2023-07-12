@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 class ObservationRepository {
   final ApiServices _apiServices = ApiServices();
 
-  Future<List<ObservationModel>> getAllObservations(
+  Future<List<ObservationModel>?> getAllObservations(
       int id, BuildContext context) async {
     try {
       http.Response response =
@@ -30,10 +30,9 @@ class ObservationRepository {
               Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
-    } catch (e) {
-      print('Erreur: $e');
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
-    throw Exception("Echec !");
   }
 
   Future<ObservationModel?> getByLatLng(
@@ -56,10 +55,9 @@ class ObservationRepository {
               Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
-    } catch (e) {
-      print('Erreur: $e');
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
-    throw Exception("Echec !");
   }
 
   void addObservation(
@@ -78,8 +76,6 @@ class ObservationRepository {
       "parcelle": p.toJson(p),
       "images": images.map((image) => image.toJson(image)).toList(),
     });
-    print(images.length);
-    print(response.body);
     if (response.statusCode == 200) {
       // ignore: use_build_context_synchronously
       Navigator.pop(context, true);
@@ -105,6 +101,23 @@ class ObservationRepository {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Server error : ${response.body}"),
       ));
+    }
+  }
+
+  Future<void> deleteObservation(int id, BuildContext context) async {
+    try {
+      http.Response response =
+          await _apiServices.delete("/Observation/delete/$id");
+      if (response.statusCode == 200) {
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
   }
 }

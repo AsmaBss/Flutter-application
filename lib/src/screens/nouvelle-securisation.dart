@@ -3,12 +3,12 @@ import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
-import 'package:flutter_application/src/repositories/ParcelleRepository.dart';
-import 'package:flutter_application/src/repositories/PlanSondageRepository.dart';
-import 'package:flutter_application/src/screens/MapPrelevement.dart';
+import 'package:flutter_application/src/repositories/parcelle-repository.dart';
+import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
+import 'package:flutter_application/src/screens/map-prelevement.dart';
 import 'package:flutter_application/src/widget/nouvelle-securisation-form-widget.dart';
 
-import '../repositories/SecurisationRepository.dart';
+import '../repositories/securisation-repository.dart';
 
 class NouvelleSecurisation extends StatefulWidget {
   @override
@@ -45,100 +45,107 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green,
-        title: Text("Nouvelle Sécurisation"),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(30.0),
-        child: Column(
-          children: [
-            NouvelleSecurisationFormWidget(
-              formKey: _formKey,
-              nom: nom,
-              valueParcelle: _selectedParcelle,
-              itemsParcelle: _parcelles.map((ParcelleModel parcelle) {
-                return DropdownMenuItem<ParcelleModel>(
-                  value: parcelle,
-                  child: Text(parcelle.nom!),
-                );
-              }).toList(),
-              onChangedDropdownParcelle: (newValue) {
-                setState(() {
-                  _selectedParcelle = newValue;
-                  _loadPlanSondage(_selectedParcelle!);
-                });
+    return WillPopScope(
+      onWillPop: () => Future.value(false),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          title: Text("Nouvelle Sécurisation"),
+          automaticallyImplyLeading: false,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(context, true);
               },
-              valueMunitionRef: _selectedMunitionReference,
-              itemsMunitionRef: MunitionReferenceEnum.values
-                  .map((value) => DropdownMenuItem(
-                        value: value,
-                        child: Text(value.sentence),
-                      ))
-                  .toList(),
-              onChangedDropdownMunitionRef: (newValue) {
-                setState(() {
-                  _selectedMunitionReference = newValue;
-                });
-              },
-              cotePlateforme: cotePlateforme,
-              onChangedCotePlateforme: (value) => updateCoteASecuriserValue(),
-              profondeurASecuriser: profondeurASecuriser,
-              onChangedProfondeurASecuriser: (value) =>
-                  updateCoteASecuriserValue(),
-              coteASecuriser: coteASecuriser,
-              planSondage: planSondage,
             ),
-            Padding(
-              padding: EdgeInsets.all(40.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        print(
-                            "mun ref => ${_selectedMunitionReference.toString()}");
-                        SecurisationModel securisation =
-                            await SecurisationRepository()
-                                .addSecurisation(
-                                    context,
-                                    SecurisationModel(
+          ],
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(30.0),
+          child: Column(
+            children: [
+              NouvelleSecurisationFormWidget(
+                formKey: _formKey,
+                nom: nom,
+                valueParcelle: _selectedParcelle,
+                itemsParcelle: _parcelles.map((ParcelleModel parcelle) {
+                  return DropdownMenuItem<ParcelleModel>(
+                    value: parcelle,
+                    child: Text(parcelle.nom!),
+                  );
+                }).toList(),
+                onChangedDropdownParcelle: (newValue) {
+                  setState(() {
+                    _selectedParcelle = newValue;
+                    _loadPlanSondage(_selectedParcelle!);
+                  });
+                },
+                valueMunitionRef: _selectedMunitionReference,
+                itemsMunitionRef: MunitionReferenceEnum.values
+                    .map((value) => DropdownMenuItem(
+                          value: value,
+                          child: Text(value.sentence),
+                        ))
+                    .toList(),
+                onChangedDropdownMunitionRef: (newValue) {
+                  setState(() {
+                    _selectedMunitionReference = newValue;
+                  });
+                },
+                cotePlateforme: cotePlateforme,
+                onChangedCotePlateforme: (value) => updateCoteASecuriserValue(),
+                profondeurASecuriser: profondeurASecuriser,
+                onChangedProfondeurASecuriser: (value) =>
+                    updateCoteASecuriserValue(),
+                coteASecuriser: coteASecuriser,
+                planSondage: planSondage,
+              ),
+              Padding(
+                padding: EdgeInsets.all(40.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text("Annuler"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          SecurisationModel? securisation =
+                              await SecurisationRepository().addSecurisation(
+                                  context,
+                                  SecurisationModel(
                                       nom: nom.text,
                                       munitionReference:
                                           _selectedMunitionReference!,
-                                      coteASecuriser:
-                                          int.parse(coteASecuriser.text),
                                       cotePlateforme:
                                           int.parse(cotePlateforme.text),
                                       profondeurASecuriser:
                                           int.parse(profondeurASecuriser.text),
-                                    ),
-                                    _selectedParcelle!)
-                                .catchError((error) {});
-                        // ignore: use_build_context_synchronously
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (BuildContext context) => MapPrelevement(
+                                      coteASecuriser:
+                                          int.parse(coteASecuriser.text)),
+                                  _selectedParcelle!);
+                          // ignore: use_build_context_synchronously
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (BuildContext context) => MapPrelevement(
                                   planSondage: _planSondages,
-                                  securisation: securisation,
-                                  parcelle: _selectedParcelle,
-                                )));
-                      }
-                    },
-                    child: Text("Enregistrer"),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Annuler"),
-                  ),
-                ],
+                                  securisation: securisation!,
+                                  parcelle: _selectedParcelle!,
+                                  leading: false)));
+                        }
+                      },
+                      child: Text("Enregistrer"),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -146,18 +153,19 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
 
   _loadParcelles() async {
     await ParcelleRepository().getAllParcelles(context).then((value) {
-      _parcelles = value;
-    }).catchError((error) {});
-    //_parcelles = list;
+      _parcelles = value!;
+    });
     setState(() {});
   }
 
   _loadPlanSondage(ParcelleModel parcelle) async {
     if (_selectedParcelle != "") {
-      List<PlanSondageModel> list =
-          await PlanSondageRepository().getPlanSondageByParcelle(parcelle.id!);
-      _planSondages = list;
-      planSondage.text = _planSondages.first.nom!;
+      await PlanSondageRepository()
+          .getByParcelle(parcelle.id!, context)
+          .then((value) {
+        _planSondages = value!;
+        planSondage.text = _planSondages.first.nom!;
+      });
     }
   }
 

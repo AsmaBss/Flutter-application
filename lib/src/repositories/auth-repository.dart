@@ -15,35 +15,30 @@ class AuthRepository {
     try {
       http.Response response = await _apiServices
           .post("/authenticate", jwtRequest.toJson(jwtRequest), noAuth: true);
+
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         return JwtResponse.fromJson(jsonData);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Email ou mot de passe invalide"),
-        ));
+        final jsonResponse = jsonDecode(response.body);
+        var x = jsonResponse['message'];
+        if (response.statusCode == 401) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(x),
+          ));
+        } else if (response.statusCode == 403) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(x),
+          ));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(x),
+          ));
+        }
       }
     } catch (e) {
       print('Erreur: $e');
     }
     throw Exception("An error occurred");
-  }
-
-  register(UserModel user, BuildContext context) async {
-    try {
-      http.Response response = await _apiServices
-          .post("/register/3", user.toJson(user), noAuth: true);
-      if (response.statusCode == 200) {
-        Navigator.of(context).push(
-            MaterialPageRoute(builder: (BuildContext context) => Login()));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content:
-              Text("Problème au niveau de serveur: ${response.statusCode}"),
-        ));
-      }
-    } catch (e) {
-      print('Erreur: $e');
-    }
   }
 }

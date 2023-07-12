@@ -1,9 +1,7 @@
 import 'dart:convert';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/classes/images_temp.dart';
-import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/images-observation-model.dart';
 import 'package:flutter_application/src/models/observation-model.dart';
 import 'package:flutter_application/src/repositories/images-observation-repository.dart';
@@ -11,7 +9,6 @@ import 'package:flutter_application/src/repositories/observation-repository.dart
 import 'package:flutter_application/src/screens/camera-page.dart';
 import 'package:flutter_application/src/widget/my-dialog.dart';
 import 'package:flutter_application/src/widget/nouvelle-observation-form-widget.dart';
-import 'package:latlong2/latlong.dart';
 
 class ModifierObservation extends StatefulWidget {
   final ObservationModel observation;
@@ -32,7 +29,6 @@ class _ModifierObservationState extends State<ModifierObservation> {
   @override
   initState() {
     super.initState();
-    print("tettt");
     nom.text = widget.observation.nom.toString();
     description.text = widget.observation.description.toString();
     _fetchImages();
@@ -47,7 +43,16 @@ class _ModifierObservationState extends State<ModifierObservation> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text("Modifier Observation"),
+        title: Text("Modifier Observation \n${widget.observation.nom}"),
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(30.0),
@@ -101,9 +106,22 @@ class _ModifierObservationState extends State<ModifierObservation> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        List<ImagesObservationModel> images = _images
+                        List<ImagesObservationModel> images = [];
+                        for (var element in _images) {
+                          if (element.id == 0) {
+                            images.add(ImagesObservationModel(
+                              image: element.image,
+                            ));
+                          } else if (element.id != 0) {
+                            images.add(ImagesObservationModel(
+                              id: element.id,
+                              image: element.image,
+                            ));
+                          }
+                        }
+                        /*List<ImagesObservationModel> images = _images
                             .map((i) => ImagesObservationModel(image: i.image))
-                            .toList();
+                            .toList();*/
                         ObservationRepository().updateObservation(
                             context,
                             ObservationModel(
@@ -134,13 +152,13 @@ class _ModifierObservationState extends State<ModifierObservation> {
   }
 
   _fetchImages() async {
-    List<ImagesObservationModel> list = await ImagesObservationRepository()
+    await ImagesObservationRepository()
         .getImagesByObservation(widget.observation.id!, context)
-        .catchError((error) {});
-    print(list);
-    for (var element in list) {
-      _images.add(ImagesTemp(id: element.id!, image: element.image!));
-    }
+        .then((value) {
+      for (var element in value!) {
+        _images.add(ImagesTemp(id: element.id!, image: element.image!));
+      }
+    });
     setState(() {});
   }
 
@@ -151,13 +169,22 @@ class _ModifierObservationState extends State<ModifierObservation> {
   }
 
   void _deleteImage(int index) {
+    ImagesTemp i = _images.elementAt(index);
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return MyDialog(
           onPressed: () async {
-            _images.removeAt(index);
-            Navigator.pop(context);
+            if (i.id == 0) {
+              _images.removeAt(index);
+              Navigator.pop(context);
+            } else {
+              await ImagesObservationRepository()
+                  .deleteImageObservation(i.id, context);
+              _images.removeAt(index);
+            }
+            /*_images.removeAt(index);
+            Navigator.pop(context);*/
             refreshPage();
           },
         );

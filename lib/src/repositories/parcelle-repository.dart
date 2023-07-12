@@ -7,13 +7,13 @@ import 'package:http/http.dart' as http;
 class ParcelleRepository {
   final ApiServices _apiServices = ApiServices();
 
-  Future<List<ParcelleModel>> getAllParcelles(BuildContext context) async {
+  Future<List<ParcelleModel>?> getAllParcelles(BuildContext context) async {
     try {
       http.Response response = await _apiServices.get("/Parcelle/show");
       if (response.statusCode == 200) {
         dynamic responseJson = jsonDecode(response.body);
-        List<dynamic> parcellesData =
-            responseJson is List ? responseJson : [responseJson];
+        final parcellesData =
+            responseJson as List; //? responseJson : [responseJson];
         List<ParcelleModel> parcellesList =
             parcellesData.map((json) => ParcelleModel.fromJson(json)).toList();
         return parcellesList;
@@ -24,10 +24,9 @@ class ParcelleRepository {
               Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
-    } catch (e) {
-      print('Erreur: $e');
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
-    throw Exception("Echec !");
   }
 
   Future<ParcelleModel> getParcelleById(int id, BuildContext context) async {
@@ -72,11 +71,34 @@ class ParcelleRepository {
     throw Exception("Echec !");
   }
 
+  Future<List<ParcelleModel>> getByUser(int id, BuildContext context) async {
+    try {
+      http.Response response =
+          await _apiServices.get("/Parcelle/show/user/$id");
+      if (response.statusCode == 200) {
+        dynamic responseJson = jsonDecode(response.body);
+        List<dynamic> parcellesData =
+            responseJson is List ? responseJson : [responseJson];
+        List<ParcelleModel> parcellesList =
+            parcellesData.map((json) => ParcelleModel.fromJson(json)).toList();
+        return parcellesList;
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } catch (e) {
+      print('Erreur: $e');
+    }
+    throw Exception("Echec !");
+  }
+
   Future<List> getCoordinates(int id, BuildContext context) async {
     try {
       http.Response response =
           await _apiServices.get("/Parcelle/show/coordinates/$id");
-      print("code = ${response.statusCode}");
       if (response.statusCode == 200) {
         dynamic responseJson = jsonDecode(response.body);
         final data = responseJson as List;

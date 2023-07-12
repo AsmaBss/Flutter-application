@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 class PrelevementRepository {
   final ApiServices _apiServices = ApiServices();
 
-  Future<PrelevementModel?> getPrelevementByPlanSondage(
+  Future<PrelevementModel?> getByPlanSondage(
       String coord, BuildContext context) async {
     try {
       http.Response response =
@@ -31,13 +31,12 @@ class PrelevementRepository {
               Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
-    } catch (e) {
-      print('Erreur: $e');
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
-    throw Exception("Echec !");
   }
 
-  Future<PrelevementModel?> getPrelevementByPlanSondageId(
+  Future<PrelevementModel?> getByPlanSondageId(
       int id, BuildContext context) async {
     try {
       http.Response response =
@@ -57,10 +56,27 @@ class PrelevementRepository {
               Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
-    } catch (e) {
-      print('Erreur: $e');
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
-    throw Exception("Echec !");
+  }
+
+  Future<int?> nbrBySecurisation(int id, BuildContext context) async {
+    try {
+      http.Response response = await _apiServices.get("/Prelevement/count/$id");
+      if (response.statusCode == 200) {
+        int count = int.parse(response.body);
+        return count;
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("Problème au niveau de serveur: ${response.statusCode}"),
+        ));
+      }
+    } on Exception catch (e) {
+      throw Exception(e.toString());
+    }
   }
 
   void addPrelevement(
@@ -120,28 +136,21 @@ class PrelevementRepository {
     }
   }
 
-  Future<int> nbrBySecurisation(int id, BuildContext context) async {
+  Future<void> deletePrelevement(int id, BuildContext context) async {
     try {
-      http.Response response = await _apiServices.get("/Prelevement/count/$id");
+      http.Response response =
+          await _apiServices.delete("/Prelevement/delete/$id");
       if (response.statusCode == 200) {
-        int count = int.parse(response.body);
-        return count;
+        Navigator.pop(context);
       } else {
-        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content:
               Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
+      //.then((value) => Navigator.pop(context));
     } catch (e) {
       print('Erreur: $e');
     }
-    throw Exception("Echec !");
-  }
-
-  deletePrelevement(int id, BuildContext context) async {
-    await _apiServices
-        .delete("/Prelevement/delete/$id")
-        .then((value) => Navigator.pop(context));
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
+import 'package:flutter_application/src/models/PlanSondageModel.dart';
+import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
 
 class PrelevementModel {
@@ -8,8 +10,6 @@ class PrelevementModel {
   int cotePlateforme;
   int profondeurASecuriser;
   int coteASecuriser;
-  int? planSondage;
-  int? securisation;
   StatutEnum? statut;
   String? remarques;
 
@@ -20,8 +20,6 @@ class PrelevementModel {
       required this.cotePlateforme,
       required this.profondeurASecuriser,
       required this.coteASecuriser,
-      this.planSondage,
-      this.securisation,
       required this.remarques,
       required this.statut});
 
@@ -29,8 +27,7 @@ class PrelevementModel {
   String toString() {
     return 'Prevelement { id: $id, numero: $numero, munitionReference: $munitionReference, '
         'cotePlateforme: $cotePlateforme, profondeurASecuriser: $profondeurASecuriser,  '
-        'coteASecuriser: $coteASecuriser, remarques: $remarques, statut: $statut, '
-        'planSondage: $planSondage, securisation: $securisation}\n';
+        'coteASecuriser: $coteASecuriser, remarques: $remarques, statut: $statut}\n';
   }
 
   factory PrelevementModel.fromJson(Map<String, dynamic> json) {
@@ -41,13 +38,12 @@ class PrelevementModel {
           MunitionReferenceEnum.fromJson(json['munitionReference']),
       statut:
           json['statut'] != null ? StatutEnum.fromJson(json['statut']) : null,
-      //statut: StatutEnum.fromJson(json['statut']),
       remarques: json['remarques'] != null ? json['remarques'] as String : null,
       cotePlateforme: json['cotePlateforme'] as int,
       profondeurASecuriser: json['profondeurASecuriser'] as int,
       coteASecuriser: json['coteASecuriser'] as int,
-      planSondage: json['planSondage'] as int,
-      securisation: json['securisation'] as int,
+      //planSondage: PlanSondageModel.fromJson(json['planSondage']),
+      //securisation: SecurisationModel.fromJson(json['securisation']),
     );
   }
 
@@ -61,8 +57,8 @@ class PrelevementModel {
       'cotePlateforme': p.cotePlateforme,
       'profondeurASecuriser': p.profondeurASecuriser,
       'coteASecuriser': p.coteASecuriser,
-      'planSondage': p.planSondage,
-      'securisation': p.securisation,
+      //'planSondage': p.planSondage,
+      //'securisation': p.securisation,
     };
   }
 
@@ -75,9 +71,7 @@ class PrelevementModel {
         statut: map['statut'],
         cotePlateforme: map['cotePlateforme'],
         profondeurASecuriser: map['profondeurASecuriser'],
-        coteASecuriser: map['coteASecuriser'],
-        planSondage: map['planSondage'],
-        securisation: map['securisation']);
+        coteASecuriser: map['coteASecuriser']);
   }
 
   Map<String, dynamic> toMap() {
@@ -88,9 +82,7 @@ class PrelevementModel {
       'remarques': remarques,
       'cotePlateforme': cotePlateforme,
       'profondeurASecuriser': profondeurASecuriser,
-      'coteASecuriser': coteASecuriser,
-      'planSondage': planSondage,
-      'securisation': securisation,
+      'coteASecuriser': coteASecuriser
     };
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/api-services/ApiServices.dart';
 import 'package:flutter_application/src/models/PasseModel.dart';
@@ -8,7 +7,7 @@ import 'package:http/http.dart' as http;
 class PasseRepository {
   final ApiServices _apiServices = ApiServices();
 
-  Future<List<PasseModel>> getPassesByPrelevement(
+  Future<List<PasseModel>?> getByPrelevement(
       int id, BuildContext context) async {
     try {
       http.Response response =
@@ -26,10 +25,9 @@ class PasseRepository {
               Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
-    } catch (e) {
-      print('Erreur: $e');
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
-    throw Exception("Echec !");
   }
 
   void addPasse(PasseModel p, int id, BuildContext context) async {
@@ -41,7 +39,6 @@ class PasseRepository {
         content: Text(response.body),
       ));
     } else {
-      print(response.body);
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Server error image: ${response.body}"),
