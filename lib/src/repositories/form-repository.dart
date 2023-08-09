@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 class FormRepository {
   final ApiServices _apiServices = ApiServices();
 
-  Future<FormModel> getById(int id, BuildContext context) async {
+  Future<FormModel?> getById(int id, BuildContext context) async {
     try {
       http.Response response = await _apiServices.get("/Form/show/$id");
       if (response.statusCode == 200) {
@@ -22,9 +22,8 @@ class FormRepository {
               Text("Problème au niveau de serveur: ${response.statusCode}"),
         ));
       }
-    } catch (e) {
-      print('Erreur: $e');
+    } on Exception catch (e) {
+      throw Exception(e.toString());
     }
-    throw Exception("Echec !");
   }
 }

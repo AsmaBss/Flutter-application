@@ -53,24 +53,26 @@ class ParcelleModel {
   }
 
   factory ParcelleModel.fromMap(Map<String, dynamic> map) {
-    return ParcelleModel(nom: map['nom'] ?? "")
+    return ParcelleModel(id: map['id'] ?? "")
+      ..nom = (map['nom'] ?? "")
+      ..type = (map['type'] ?? "")
+      ..geometry = (map['geometry'] ?? "")
       ..fichierShp = (map['fichierShp'] ?? "")
       ..fichierShx = (map['fichierShx'] ?? "")
       ..fichierDbf = (map['fichierDbf'] ?? "")
-      ..fichierPrj = (map['fichierPrj'] ?? "")
-      ..type = (map['type'] ?? "")
-      ..geometry = (map['geometry'] ?? "");
+      ..fichierPrj = (map['fichierPrj'] ?? "");
   }
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'nom': nom,
+      'type': type,
+      'geometry': geometry,
       'fichierShp': fichierShp,
       'fichierShx': fichierShx,
       'fichierDbf': fichierDbf,
       'fichierPrj': fichierPrj,
-      'type': type,
-      'geometry': geometry
     };
   }
 }

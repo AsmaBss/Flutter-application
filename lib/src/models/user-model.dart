@@ -1,3 +1,4 @@
+import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/role-model.dart';
 
 class UserModel {
@@ -6,7 +7,9 @@ class UserModel {
   String? password;
   String? firstname;
   String? lastname;
-  Set<RoleModel>? roles;
+  //Set<RoleModel>? roles;
+  int? role_id;
+  Set<ParcelleModel>? parcelles;
 
   UserModel({
     this.id,
@@ -14,14 +17,15 @@ class UserModel {
     this.password,
     this.firstname,
     this.lastname,
-    this.roles, // = const {},
+    this.role_id, // = const {},
+    this.parcelles,
   });
 
   @override
   String toString() {
     return 'User { id: $id, email: $email, '
         'password: $password, firstname: $firstname, '
-        'lastname: $lastname, roles: $roles}\n'; //
+        'lastname: $lastname, role_id: $role_id, parcelles: $parcelles}\n'; //
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -31,8 +35,12 @@ class UserModel {
       password: json['password'] as String,
       firstname: json['firstname'] as String,
       lastname: json['lastname'] as String,
-      roles: (json['roles'] as List<dynamic>)
+      /*roles: (json['roles'] as List<dynamic>)
           .map((roleJson) => RoleModel.fromJson(roleJson))
+          .toSet(),*/
+      role_id: json['roles'][0]['id'],
+      parcelles: (json['parcelles'] as List<dynamic>)
+          .map((parcelleJson) => ParcelleModel.fromJson(parcelleJson))
           .toSet(),
     );
   }
@@ -44,25 +52,34 @@ class UserModel {
       'password': p.password,
       'firstname': p.firstname,
       'lastname': p.lastname,
-      'roles': p.roles?.map((role) => role.toJson(role)).toList(),
+      //'roles': p.roles?.map((role) => role.toJson(role)).toList(),
+      'role_id': p.role_id,
+      'parcelles':
+          p.parcelles?.map((parcelle) => parcelle.toJson(parcelle)).toList(),
     };
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
-    return UserModel(email: map['email'] ?? "")
+    return UserModel(id: map['id'] ?? "")
+      ..email = (map['email'] ?? "")
       ..password = (map['password'] ?? "")
       ..firstname = (map['firstname'] ?? "")
       ..lastname = (map['lastname'] ?? "")
-      ..roles = (map['roles'] ?? "");
+      ..role_id = (map['role_id'] ?? "");
+    /*..parcelles = (map['parcelles'] as List<dynamic>?)
+          ?.map((parcelleJson) => ParcelleModel.fromJson(parcelleJson))
+          .toSet();*/
   }
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'email': email,
       'password': password,
       'firstname': firstname,
       'lastname': lastname,
-      'roles': roles,
+      'role_id': role_id,
+      //'parcelles': parcelles,
     };
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/screens/list-securisation.dart';
+import 'package:flutter_application/src/screens/modif/list-parcelle.dart';
 import 'package:flutter_application/src/screens/nouvelle-securisation.dart';
 import 'package:flutter_application/src/screens/list-observations.dart';
 
@@ -30,16 +30,13 @@ class _MyDrawerState extends State<MyDrawer> {
           ),
           ListTile(
             title: Text('Liste des sécurisations'),
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => ListSecurisation()));
-            },
+            onTap: () {},
           ),
           ListTile(
             title: Text('Nouvelle Sécurisation'),
             onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => NouvelleSecurisation()));
+              /*Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => NouvelleSecurisation()));*/
             },
           ),
         ],

@@ -4,12 +4,12 @@ import 'package:flutter_application/src/widget/nouveau-passe-form-widget.dart';
 import 'package:photo_view/photo_view.dart';
 
 class NouveauPasse extends StatefulWidget {
-  final Function(MunitionReferenceEnum, int, int, int, int) nvPasse;
-  final String cotePlateforme;
+  final Function(MunitionReferenceEnum, double, double, double, double) nvPasse;
+  final double cotePlateforme;
   final MunitionReferenceEnum munitionRef;
-  final int profSonde;
-  final int profSec;
-  final int count;
+  final double profSonde;
+  final double profSec;
+  final double count;
   final bool first;
 
   const NouveauPasse(
@@ -29,22 +29,23 @@ class NouveauPasse extends StatefulWidget {
 
 class _NouveauPasseState extends State<NouveauPasse> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController gradient = TextEditingController(text: "0");
-  TextEditingController coteSecurisee = TextEditingController(text: "0");
-  TextEditingController profondeurSecurisee = TextEditingController(text: "0");
-  TextEditingController profondeurSonde = TextEditingController(text: "0");
+  TextEditingController gradient = TextEditingController(text: "0.0");
+  TextEditingController coteSecurisee = TextEditingController(text: "0.0");
+  TextEditingController profondeurSecurisee =
+      TextEditingController(text: "0.0");
+  TextEditingController profondeurSonde = TextEditingController(text: "0.0");
   MunitionReferenceEnum? _selectedMunitionReference;
 
   @override
   initState() {
     _selectedMunitionReference = widget.munitionRef;
     if (widget.first == true) {
-      profondeurSonde.text = "0";
+      profondeurSonde.text = "0.0";
     } else {
-      int result1 = widget.profSonde + widget.profSec;
+      double result1 = widget.profSonde + widget.profSec;
       profondeurSonde.text = result1.toString();
     }
-    int result2 = int.parse(widget.cotePlateforme) - widget.count;
+    double result2 = widget.cotePlateforme - widget.count;
     coteSecurisee.text = result2.toString();
     super.initState();
   }
@@ -61,10 +62,10 @@ class _NouveauPasseState extends State<NouveauPasse> {
   Future<void> _addNvPasse() async {
     widget.nvPasse(
         _selectedMunitionReference!,
-        int.parse(gradient.text),
-        int.parse(profondeurSonde.text),
-        int.parse(coteSecurisee.text),
-        int.parse(profondeurSecurisee.text));
+        double.parse(gradient.text),
+        double.parse(profondeurSonde.text),
+        double.parse(coteSecurisee.text),
+        double.parse(profondeurSecurisee.text));
     Navigator.pop(context);
   }
 

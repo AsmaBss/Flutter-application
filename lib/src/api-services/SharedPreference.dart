@@ -42,4 +42,9 @@ class SharedPreference {
       return null;
     }
   }
+
+  Future<void> removeUser() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove('user');
+  }
 }

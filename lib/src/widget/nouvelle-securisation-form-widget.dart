@@ -8,12 +8,9 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
       cotePlateforme,
       coteASecuriser,
       profondeurASecuriser,
-      planSondage;
-  final ParcelleModel? valueParcelle;
+      parcelle;
   final MunitionReferenceEnum? valueMunitionRef;
-  final List<DropdownMenuItem<ParcelleModel>>? itemsParcelle;
   final List<DropdownMenuItem<MunitionReferenceEnum>>? itemsMunitionRef;
-  final void Function(ParcelleModel?)? onChangedDropdownParcelle;
   final void Function(MunitionReferenceEnum?)? onChangedDropdownMunitionRef;
   final Function(String)? onChangedCotePlateforme,
       onChangedProfondeurASecuriser;
@@ -21,9 +18,6 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
   NouvelleSecurisationFormWidget({
     this.formKey,
     this.nom,
-    this.valueParcelle,
-    this.itemsParcelle,
-    this.onChangedDropdownParcelle,
     this.valueMunitionRef,
     this.itemsMunitionRef,
     this.onChangedDropdownMunitionRef,
@@ -32,7 +26,7 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
     this.coteASecuriser,
     this.profondeurASecuriser,
     this.onChangedProfondeurASecuriser,
-    this.planSondage,
+    this.parcelle,
   });
 
   @override
@@ -46,6 +40,17 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(bottom: 15.0),
             child: TextFormField(
+              controller: parcelle,
+              decoration: InputDecoration(
+                hintText: 'Parcelle sélectionnée',
+                labelText: 'Parcelle sélectionnée',
+              ),
+              readOnly: true,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 15.0),
+            child: TextFormField(
               controller: nom,
               decoration: InputDecoration(
                 labelText: "Nom de la sécurisation",
@@ -55,21 +60,6 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Veuillez renseigner ce champ';
-                }
-                return null;
-              },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(bottom: 15.0),
-            child: DropdownButtonFormField<ParcelleModel>(
-              value: valueParcelle,
-              hint: Text('Sélectionner un lot'),
-              items: itemsParcelle,
-              onChanged: onChangedDropdownParcelle,
-              validator: (value) {
-                if (value == null) {
                   return 'Veuillez renseigner ce champ';
                 }
                 return null;
@@ -151,17 +141,6 @@ class NouvelleSecurisationFormWidget extends StatelessWidget {
                 }
                 return null;
               },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(bottom: 15.0),
-            child: TextFormField(
-              controller: planSondage,
-              decoration: InputDecoration(
-                hintText: 'Plan de sondage sélectionné',
-                labelText: 'Plan de sondage sélectionné',
-              ),
-              readOnly: true,
             ),
           ),
         ],

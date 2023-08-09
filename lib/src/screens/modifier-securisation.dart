@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
-import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
-import 'package:flutter_application/src/repositories/parcelle-repository.dart';
-import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
+import 'package:flutter_application/src/sqlite/SecurisationQuery.dart';
 import 'package:flutter_application/src/widget/nouvelle-securisation-form-widget.dart';
-
-import '../repositories/securisation-repository.dart';
 
 class ModifierSecurisation extends StatefulWidget {
   final SecurisationModel securisation;
-  final ParcelleModel? parcelle;
+  final ParcelleModel parcelle;
 
   const ModifierSecurisation(
       {required this.securisation, required this.parcelle, Key? key})
@@ -27,22 +23,19 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
   TextEditingController cotePlateforme = TextEditingController();
   TextEditingController coteASecuriser = TextEditingController();
   TextEditingController profondeurASecuriser = TextEditingController();
-  TextEditingController planSondage = TextEditingController();
-  List<ParcelleModel> _parcelles = [];
-  ParcelleModel? _selectedParcelle;
-  List<PlanSondageModel> _planSondages = [];
+  TextEditingController parcelle = TextEditingController();
   MunitionReferenceEnum? _selectedMunitionReference;
 
   @override
   initState() {
     super.initState();
     nom.text = widget.securisation.nom.toString();
-    _loadParcelles();
     _selectedMunitionReference = widget.securisation.munitionReference;
     cotePlateforme.text = widget.securisation.cotePlateforme.toString();
     profondeurASecuriser.text =
         widget.securisation.profondeurASecuriser.toString();
     coteASecuriser.text = widget.securisation.coteASecuriser.toString();
+    parcelle.text = widget.parcelle.nom.toString();
   }
 
   @override
@@ -68,19 +61,7 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
             NouvelleSecurisationFormWidget(
               formKey: _formKey,
               nom: nom,
-              valueParcelle: _selectedParcelle,
-              itemsParcelle: _parcelles.map((ParcelleModel parcelle) {
-                return DropdownMenuItem<ParcelleModel>(
-                  value: parcelle,
-                  child: Text(parcelle.nom!),
-                );
-              }).toList(),
-              onChangedDropdownParcelle: (newValue) {
-                setState(() {
-                  _selectedParcelle = newValue;
-                  _loadPlanSondage(_selectedParcelle!);
-                });
-              },
+              parcelle: parcelle,
               valueMunitionRef: _selectedMunitionReference,
               itemsMunitionRef: MunitionReferenceEnum.values
                   .map((value) => DropdownMenuItem(
@@ -99,7 +80,6 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
               onChangedProfondeurASecuriser: (value) =>
                   updateCoteASecuriserValue(),
               coteASecuriser: coteASecuriser,
-              planSondage: planSondage,
             ),
             Padding(
               padding: EdgeInsets.all(40.0),
@@ -110,17 +90,33 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        SecurisationRepository().updateSecurisation(
+                        /*SecurisationRepository().updateSecurisation(
                             context,
                             SecurisationModel(
-                              nom: nom.text,
-                              munitionReference: _selectedMunitionReference!,
-                              cotePlateforme: int.parse(cotePlateforme.text),
-                              profondeurASecuriser:
-                                  int.parse(profondeurASecuriser.text),
-                              coteASecuriser: int.parse(coteASecuriser.text),
-                            ),
-                            widget.securisation.id!);
+                                id: widget.securisation.id,
+                                nom: nom.text,
+                                munitionReference: _selectedMunitionReference!,
+                                cotePlateforme:
+                                    double.parse(cotePlateforme.text),
+                                profondeurASecuriser:
+                                    double.parse(profondeurASecuriser.text),
+                                coteASecuriser:
+                                    double.parse(coteASecuriser.text),
+                                parcelle: widget.parcelle.id),
+                            widget.securisation.id!);*/
+                        SecurisationQuery().updateSecurisation(
+                            SecurisationModel(
+                                id: widget.securisation.id,
+                                nom: nom.text,
+                                munitionReference: _selectedMunitionReference!,
+                                cotePlateforme:
+                                    double.parse(cotePlateforme.text),
+                                profondeurASecuriser:
+                                    double.parse(profondeurASecuriser.text),
+                                coteASecuriser:
+                                    double.parse(coteASecuriser.text),
+                                parcelle: widget.parcelle.id),
+                            context);
                       }
                     },
                     child: Text("Enregistrer"),
@@ -140,28 +136,6 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
     );
   }
 
-  _loadParcelles() async {
-    List<ParcelleModel>? list =
-        await ParcelleRepository().getAllParcelles(context);
-    _parcelles = list!;
-    _parcelles
-        .map((ParcelleModel e) => {
-              if (e.toString() == widget.parcelle.toString())
-                {_selectedParcelle = e, _loadPlanSondage(_selectedParcelle!)}
-            })
-        .toList();
-    setState(() {});
-  }
-
-  _loadPlanSondage(ParcelleModel parcelle) async {
-    if (_selectedParcelle != "") {
-      List<PlanSondageModel>? list =
-          await PlanSondageRepository().getByParcelle(parcelle.id!, context);
-      _planSondages = list!;
-      planSondage.text = _planSondages.first.nom!;
-    }
-  }
-
   void updateCoteASecuriserValue() {
     String firstValue = cotePlateforme.text;
     String secondValue = profondeurASecuriser.text;
@@ -171,7 +145,7 @@ class _ModifierSecurisationState extends State<ModifierSecurisation> {
       return;
     }
 
-    int result = int.parse(firstValue) - int.parse(secondValue);
+    double result = double.parse(firstValue) - double.parse(secondValue);
     coteASecuriser.text = result.toString();
     setState(() {});
   }

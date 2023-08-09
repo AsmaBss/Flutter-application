@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/screens/list-securisation.dart';
+import 'package:flutter_application/src/screens/modif/list-parcelle.dart';
 import 'package:flutter_application/src/screens/form-example.dart';
 import 'package:flutter_application/src/screens/list-observations.dart';
-import 'package:flutter_application/src/screens/testSecurisation.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({Key? key}) : super(key: key);
@@ -41,12 +40,6 @@ class _TestPageState extends State<TestPage>
           children: [
             Navigator(
               onGenerateRoute: (settings) => MaterialPageRoute(
-                builder: (context) => ListSecurisation(),
-                settings: settings,
-              ),
-            ),
-            Navigator(
-              onGenerateRoute: (settings) => MaterialPageRoute(
                 builder: (context) => ListObservations(),
                 settings: settings,
               ),
@@ -66,13 +59,13 @@ class _TestPageState extends State<TestPage>
             controller: _tabController,
             tabs: [
               Tab(
-                text: "Sécurisations",
+                text: "Parcelles",
               ),
               Tab(
                 text: "Observations",
               ),
               Tab(
-                text: "Formulaires",
+                text: "FormExample",
               ),
             ],
           ),

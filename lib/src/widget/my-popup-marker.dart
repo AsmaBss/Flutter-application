@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MyPopupMarker extends StatelessWidget {
-  final void Function()? onPressed;
   final String titre;
+  final void Function()? onPressed;
 
   MyPopupMarker({required this.onPressed, required this.titre});
 

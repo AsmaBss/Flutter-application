@@ -14,6 +14,28 @@ class SynchronisationModel {
       this.data,
       this.syncStatus});
 
+  factory SynchronisationModel.fromJson(Map<String, dynamic> json) {
+    return SynchronisationModel(
+      id: json['id'] as int,
+      tableName: json['tableName'] as String,
+      recordId: json['recordId'] as int,
+      operation: json['operation'] as String,
+      data: json['data'] as String,
+      syncStatus: json['syncStatus'] as int,
+    );
+  }
+
+  Map<String, dynamic> toJson(SynchronisationModel p) {
+    return {
+      'id': p.id,
+      'tableName': p.tableName,
+      'recordId': p.recordId,
+      'operation': p.operation,
+      'data': p.data,
+      'syncStatus': p.syncStatus,
+    };
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

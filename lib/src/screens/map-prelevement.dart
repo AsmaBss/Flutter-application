@@ -5,8 +5,6 @@ import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/repositories/prelevement-repository.dart';
-import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
-import 'package:flutter_application/src/screens/list-securisation.dart';
 import 'package:flutter_application/src/screens/modifier-prelevement.dart';
 import 'package:flutter_application/src/screens/nouveau-prelevement.dart';
 import 'package:flutter_application/src/widget/my-dialog.dart';
@@ -77,8 +75,8 @@ class _MapPrelevementState extends State<MapPrelevement>
               ? IconButton(
                   icon: Icon(Icons.arrow_back),
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (BuildContext context) => ListSecurisation()));
+                    /*Navigator.of(context).push(MaterialPageRoute(
+                        builder: (BuildContext context) => ListSecurisation()));*/
                   },
                 )
               : IconButton(
@@ -155,7 +153,7 @@ class _MapPrelevementState extends State<MapPrelevement>
   }
 
   _loadPlanSondage() async {
-    List<String?> geometries = widget.planSondage
+    /*List<String?> geometries = widget.planSondage
         .map((e) => e!.geometry
             .toString()
             .replaceAll("POINT (", "")
@@ -184,6 +182,7 @@ class _MapPrelevementState extends State<MapPrelevement>
       // ignore: use_build_context_synchronously
       PlanSondageModel? ps =
           await PlanSondageRepository().getPlanSondageByCoords(coord, context);
+      print("error");
       if (prelevement == null) {
         markers.add(
           Marker(
@@ -245,7 +244,7 @@ class _MapPrelevementState extends State<MapPrelevement>
         );
       }
       setState(() {});
-    }
+    }*/
   }
 
   LatLng _calculateCentroid(List<LatLng> polygon) {
@@ -296,7 +295,7 @@ class _MapPrelevementState extends State<MapPrelevement>
         return MyDialog(
           onPressed: () async {
             await PrelevementRepository()
-                .deletePrelevement(item.id!, context)
+                .deletePrelevement(item, context)
                 .then((value) {
               //Navigator.pop(context);
               refreshPage();
@@ -327,13 +326,14 @@ class _MapPrelevementState extends State<MapPrelevement>
             child: Center(
               child: Column(
                 children: <Widget>[
-                  Text(widget.parcelle!.nom!,
+                  Text(widget.parcelle.nom!,
                       style: TextStyle(fontSize: 20, color: Colors.green)),
                   FutureBuilder<List<PlanSondageModel?>>(
                     future: _fetchPlanSondageList(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         final planSondageList = snapshot.data!;
+                        print(planSondageList);
                         return ListView.builder(
                           shrinkWrap: true,
                           itemCount: planSondageList.length,

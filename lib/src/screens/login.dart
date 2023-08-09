@@ -3,7 +3,11 @@ import 'package:flutter_application/src/api-services/SharedPreference.dart';
 import 'package:flutter_application/src/models/TypeRoleEnum.dart';
 import 'package:flutter_application/src/models/jwt-request.dart';
 import 'package:flutter_application/src/repositories/auth-repository.dart';
-import 'package:flutter_application/src/screens/TestPage.dart';
+import 'package:flutter_application/src/screens/modif/list-parcelle.dart';
+import 'package:flutter_application/src/sqlite/SecurisationQuery.dart';
+import 'package:flutter_application/src/sqlite/parcelle-query.dart';
+import 'package:flutter_application/src/sqlite/plan-sondage-query.dart';
+import 'package:flutter_application/src/sqlite/prelevement-query.dart';
 import 'package:flutter_application/src/widget/login-form-widget.dart';
 
 class Login extends StatefulWidget {
@@ -63,22 +67,39 @@ class _LoginState extends State<Login> {
                                       username: username.text,
                                       password: password.text),
                                   context)
-                              .then((value) {
-                            value.user.roles?.forEach((role) {
+                              .then((value) async {
+                            if (value?.user != null) {
+                              if (value?.user.role_id != 3) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content: Text("Vous n'avez pas le droit !"),
+                                ));
+                              } else {
+                                SharedPreference()
+                                    .storeJwtToken(value!.jwtToken);
+                                SharedPreference().storeUser(value.user);
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (BuildContext context) =>
+                                        ListParcelle(user: value.user)));
+                              }
+                            }
+                            /*value!.user.roles?.forEach((role) {
                               if (role.type != TypeRoleEnum.SUPERVISOR) {
                                 SharedPreference()
                                     .storeJwtToken(value.jwtToken);
                                 SharedPreference().storeUser(value.user);
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (BuildContext context) =>
-                                        TestPage()));
+                                        ListParcelle(user: value.user)
+                                    //TestPage()
+                                    ));
                               } else if (role.type == TypeRoleEnum.SUPERVISOR) {
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(SnackBar(
                                   content: Text("Vous n'avez pas le droit !"),
                                 ));
                               }
-                            });
+                            });*/
                           });
                         }
                       },

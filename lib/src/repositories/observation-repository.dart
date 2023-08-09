@@ -5,6 +5,7 @@ import 'package:flutter_application/src/api-services/ApiServices.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/images-observation-model.dart';
 import 'package:flutter_application/src/models/observation-model.dart';
+import 'package:flutter_application/src/sqlite/observation-query.dart';
 import 'package:http/http.dart' as http;
 
 class ObservationRepository {
@@ -12,27 +13,23 @@ class ObservationRepository {
 
   Future<List<ObservationModel>?> getAllObservations(
       int id, BuildContext context) async {
-    try {
-      http.Response response =
-          await _apiServices.get("/Observation/show/parcelle/$id");
-      if (response.statusCode == 200) {
-        dynamic responseJson = jsonDecode(response.body);
-        List<dynamic> observationsData =
-            responseJson is List ? responseJson : [responseJson];
-        List<ObservationModel> observationsList = observationsData
-            .map((json) => ObservationModel.fromJson(json))
-            .toList();
-        return observationsList;
-      } else {
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content:
-              Text("Problème au niveau de serveur: ${response.statusCode}"),
-        ));
-      }
-    } on Exception catch (e) {
-      throw Exception(e.toString());
+    //try {
+    http.Response response =
+        await _apiServices.get("/Observation/show/parcelle/$id");
+    if (response.statusCode == 200) {
+      dynamic responseJson = jsonDecode(response.body);
+      List<dynamic> observationsData =
+          responseJson is List ? responseJson : [responseJson];
+      List<ObservationModel> observationsList = observationsData
+          .map((json) => ObservationModel.fromJson(json))
+          .toList();
+      return observationsList;
+    } else {
+      return await ObservationQuery().showObservationByParcelleId(id);
     }
+    /*} on Exception catch (e) {
+      throw Exception(e.toString());
+    }*/
   }
 
   Future<ObservationModel?> getByLatLng(

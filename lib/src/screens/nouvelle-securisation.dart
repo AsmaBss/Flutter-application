@@ -3,14 +3,15 @@ import 'package:flutter_application/src/models/MunitionReferenceEnum.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/PlanSondageModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
-import 'package:flutter_application/src/repositories/parcelle-repository.dart';
-import 'package:flutter_application/src/repositories/plan-sondage-repository.dart';
-import 'package:flutter_application/src/screens/map-prelevement.dart';
+import 'package:flutter_application/src/sqlite/SecurisationQuery.dart';
 import 'package:flutter_application/src/widget/nouvelle-securisation-form-widget.dart';
 
-import '../repositories/securisation-repository.dart';
-
 class NouvelleSecurisation extends StatefulWidget {
+  final ParcelleModel parcelle;
+
+  const NouvelleSecurisation({required this.parcelle, Key? key})
+      : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _NouvelleSecurisationState();
 }
@@ -18,19 +19,18 @@ class NouvelleSecurisation extends StatefulWidget {
 class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController nom = TextEditingController();
-  TextEditingController cotePlateforme = TextEditingController(text: "0");
-  TextEditingController coteASecuriser = TextEditingController(text: "0");
-  TextEditingController profondeurASecuriser = TextEditingController(text: "0");
-  TextEditingController planSondage = TextEditingController();
-  List<ParcelleModel> _parcelles = [];
-  ParcelleModel? _selectedParcelle;
+  TextEditingController cotePlateforme = TextEditingController(text: "0.0");
+  TextEditingController coteASecuriser = TextEditingController(text: "0.0");
+  TextEditingController profondeurASecuriser =
+      TextEditingController(text: "0.0");
+  TextEditingController parcelle = TextEditingController();
   List<PlanSondageModel> _planSondages = [];
   MunitionReferenceEnum? _selectedMunitionReference;
 
   @override
   initState() {
     super.initState();
-    _loadParcelles();
+    parcelle.text = widget.parcelle.nom.toString();
   }
 
   @override
@@ -39,7 +39,7 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
     cotePlateforme.dispose();
     coteASecuriser.dispose();
     profondeurASecuriser.dispose();
-    planSondage.dispose();
+    parcelle.dispose();
     super.dispose();
   }
 
@@ -68,19 +68,7 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
               NouvelleSecurisationFormWidget(
                 formKey: _formKey,
                 nom: nom,
-                valueParcelle: _selectedParcelle,
-                itemsParcelle: _parcelles.map((ParcelleModel parcelle) {
-                  return DropdownMenuItem<ParcelleModel>(
-                    value: parcelle,
-                    child: Text(parcelle.nom!),
-                  );
-                }).toList(),
-                onChangedDropdownParcelle: (newValue) {
-                  setState(() {
-                    _selectedParcelle = newValue;
-                    _loadPlanSondage(_selectedParcelle!);
-                  });
-                },
+                parcelle: parcelle,
                 valueMunitionRef: _selectedMunitionReference,
                 itemsMunitionRef: MunitionReferenceEnum.values
                     .map((value) => DropdownMenuItem(
@@ -99,7 +87,6 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                 onChangedProfondeurASecuriser: (value) =>
                     updateCoteASecuriserValue(),
                 coteASecuriser: coteASecuriser,
-                planSondage: planSondage,
               ),
               Padding(
                 padding: EdgeInsets.all(40.0),
@@ -116,27 +103,33 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
                     ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          SecurisationModel? securisation =
-                              await SecurisationRepository().addSecurisation(
-                                  context,
-                                  SecurisationModel(
-                                      nom: nom.text,
-                                      munitionReference:
-                                          _selectedMunitionReference!,
-                                      cotePlateforme:
-                                          int.parse(cotePlateforme.text),
-                                      profondeurASecuriser:
-                                          int.parse(profondeurASecuriser.text),
-                                      coteASecuriser:
-                                          int.parse(coteASecuriser.text)),
-                                  _selectedParcelle!);
-                          // ignore: use_build_context_synchronously
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (BuildContext context) => MapPrelevement(
-                                  planSondage: _planSondages,
-                                  securisation: securisation!,
-                                  parcelle: _selectedParcelle!,
-                                  leading: false)));
+                          /*SecurisationRepository().addSecurisation(
+                              context,
+                              SecurisationModel(
+                                  nom: nom.text,
+                                  munitionReference:
+                                      _selectedMunitionReference!,
+                                  cotePlateforme:
+                                      double.parse(cotePlateforme.text),
+                                  profondeurASecuriser:
+                                      double.parse(profondeurASecuriser.text),
+                                  coteASecuriser:
+                                      double.parse(coteASecuriser.text),
+                                  parcelle: widget.parcelle.id),
+                              widget.parcelle);*/
+                          SecurisationQuery().addSecurisation(
+                              SecurisationModel(
+                                  nom: nom.text,
+                                  munitionReference:
+                                      _selectedMunitionReference!,
+                                  cotePlateforme:
+                                      double.parse(cotePlateforme.text),
+                                  profondeurASecuriser:
+                                      double.parse(profondeurASecuriser.text),
+                                  coteASecuriser:
+                                      double.parse(coteASecuriser.text),
+                                  parcelle: widget.parcelle.id),
+                              context);
                         }
                       },
                       child: Text("Enregistrer"),
@@ -151,24 +144,6 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
     );
   }
 
-  _loadParcelles() async {
-    await ParcelleRepository().getAllParcelles(context).then((value) {
-      _parcelles = value!;
-    });
-    setState(() {});
-  }
-
-  _loadPlanSondage(ParcelleModel parcelle) async {
-    if (_selectedParcelle != "") {
-      await PlanSondageRepository()
-          .getByParcelle(parcelle.id!, context)
-          .then((value) {
-        _planSondages = value!;
-        planSondage.text = _planSondages.first.nom!;
-      });
-    }
-  }
-
   void updateCoteASecuriserValue() {
     String firstValue = cotePlateforme.text;
     String secondValue = profondeurASecuriser.text;
@@ -178,7 +153,7 @@ class _NouvelleSecurisationState extends State<NouvelleSecurisation> {
       return;
     }
 
-    int result = int.parse(firstValue) - int.parse(secondValue);
+    double result = double.parse(firstValue) - double.parse(secondValue);
     coteASecuriser.text = result.toString();
     setState(() {});
   }

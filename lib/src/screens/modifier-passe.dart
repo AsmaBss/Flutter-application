@@ -7,7 +7,8 @@ import 'package:photo_view/photo_view.dart';
 class ModifierPasse extends StatefulWidget {
   final PassesTemp passe;
   final int index;
-  final Function(int, MunitionReferenceEnum, int, int, int, int) updatePasse;
+  final Function(int, MunitionReferenceEnum, double, double, double, double)
+      updatePasse;
 
   const ModifierPasse(
       {required this.passe,
@@ -51,10 +52,10 @@ class _ModifierPasseState extends State<ModifierPasse> {
     widget.updatePasse(
         widget.index,
         _selectedMunitionReference,
-        int.parse(gradient.text),
-        int.parse(profondeurSonde.text),
-        int.parse(coteSecurisee.text),
-        int.parse(profondeurSecurisee.text));
+        double.parse(gradient.text),
+        double.parse(profondeurSonde.text),
+        double.parse(coteSecurisee.text),
+        double.parse(profondeurSecurisee.text));
     Navigator.pop(context);
   }
 

@@ -12,4 +12,10 @@ class JwtResponse {
       jwtToken: json['jwtToken'],
     );
   }
+  factory JwtResponse.fromMap(Map<String, dynamic> map) {
+    return JwtResponse(
+      user: UserModel.fromMap(map['user']),
+      jwtToken: map['jwtToken'] ?? '',
+    );
+  }
 }

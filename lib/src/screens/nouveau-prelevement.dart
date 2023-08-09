@@ -10,17 +10,17 @@ import 'package:flutter_application/src/models/PrelevementModel.dart';
 import 'package:flutter_application/src/models/SecurisationModel.dart';
 import 'package:flutter_application/src/models/StatutEnum.dart';
 import 'package:flutter_application/src/models/ImageModel.dart';
-import 'package:flutter_application/src/repositories/prelevement-repository.dart';
 import 'package:flutter_application/src/screens/camera-page.dart';
 import 'package:flutter_application/src/screens/modifier-passe.dart';
 import 'package:flutter_application/src/screens/nouveau-passe.dart';
+import 'package:flutter_application/src/sqlite/prelevement-query.dart';
 import 'package:flutter_application/src/widget/my-dialog.dart';
 import 'package:flutter_application/src/widget/nouveau-prelevement-form-widget.dart';
 import 'package:photo_view/photo_view.dart';
 
 class NouveauPrelevement extends StatefulWidget {
   final PlanSondageModel planSondage;
-  final SecurisationModel securisation;
+  final SecurisationModel? securisation;
 
   const NouveauPrelevement(
       {required this.planSondage, required this.securisation, Key? key})
@@ -33,11 +33,12 @@ class NouveauPrelevement extends StatefulWidget {
 class _NouveauPrelevementState extends State<NouveauPrelevement> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController numero = TextEditingController();
-  TextEditingController cotePlateforme = TextEditingController();
-  TextEditingController coteASecuriser = TextEditingController();
-  TextEditingController profondeurASecuriser = TextEditingController();
+  TextEditingController cotePlateforme = TextEditingController(text: "0.0");
+  TextEditingController coteASecuriser = TextEditingController(text: "0.0");
+  TextEditingController profondeurASecuriser =
+      TextEditingController(text: "0.0");
   TextEditingController remarques = TextEditingController();
-  late MunitionReferenceEnum _selectedMunitionReference;
+  MunitionReferenceEnum? _selectedMunitionReference;
   PlanSondageModel? _selectedSondage;
   StatutEnum? _selectedStatut;
   List<ImagesTemp> _images = [];
@@ -48,11 +49,14 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   @override
   initState() {
     _selectedSondage = widget.planSondage;
-    _selectedMunitionReference = widget.securisation.munitionReference!;
-    cotePlateforme.text = widget.securisation.cotePlateforme.toString();
-    coteASecuriser.text = widget.securisation.coteASecuriser.toString();
-    profondeurASecuriser.text =
-        widget.securisation.profondeurASecuriser.toString();
+    numero.text = _selectedSondage!.baseRef.toString();
+    if (widget.securisation != null) {
+      _selectedMunitionReference = widget.securisation!.munitionReference!;
+      cotePlateforme.text = widget.securisation!.cotePlateforme.toString();
+      coteASecuriser.text = widget.securisation!.coteASecuriser.toString();
+      profondeurASecuriser.text =
+          widget.securisation!.profondeurASecuriser.toString();
+    }
     transformController = TransformationController();
     super.initState();
   }
@@ -155,8 +159,8 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                 });
               },
               nvPasse: () {
-                final int profSonde, profSec;
-                int count = 0;
+                final double profSonde, profSec;
+                double count = 0;
                 final bool first;
                 if (_passes.isEmpty) {
                   profSonde = 0;
@@ -176,8 +180,8 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                   MaterialPageRoute(
                     builder: (context) => NouveauPasse(
                       nvPasse: _addPasse,
-                      munitionRef: _selectedMunitionReference,
-                      cotePlateforme: cotePlateforme.text,
+                      munitionRef: _selectedMunitionReference!,
+                      cotePlateforme: double.parse(cotePlateforme.text),
                       profSonde: profSonde,
                       profSec: profSec,
                       count: count,
@@ -255,21 +259,38 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
                                 profondeurSecurisee: i.profondeurSecurisee,
                                 coteSecurisee: i.coteSecurisee))
                             .toList();
-                        PrelevementRepository().addPrelevement(
+                        /*PrelevementRepository().addPrelevement(
                             context,
                             PrelevementModel(
-                                numero: int.parse(numero.text),
-                                munitionReference: _selectedMunitionReference,
-                                cotePlateforme: int.parse(cotePlateforme.text),
-                                coteASecuriser: int.parse(coteASecuriser.text),
+                                numero: numero.text,
+                                munitionReference: _selectedMunitionReference!,
+                                cotePlateforme:
+                                    double.parse(cotePlateforme.text),
+                                coteASecuriser:
+                                    double.parse(coteASecuriser.text),
                                 profondeurASecuriser:
-                                    int.parse(profondeurASecuriser.text),
+                                    double.parse(profondeurASecuriser.text),
                                 statut: _selectedStatut,
-                                remarques: remarques.text),
+                                remarques: remarques.text,
+                                plan_sondage: widget.planSondage.id),
                             passes,
+                            images);*/
+                        PrelevementQuery().addPrelevement(
+                            PrelevementModel(
+                                numero: numero.text,
+                                munitionReference: _selectedMunitionReference!,
+                                cotePlateforme:
+                                    double.parse(cotePlateforme.text),
+                                coteASecuriser:
+                                    double.parse(coteASecuriser.text),
+                                profondeurASecuriser:
+                                    double.parse(profondeurASecuriser.text),
+                                statut: _selectedStatut,
+                                remarques: remarques.text,
+                                plan_sondage: widget.planSondage.id),
                             images,
-                            widget.securisation,
-                            _selectedSondage!);
+                            passes,
+                            context);
                       }
                     },
                     child: Text("Enregistrer"),
@@ -296,7 +317,7 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
       coteASecuriser.text = '';
       return;
     }
-    int result = int.parse(cotePlat) - int.parse(profASec);
+    double result = double.parse(cotePlat) - double.parse(profASec);
     coteASecuriser.text = result.toString();
     setState(() {});
   }
@@ -322,8 +343,12 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
     );
   }
 
-  void _addPasse(MunitionReferenceEnum munitionReference, int gradientMag,
-      int profondeurSonde, int coteSecurisee, int profondeurSecurisee) {
+  void _addPasse(
+      MunitionReferenceEnum munitionReference,
+      double gradientMag,
+      double profondeurSonde,
+      double coteSecurisee,
+      double profondeurSecurisee) {
     setState(() {
       _passes.add(PassesTemp(
           id: 0,
@@ -338,10 +363,10 @@ class _NouveauPrelevementState extends State<NouveauPrelevement> {
   void _updatePasse(
       int index,
       MunitionReferenceEnum munitionReference,
-      int gradientMag,
-      int profondeurSonde,
-      int coteSecurisee,
-      int profondeurSecurisee) {
+      double gradientMag,
+      double profondeurSonde,
+      double coteSecurisee,
+      double profondeurSecurisee) {
     for (var element in _passes) {
       if (_passes.indexOf(element) == index) {
         element.munitionReference = munitionReference;

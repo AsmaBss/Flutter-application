@@ -4,6 +4,7 @@ class ObservationModel {
   String? description;
   String? latitude;
   String? longitude;
+  int? parcelle;
 
   ObservationModel({
     this.id,
@@ -11,12 +12,13 @@ class ObservationModel {
     required this.description,
     this.latitude,
     this.longitude,
+    this.parcelle,
   });
 
   @override
   String toString() {
     return 'Observation { id: $id, nom: $nom, description: $description, '
-        'latitude: $latitude , longitude: $longitude}\n';
+        'latitude: $latitude , longitude: $longitude, parcelle: $parcelle}\n';
   }
 
   factory ObservationModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class ObservationModel {
       description: json['description'] as String,
       latitude: json['latitude'] as String,
       longitude: json['longitude'] as String,
+      parcelle: json['parcelle']['id'] as int,
     );
   }
 
@@ -36,6 +39,7 @@ class ObservationModel {
       'description': p.description,
       'latitude': p.latitude,
       'longitude': p.longitude,
+      'parcelle': p.parcelle
     };
   }
 
@@ -44,16 +48,19 @@ class ObservationModel {
         id: map['id'],
         nom: map['nom'],
         description: map['description'],
+        latitude: map['latitude'],
         longitude: map['longitude'],
-        latitude: map['latitude']);
+        parcelle: map['parcelle']);
   }
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'nom': nom,
       'description': description,
       'latitude': latitude,
       'longitude': longitude,
+      'parcelle': parcelle,
     };
   }
 }

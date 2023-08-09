@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/models/form-model.dart';
@@ -11,50 +12,103 @@ class FormExample extends StatefulWidget {
 }
 
 class _FormExampleState extends State<FormExample> {
+  FormModel? f;
+  String fields = "";
+
   Map keyboardTypes = {
     "number": TextInputType.number,
   };
   String form = json.encode({
-    'fields': [
+    "fields": [
       {
+        //'key': 'input1',
         "type": "Input",
-        "label": "text 1",
-        "required": true,
-        "placeholder": "text1"
+        "label": "Input",
+        "placeholder": "Input",
+        "value": "Input",
+        "required": true
       },
       {
-        "type": "Input",
-        "label": "text2",
-        "required": false,
-        "placeholder": "text2"
+        //'key': 'tareatext1',
+        'type': 'TextArea',
+        'label': 'TareaText',
+        'placeholder': "TextArea",
+        'value': 'TextArea',
+        'required': true
       },
       {
-        "type": "TextArea",
-        "label": "note1",
-        "required": true,
-        "placeholder": "note1"
+        //'key': 'date',
+        'type': 'Date',
+        'label': 'Date',
+        'required': true
+      },
+      {
+        'key': 'switch1',
+        'type': 'Switch',
+        'label': 'Switch test',
+        'value': false,
+      },
+      {
+        'key': 'radiobutton1',
+        'type': 'RadioButton',
+        'label': 'Radio Button',
+        'value': 2,
+        'items': [
+          {
+            'label': "product 1",
+            'value': 1,
+          },
+          {
+            'label': "product 2",
+            'value': 2,
+          },
+          {
+            'label': "product 3",
+            'value': 3,
+          }
+        ]
+      },
+      {
+        'key': 'checkbox1',
+        'type': 'Checkbox',
+        'label': 'Checkbox test',
+        'items': [
+          {
+            'label': "product 1",
+            'value': true,
+          },
+          {
+            'label': "product 2",
+            'value': false,
+          },
+          {
+            'label': "product 3",
+            'value': false,
+          }
+        ]
+      },
+      {
+        'key': 'select1',
+        'type': 'Select',
+        'label': 'Select test',
+        'value': 'product 1',
+        'items': [
+          {
+            'label': "product 1",
+            'value': "product 1",
+          },
+          {
+            'label': "product 2",
+            'value': "product 2",
+          },
+          {
+            'label': "product 3",
+            'value': "product 3",
+          }
+        ]
       }
     ]
-    /*'fields': [
-      {
-        'type': 'Text',
-        'label': 'Name',
-        'placeholder': "Enter Your Name",
-        'required': true,
-      },
-      {
-        'type': 'Input',
-        'label': 'Username',
-        'placeholder': "Enter Your Username",
-        'required': true,
-        'hiddenLabel': true,
-      },
-      {'type': 'Email', 'label': 'email', 'required': true},
-      {'type': 'Password', 'label': 'Password', 'required': true},
-      {'type': 'Input', 'label': 'number', 'required': true},
-    ]*/
   });
-
   dynamic response;
 
   Map decorations = {
@@ -73,10 +127,6 @@ class _FormExampleState extends State<FormExample> {
         prefixIcon: Icon(Icons.security), border: OutlineInputBorder()),
   };
 
-  FormModel? myForm;
-  String? fields;
-  //String form = json.encode({'fields': []});
-
   @override
   void initState() {
     _getForm();
@@ -87,57 +137,65 @@ class _FormExampleState extends State<FormExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Form Example"),
+        title: const Text("test page"),
       ),
       body: SingleChildScrollView(
         child: Center(
-          child: Column(children: <Widget>[
-            Container(
-              margin: EdgeInsets.only(top: 10.0),
-              child: Text(
-                myForm != null ? myForm!.titre.toString() : '',
-                style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 10.0),
-              child: Text(
-                myForm != null ? myForm!.description.toString() : '',
-                style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
-              ),
-            ),
-            JsonSchema(
-              decorations: decorations,
-              keyboardTypes: keyboardTypes,
-              form: form,
-              onChanged: (dynamic response) {
-                print(jsonEncode(response));
-                this.response = response;
-              },
-              actionSave: (data) {
-                print(data);
-              },
-              buttonSave: Container(
-                height: 40.0,
-                color: Colors.blueAccent,
-                child: const Center(
-                  child: Text("Register",
+          child: (f != null && f!.fields != null)
+              ? Column(children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      utf8.decode(f!.titre!.codeUnits),
+                      //"Test Form",
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ),
-          ]),
+                          fontSize: 30.0, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      utf8.decode(f!.description!.codeUnits),
+                      //"Test Form",
+                      style: TextStyle(
+                          fontSize: 20.0, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  JsonSchema(
+                    decorations: decorations,
+                    keyboardTypes: keyboardTypes,
+                    form: utf8.decode(fields.codeUnits),
+                    //form: form,
+                    onChanged: (dynamic response) {
+                      print(jsonEncode(response));
+                      this.response = response;
+                    },
+                    actionSave: (data) {
+                      print(data);
+                    },
+                    buttonSave: Container(
+                      height: 40.0,
+                      color: Colors.blueAccent,
+                      child: const Center(
+                        child: Text("Register",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ),
+                ])
+              : Text("no fields"),
         ),
       ),
     );
   }
 
   _getForm() async {
-    myForm = await FormRepository().getById(3, context);
-    print("---> $myForm");
-    fields = "{\"fields\": ${myForm!.fields}}";
-    form = json.encode({'fields': myForm!.fields});
+    print("testtt");
+    f = await FormRepository().getById(1, context);
+    fields = "{\"fields\": ${f!.fields}}";
+
     print(fields);
     setState(() {});
   }

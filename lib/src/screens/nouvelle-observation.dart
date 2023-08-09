@@ -6,8 +6,8 @@ import 'package:flutter_application/src/classes/images_temp.dart';
 import 'package:flutter_application/src/models/ParcelleModel.dart';
 import 'package:flutter_application/src/models/images-observation-model.dart';
 import 'package:flutter_application/src/models/observation-model.dart';
-import 'package:flutter_application/src/repositories/observation-repository.dart';
 import 'package:flutter_application/src/screens/camera-page.dart';
+import 'package:flutter_application/src/sqlite/observation-query.dart';
 import 'package:flutter_application/src/widget/my-dialog.dart';
 import 'package:flutter_application/src/widget/nouvelle-observation-form-widget.dart';
 import 'package:latlong2/latlong.dart';
@@ -55,7 +55,7 @@ class _NouvelleObservationState extends State<NouvelleObservation> {
           IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pop(context, true);
+              Navigator.pop(context);
             },
           ),
         ],
@@ -115,7 +115,7 @@ class _NouvelleObservationState extends State<NouvelleObservation> {
                         List<ImagesObservationModel> images = _images
                             .map((i) => ImagesObservationModel(image: i.image))
                             .toList();
-                        ObservationRepository().addObservation(
+                        /*ObservationRepository().addObservation(
                             context,
                             ObservationModel(
                               nom: nom.text,
@@ -124,7 +124,16 @@ class _NouvelleObservationState extends State<NouvelleObservation> {
                               longitude: widget.latLng.longitude.toString(),
                             ),
                             widget.parcelle,
-                            images);
+                            images);*/
+                        ObservationQuery().addObservation(
+                            ObservationModel(
+                                nom: nom.text,
+                                description: description.text,
+                                latitude: widget.latLng.latitude.toString(),
+                                longitude: widget.latLng.longitude.toString(),
+                                parcelle: widget.parcelle.id),
+                            images,
+                            context);
                       }
                     },
                     child: Text("Enregistrer"),

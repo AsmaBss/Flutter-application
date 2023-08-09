@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/classes/images_temp.dart';
 import 'package:flutter_application/src/models/images-observation-model.dart';
 import 'package:flutter_application/src/models/observation-model.dart';
-import 'package:flutter_application/src/repositories/images-observation-repository.dart';
-import 'package:flutter_application/src/repositories/observation-repository.dart';
 import 'package:flutter_application/src/screens/camera-page.dart';
+import 'package:flutter_application/src/sqlite/images-observation.dart';
+import 'package:flutter_application/src/sqlite/observation-query.dart';
 import 'package:flutter_application/src/widget/my-dialog.dart';
 import 'package:flutter_application/src/widget/nouvelle-observation-form-widget.dart';
 
@@ -110,19 +110,16 @@ class _ModifierObservationState extends State<ModifierObservation> {
                         for (var element in _images) {
                           if (element.id == 0) {
                             images.add(ImagesObservationModel(
-                              image: element.image,
-                            ));
+                                image: element.image,
+                                observation: widget.observation.id));
                           } else if (element.id != 0) {
                             images.add(ImagesObservationModel(
-                              id: element.id,
-                              image: element.image,
-                            ));
+                                id: element.id,
+                                image: element.image,
+                                observation: widget.observation.id));
                           }
                         }
-                        /*List<ImagesObservationModel> images = _images
-                            .map((i) => ImagesObservationModel(image: i.image))
-                            .toList();*/
-                        ObservationRepository().updateObservation(
+                        /*ObservationRepository().updateObservation(
                             context,
                             ObservationModel(
                               id: widget.observation.id,
@@ -131,7 +128,18 @@ class _ModifierObservationState extends State<ModifierObservation> {
                               latitude: widget.observation.latitude,
                               longitude: widget.observation.longitude,
                             ),
-                            images);
+                            images);*/
+                        ObservationQuery().updateObservation(
+                            ObservationModel(
+                              id: widget.observation.id,
+                              nom: nom.text,
+                              description: description.text,
+                              latitude: widget.observation.latitude,
+                              longitude: widget.observation.longitude,
+                              parcelle: widget.observation.parcelle,
+                            ),
+                            images,
+                            context);
                       }
                     },
                     child: Text("Enregistrer"),
@@ -152,8 +160,15 @@ class _ModifierObservationState extends State<ModifierObservation> {
   }
 
   _fetchImages() async {
-    await ImagesObservationRepository()
+    /*await ImagesObservationRepository()
         .getImagesByObservation(widget.observation.id!, context)
+        .then((value) {
+      for (var element in value!) {
+        _images.add(ImagesTemp(id: element.id!, image: element.image!));
+      }
+    });*/
+    await ImagesObservationQuery()
+        .showImagesObservationByObservationId(widget.observation.id!)
         .then((value) {
       for (var element in value!) {
         _images.add(ImagesTemp(id: element.id!, image: element.image!));
@@ -179,8 +194,14 @@ class _ModifierObservationState extends State<ModifierObservation> {
               _images.removeAt(index);
               Navigator.pop(context);
             } else {
-              await ImagesObservationRepository()
-                  .deleteImageObservation(i.id, context);
+              /*await ImagesObservationRepository()
+                  .deleteImageObservation(i.id, context);*/
+              await ImagesObservationQuery().deleteImageObservation(
+                  ImagesObservationModel(
+                      id: i.id,
+                      image: i.image,
+                      observation: widget.observation.id),
+                  context);
               _images.removeAt(index);
             }
             /*_images.removeAt(index);

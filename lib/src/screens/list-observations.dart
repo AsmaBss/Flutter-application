@@ -275,15 +275,14 @@ class _ListObservationsState extends State<ListObservations> {
 
   _loadParcelles() async {
     UserModel? user = await SharedPreference().getUser();
-    if (user?.roles?.first.type == TypeRoleEnum.ADMIN) {
-      List<ParcelleModel>? list =
-          await ParcelleRepository().getAllParcelles(context);
+    /*if (user?.roles?.first.type == TypeRoleEnum.ADMIN) {
+      List<ParcelleModel>? list = await ParcelleRepository().getAllParcelles();
       _parcelles = list!;
     } else {
       List<ParcelleModel> list =
           await ParcelleRepository().getByUser(user!.id!, context);
       _parcelles = list;
-    }
+    }*/
     setState(() {});
   }
 
